@@ -13,11 +13,11 @@ Aplicación libre e independiente para calcular precios y rentabilidad en COP. C
 
 ## Desarrollo local
 
-Requisitos: Node.js >=20.11, pnpm 9.15.9.
+Requisitos: Node.js >=20.19, pnpm 10.34.7.
 
 ~~~sh
 corepack enable
-corepack prepare pnpm@9.15.9 --activate
+corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
 pnpm dev
 ~~~
