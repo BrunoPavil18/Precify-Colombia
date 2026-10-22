@@ -1,6 +1,6 @@
 # Auditoría técnica — 22/10/2026
 
-Estado: inspección inicial; **no homologado**.
+Estado: inspección inicial; **no homologado**. Versiones directas revisadas: pnpm 10.34.7 (posterior a correcciones de advisories de agosto 2026), React/React DOM 19.3.1 (se evitó React inicial antiguo), Vite 8.3.4 y plugin React 6.1.2. La revisión estática **no** sustituye auditoría transitiva con lockfile.
 
 Confirmado: se partió de main con solo LICENSE; no se copió código de referencias Precify. No se crearon workflows ni se invocó GitHub Actions. Validación de costos BigInt, esquema JSON versionado, límite de 2 MB, invalidación completa de backups corruptos, confirmación antes de reemplazo, CSV neutralizado y React sin dangerouslySetInnerHTML.
 
