@@ -33,9 +33,9 @@ export function validateInput(value: unknown): PriceInput {
     throw new FinancialInputError("Redondeo inválido.");
   for (const key of moneyFields) parseDecimal(v[key] as string, key);
   for (const key of rateFields) percentBps(v[key] as string, key);
-  if (typeof v.monthlyUnits !== "string" || !/^(0|[1-9]\\d{0,7})$/.test(v.monthlyUnits))
+  if (typeof v.monthlyUnits !== "string" || !/^(0|[1-9]\d{0,7})$/.test(v.monthlyUnits))
     throw new FinancialInputError("Unidades mensuales inválidas.");
-  const cast = v as PriceInput;
+  const cast = v as unknown as PriceInput;
   const deductions = percentBps(cast.feePercent) + percentBps(cast.taxPercent) + percentBps(cast.codPercent);
   if (deductions >= 10000n) throw new FinancialInputError("Las deducciones porcentuales deben ser menores a 100%.");
   if (percentBps(cast.targetMargin) >= 10000n) throw new FinancialInputError("La meta de margen debe ser menor a 100%.");
@@ -102,7 +102,7 @@ export function suggestPrice(input: PriceInput): { price: string; result: Breakd
      const r=analyze(v,fromCents(price));
      const netSale=parseDecimal(r.salePrice)-parseDecimal(r.discount);
      if(netSale<=0n) return false;
-     return BigInt(Math.round(Number(parseDecimal(r.contribution))*1)) * 10000n >= target * netSale;
+     return parseDecimal(r.contribution) * 10000n >= target * netSale;
    }catch{return false;}
  };
  let lo=0n, hi=100n;
