@@ -1,6 +1,6 @@
 {
   "name": "precify-colombia", "version":"1.0.0", "private":true,
-  "packageManager":"pnpm@9.15.9",
-  "engines":{"node":">=20.11"},
+  "packageManager":"pnpm@10.34.7",
+  "engines":{"node":">=20.19"},
   "scripts":{"dev":"pnpm --filter @precify-colombia/web dev","typecheck":"pnpm -r typecheck","lint":"pnpm -r lint","test":"pnpm -r test","build":"pnpm -r build","verify":"node scripts/verify-local.mjs"}
 }
