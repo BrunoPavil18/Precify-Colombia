@@ -13,7 +13,7 @@ export const EMPTY_INPUT: PriceInput = {
  name:"Producto ejemplo", category:"General", origin:"manual",
  acquisition:"35000.00",packaging:"2000.00",shippingCost:"7000.00",
  shippingCharged:"0.00",fixedFee:"1000.00",advertising:"3000.00",
- returnsReserve:"0.00",codReserve:"0.00",feePercent:"3.00",taxPercent:"0.00",
+ returnsReserve:"0.00",codReserve:"0.00",feePercent:"0.00",taxPercent:"0.00",
  ivaPercent:"0.00",codPercent:"0.00",discountPercent:"0.00",
  discountFixed:"0.00",targetMargin:"20.00",currentPrice:"89900.00",
  monthlyFixed:"0.00",monthlyUnits:"100",rounding:"peso"
@@ -25,7 +25,7 @@ export function validateInput(value: unknown): PriceInput {
     throw new FinancialInputError("Formato de producto inválido.");
   const v = value as Record<string, unknown>;
   if (typeof v.name !== "string" || !v.name.trim() || v.name.length > 120 ||
-      typeof v.category !== "string" || v.category.length > 80)
+      typeof v.category !== "string" || v.category.length > 80 || /[\u0000-\u001F\u007F]/.test(v.name) || /[\u0000-\u001F\u007F]/.test(v.category))
     throw new FinancialInputError("Nombre o categoría inválidos.");
   if (!["manual","estimado","confirmado"].includes(String(v.origin)))
     throw new FinancialInputError("Origen inválido.");
@@ -35,6 +35,8 @@ export function validateInput(value: unknown): PriceInput {
   for (const key of rateFields) percentBps(v[key] as string, key);
   if (typeof v.monthlyUnits !== "string" || !/^(0|[1-9]\d{0,7})$/.test(v.monthlyUnits))
     throw new FinancialInputError("Unidades mensuales inválidas.");
+  const permitted = new Set<string>(["name","category","origin","rounding","monthlyUnits",...moneyFields,...rateFields]);
+  if(Object.keys(v).some(k=>!permitted.has(k)))throw new FinancialInputError("El producto incluye campos desconocidos.");
   const cast = v as unknown as PriceInput;
   const deductions = percentBps(cast.feePercent) + percentBps(cast.taxPercent) + percentBps(cast.codPercent);
   if (deductions >= 10000n) throw new FinancialInputError("Las deducciones porcentuales deben ser menores a 100%.");
@@ -45,7 +47,7 @@ export type Breakdown = {
   salePrice: string; collected: string; revenue: string; discount: string;
   variableCost: string; deductions: string; ivaIncluded: string; contribution: string;
   marginPercent: string | null; markupPercent: string | null;
-  monthlyNet: string; breakEvenUnits: string | null; feasible: boolean;
+  monthlyNet: string; monthlyNetMargin: string | null; breakEvenUnits: string | null; feasible: boolean;
   assumptions: string[]; warnings: string[];
 };
 function signedRatio(n: bigint, d: bigint): string | null {
@@ -82,7 +84,7 @@ export function analyze(input: PriceInput, salePrice = input.currentPrice): Brea
     deductions:fromCents(deductions), ivaIncluded:fromCents(iva),
     contribution:fromCents(contribution), marginPercent:signedRatio(contribution, netSale),
     markupPercent: signedRatio(contribution, variableCost),
-    monthlyNet:fromCents(net), breakEvenUnits:breakEven,
+    monthlyNet:fromCents(net), monthlyNetMargin:signedRatio(net, revenue * monthlyUnits), breakEvenUnits:breakEven,
     feasible: contribution >= 0n, assumptions:[
       "Margen de contribución = ingreso cobrado − deducciones − costos variables.",
       "Descuentos sobre el precio del producto; flete cobrado se suma separadamente.",
@@ -119,7 +121,7 @@ export function suggestPrice(input: PriceInput): { price: string; result: Breakd
  if (!adequate(rounded)) throw new FinancialInputError("El precio redondeado no cumple la meta de margen.");
  return {price:fromCents(rounded),result,warnings:result.warnings};
 }
-export function maxDiscountPercent(input: PriceInput): string {
+export function maxDiscountPercent(input: PriceInput): string | null {
  const v=validateInput({...input,discountPercent:"0.00",discountFixed:"0.00"});
  let lo=0n,hi=10000n;
  const pass=(bps:bigint)=>{
@@ -130,7 +132,7 @@ export function maxDiscountPercent(input: PriceInput): string {
      return net>0n && parseDecimal(r.contribution)*10000n>=percentBps(v.targetMargin)*net;
    } catch{return false;}
  };
- if(!pass(0n)) return "0.00";
+ if(!pass(0n)) return null;
  while(lo<hi){
    const mid=(lo+hi+1n)/2n;
    if(pass(mid)) lo=mid; else hi=mid-1n;
