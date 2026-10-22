@@ -9,7 +9,7 @@ export class FinancialInputError extends Error {
   constructor(message: string) { super(message); this.name = "FinancialInputError"; }
 }
 export function parseDecimal(value: string, label = "Valor"): bigint {
-  if (typeof value !== "string" || !/^(0|[1-9]\\d{0,11})(?:\\.\\d{1,2})?$/.test(value))
+  if (typeof value !== "string" || !/^(0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.test(value))
     throw new FinancialInputError(label + ": use formato decimal 1234.50 sin separadores de miles.");
   const parts = value.split(".");
   const cents = BigInt(parts[0]!) * 100n + BigInt((parts[1] || "").padEnd(2, "0") || "0");
@@ -18,10 +18,10 @@ export function parseDecimal(value: string, label = "Valor"): bigint {
 }
 /** Parse es-CO screen entry; 89.900 is ninety-thousand minus one hundred. */
 export function parseCOPInput(value: string): string {
-  const s = value.trim().replace(/^COP\\s*/i, "").replace(/^\\$\\s*/, "").replace(/\\s/g, "");
-  if (!/^(?:0|[1-9]\\d*|[1-9]\\d{0,2}(?:\\.\\d{3})+)(?:,\\d{1,2})?$/.test(s))
+  const s = value.trim().replace(/^COP\s*/i, "").replace(/^\$\s*/, "").replace(/\s/g, "");
+  if (!/^(?:0|[1-9]\d*|[1-9]\d{0,2}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(s))
     throw new FinancialInputError("Valor COP inválido. Ejemplo: 89.900,50");
-  const normalized = s.replace(/\\./g, "").replace(",", ".");
+  const normalized = s.replace(/\./g, "").replace(",", ".");
   return fromCents(parseDecimal(normalized));
 }
 export function fromCents(n: bigint): string {
@@ -30,7 +30,7 @@ export function fromCents(n: bigint): string {
   return sign + (a / 100n).toString() + "." + (a % 100n).toString().padStart(2, "0");
 }
 export function percentBps(s: string, name = "Porcentaje"): bigint {
-  if (typeof s !== "string" || !/^(?:0|[1-9]\\d{0,2})(?:\\.\\d{1,2})?$/.test(s))
+  if (typeof s !== "string" || !/^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?$/.test(s))
     throw new FinancialInputError(name + ": use porcentaje explícito entre 0 y 100 (ej.: 19.5).");
   const bps = parseDecimal(s, name);
   if (bps > 10000n) throw new FinancialInputError(name + ": no puede superar 100%.");
@@ -62,7 +62,7 @@ export function roundPrice(cents: bigint, method: PriceRounding): bigint {
 }
 export function moneyDisplay(value: string, prefix = "$ "): string {
   const cents = parseDecimal(value);
-  const integer = (cents / 100n).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ".");
+  const integer = (cents / 100n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   const fraction = cents % 100n;
   return prefix + integer + (fraction === 0n ? "" : "," + fraction.toString().padStart(2, "0"));
 }
