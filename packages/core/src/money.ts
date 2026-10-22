@@ -18,7 +18,7 @@ export function parseDecimal(value: string, label = "Valor"): bigint {
 }
 /** Parse es-CO screen entry; 89.900 is ninety-thousand minus one hundred. */
 export function parseCOPInput(value: string): string {
-  const s = value.trim().replace(/^COP\s*/i, "").replace(/^\$\s*/, "").replace(/\s/g, "");
+  const s = value.trim().replace(/^COP\s*/i, "").replace(/^\$\s*/, "");
   if (!/^(?:0|[1-9]\d*|[1-9]\d{0,2}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(s))
     throw new FinancialInputError("Valor COP inválido. Ejemplo: 89.900,50");
   const normalized = s.replace(/\./g, "").replace(",", ".");
