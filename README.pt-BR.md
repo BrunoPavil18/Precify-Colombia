@@ -4,11 +4,11 @@ Projeto open source Apache-2.0 e independente, com motor monetário em centavos 
 
 **Status:** candidato 1.0.0; não homologado. Necessário gerar pnpm-lock.yaml e validar instalação, compilação, testes, auditoria de pacotes e fluxo no navegador.
 
-Requisitos: Node >=20.11 e pnpm 9.15.9.
+Requisitos: Node >=20.11 e pnpm 10.34.7.
 
 ~~~sh
 corepack enable
-corepack prepare pnpm@9.15.9 --activate
+corepack prepare pnpm@10.34.7 --activate
 pnpm install --lockfile-only --ignore-scripts
 pnpm install --frozen-lockfile --ignore-scripts
 pnpm typecheck
