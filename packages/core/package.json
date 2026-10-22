@@ -1,7 +1,1 @@
-{
-  "name":"@precify-colombia/core","version":"1.0.0","type":"module",
-  "exports":{".":"./src/index.ts"},
-  "types":"./src/index.ts",
-  "scripts":{"typecheck":"tsc --noEmit -p tsconfig.json","lint":"tsc --noEmit -p tsconfig.json","test":"node --experimental-strip-types --test tests/*.test.mts","build":"tsc -p tsconfig.build.json"},
-  "devDependencies":{"typescript":"5.7.3"}
-}
+{"name":"@precify-colombia/core","version":"1.0.0","type":"module","exports":{".":"./src/index.ts"},"types":"./src/index.ts","scripts":{"typecheck":"tsc --noEmit -p tsconfig.json","lint":"tsc --noEmit -p tsconfig.json","test":"pnpm build && node --test tests/*.test.mjs","build":"tsc -p tsconfig.build.json"},"devDependencies":{"typescript":"5.7.3"}}
