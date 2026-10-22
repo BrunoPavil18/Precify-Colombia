@@ -13,7 +13,7 @@ test("COP 89.900 is 89900 and comma decimal",()=>{
  assert.equal(parseCOPInput("COP 1.000.000"),"1000000.00");
 });
 test("ambiguous and malformed money rejected",()=>{
- for(const s of ["89.90","1,234.00","1.2.3","-9","Infinity","NaN","01","100,123"])
+ for(const s of ["89.90","1,234.00","1.2.3","-9","Infinity","NaN","01","100,123","89 900"])
   assert.throws(()=>parseCOPInput(s),FinancialInputError);
 });
 test("canonical money and bounds",()=>{
@@ -82,8 +82,7 @@ test("CSV formula injection neutralized",()=>{
  const now=new Date().toISOString(),w=emptyWorkspace();
  w.products.push({id:"p",createdAt:now,updatedAt:now,input:{...EMPTY_INPUT,name:"=cmd|calc",category:"+SUM(1)"}});
  const csv=exportProductsCsv(w);
- assert.ok(csv.includes('"\'=cmd|calc"'));assert.ok(csv.includes('"\' +SUM')===false);
- assert.ok(csv.includes('"\' +SUM')===false && csv.includes('"\' +SUM')===false);
+ assert.ok(csv.includes('"\'=cmd|calc"'));
  assert.ok(csv.includes('"\'+SUM(1)"'));
 });
 test("max-price and ratio limits",()=>{
