@@ -25,7 +25,7 @@ test("COD 100 percent paid and 0 percent paid limits",()=>{
  const a=simulateCOD(values);
  assert.equal(a.paidOrders,"10");assert.equal(a.expectedProfit,"470.00");
  const b=simulateCOD({...values,paidPercentOfDelivered:"0"});
- assert.equal(b.paidOrders,"0");assert.equal(b.expectedProfit,"-80.00");assert.equal(b.profitPerPaidOrder,null);
+ assert.equal(b.paidOrders,"0");assert.equal(b.expectedProfit,"-30.00");assert.equal(b.profitPerPaidOrder,null);
 });
 test("PUM scales 500 grams to kilograms",()=>{
  assert.equal(pricePerMeasure("10000.00","500.00","g").pricePerUnit,"20000.00");
@@ -75,4 +75,42 @@ test("invalid advanced snapshot rejects restore",()=>{
  w.advancedSimulations.push({id:"x",kind:"cod",productId:null,at:new Date().toISOString(),
  label:"Bad",inputs:{unexpectedCode:"evil"}});
  assert.throws(()=>encodeBackup(w));
+});
+
+test("COD non-shipped orders never incur failed delivery attempts",()=>{
+ const input={product:base,createdOrders:"10",shippedPercent:"0",deliveredPercentOfShipped:"100",
+ paidPercentOfDelivered:"100",failedAttemptCost:"9.00",returnShippingCost:"3.00",
+ advertisingPerCreatedOrder:"2.00",extraCODFeePerPaidOrder:"0",lossReservePerFailedOrder:"0"};
+ const a=simulateCOD(input);
+ assert.equal(a.cancelledBeforeShipping,"10");assert.equal(a.deliveryFailures,"0");
+ assert.equal(a.expectedProfit,"-20.00");assert.equal(a.profitPerShippedOrder,null);
+ const b=simulateCOD({...input,shippedPercent:"100",deliveredPercentOfShipped:"0"});
+ assert.equal(b.deliveryFailures,"10");assert.equal(b.expectedProfit,"-140.00");
+});
+test("campaign projected profit reconciles refunds separately from attributed ROAS",()=>{
+ const params={product:base,impressions:"1000",conversionPercent:"2.00",advertisingSpend:"100.00",
+ attributedRevenue:"0.00",refundPercent:"100.00"};
+ const x=simulateCampaign(params);
+ assert.equal(x.conversions,"20");
+ assert.equal(x.roas,"0.00");
+ assert.equal(x.projectedProfit,"-1100.00");
+ assert.equal(x.attributionMismatch,true);
+ assert.equal(x.projectedRevenue,"2000.00");
+ assert.equal(x.projectedRoas,"0.00");
+ const zero=simulateCampaign({...params,conversionPercent:"0",refundPercent:"0"});
+ assert.equal(zero.projectedProfit,"-100.00");assert.equal(zero.cac,null);
+});
+test("PUM preserves math rounding while reporting SIC-style truncated presentation separately",()=>{
+ const x=pricePerMeasure("1000.00","6.00","unit");
+ assert.equal(x.pricePerUnit,"166.67");
+ assert.equal(x.regulatoryTruncatedPrice,"166.66");
+ assert.equal(x.exactPriceFraction.numerator,"10000000");
+ assert.equal(x.exactPriceFraction.denominator,"600");
+});
+test("portfolio break-even avoids prematurely rounded average",()=>{
+ const low={...base,acquisition:"99.99"};
+ const r=simulatePortfolio([{product:low,monthlyUnits:"3"}],"0.02");
+ assert.equal(r.breakEvenUnits,"2");
+ assert.equal(r.totalContribution,"0.03");
+ assert.equal(simulatePortfolio([{product:low,monthlyUnits:"0"}],"0.02").breakEvenUnits,null);
 });
