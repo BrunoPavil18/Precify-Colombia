@@ -66,15 +66,15 @@ export function simulateCampaign(input:CampaignInput){
    attributedRevenueAfterRefunds:fromCents(netAttributed),projectedProfit:fromCents(projectedProfit),
    estimated:true};
 }
-export type PUMUnit="g"|"kg"|"ml"|"l"|"unit";
+export type PUMUnit="g"|"kg"|"ml"|"l"|"cm"|"m"|"unit";
 export function pricePerMeasure(price:string,quantity:string,unit:PUMUnit){
  const cents=parseDecimal(price),q=parseDecimal(quantity);
  nonzero(q,"Cantidad");
- if(!["g","kg","ml","l","unit"].includes(unit))throw new FinancialInputError("Unidad inválida.");
+ if(!["g","kg","ml","l","cm","m","unit"].includes(unit))throw new FinancialInputError("Unidad inválida.");
  // quantity carries two decimal digits. Per 1kg for g, per 1L for ml, otherwise per base unit.
- const scale=unit==="g"||unit==="ml"?1000n:1n;
+ const scale=unit==="g"||unit==="ml"?1000n:unit==="cm"?100n:1n;
  const amount=roundDiv(cents*100n*scale,q);
- return {unit:unit==="g"?"kg":unit==="ml"?"l":unit,
+ return {unit:unit==="g"?"kg":unit==="ml"?"l":unit==="cm"?"m":unit,
  pricePerUnit:fromCents(amount),informativeOnly:true};
 }
 export type ConsumerPriceInput={
