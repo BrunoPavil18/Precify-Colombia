@@ -59,3 +59,13 @@ test("advanced financial outputs carry clear COP, percentage and ROAS units",()=
  assert.ok(lab.includes('displayAdvancedResult(key,value as string|number)'));
  assert.ok(lab.includes('COP '));
 });
+
+test("native confirmation APIs are replaced by cancel-safe accessible dialogs",()=>{
+ assert.ok(!app.includes("window.confirm("));
+ for(const token of ['role="alertdialog"','aria-modal="true"','answerConfirmation(false)','event.key==="Escape"','data-confirm-button','askConfirmation('])assert.ok(app.includes(token),token);
+});
+test("saved workspace writes compare complete state before mutation",()=>{
+ const storage=readFileSync(new URL("../src/storage.ts",import.meta.url),"utf8");
+ assert.ok(storage.includes('JSON.stringify(current)!==JSON.stringify(validateWorkspace(expected))'));
+ assert.ok(app.includes('persistWorkspace(next,wasStored.current?workspace:undefined)'));
+});
