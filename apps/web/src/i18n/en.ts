@@ -334,5 +334,10 @@ export const en: Record<string,string> = {
   "Hay cambios sin guardar. ¿Descartarlos antes de duplicar?": "There are unsaved changes. Discard them before duplicating?",
   "Hay cambios sin guardar. ¿Aplicar el perfil y descartarlos?": "There are unsaved changes. Discard them to apply this profile?",
   "Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?": "There are unsaved changes. Discard them to switch scenario products?",
-  "Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?": "There are unsaved changes. Discard them to create a new product?"
+  "Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?": "There are unsaved changes. Discard them to create a new product?",
+  "Hay una actualización disponible para uso offline.": "An update is available for offline use.",
+  "Instalar actualización": "Install update",
+  "Guarda o descarta tus cambios antes de actualizar la aplicación.": "Save or discard your changes before updating the application.",
+  "Hay una actualización disponible. Guarda una copia de seguridad antes de instalarla. ¿Actualizar ahora?": "An update is available. Back up your data before installing it. Update now?",
+  "La actualización no pudo activarse.": "The update could not be activated."
 };
