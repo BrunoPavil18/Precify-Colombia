@@ -341,5 +341,8 @@ export const en: Record<string,string> = {
   "Hay una actualización disponible. Guarda una copia de seguridad antes de instalarla. ¿Actualizar ahora?": "An update is available. Back up your data before installing it. Update now?",
   "La actualización no pudo activarse.": "The update could not be activated.",
   "Simula tu negocio con precisión.": "Simulate your business with precision.",
-  "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analyze COD, advertising, unit prices, and profitability across products."
+  "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analyze COD, advertising, unit prices, and profitability across products.",
+  "Confirmar operación": "Confirm action",
+  "Cancelar": "Cancel",
+  "Confirmar": "Confirm"
 };
