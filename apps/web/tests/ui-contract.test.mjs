@@ -15,3 +15,32 @@ test("discard restores persisted draft and remounts localized inputs",()=>{
   "setEditorRevision(n=>n+1)","Descartar cambios"])
   assert.ok(app.includes(token),token);
 });
+
+
+test("Goals selects a persisted product independently of the calculator and scenarios",()=>{
+ for(const token of [
+  'const goalProduct=workspace.products.find(p=>p.id===goalProductId)',
+  '??workspace.products.find(p=>p.id===activeId)??workspace.products[0]',
+  'function selectGoalProduct(id:string)',
+  'value={goalProduct.id} onChange={e=>selectGoalProduct(e.target.value)}',
+  'const goalInput=useMemo(()=>goalProduct?{',
+  'monthlyFixed:goalFixedOverride??goalProduct.input.monthlyFixed',
+  'monthlyUnits:goalUnitsOverride??goalProduct.input.monthlyUnits',
+  'goalResult.breakdown.breakEvenUnits'
+ ])assert.ok(app.includes(token),token);
+});
+test("Goals discards unsaved simulations and saves only monthly product fields",()=>{
+ for(const token of [
+  'if(goalDirty&&!window.confirm(t("Hay cambios sin guardar en Metas.',
+  'function saveGoalChanges(){',
+  'if(goalMoneyUnvalidated)',
+  'monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits',
+  'products:w.products.map(p=>p.id!==goalProduct.id?p:',
+  'snapshot:{...goalProduct.input,monthlyFixed:goalInput.monthlyFixed',
+  'function resetGoalDraft(){',
+  'disabled={!goalDirty||goalMoneyUnvalidated||!!goalResult.error}',
+  'setGoalProductId(selected?.id??"");resetGoalDraft()'
+ ])assert.ok(app.includes(token),token);
+ assert.ok(!app.slice(app.indexOf('function saveGoalChanges(){'),app.indexOf('function restoreSavedDraft(){')).includes('scenarios:w.scenarios'),
+  "saving a goal must never edit scenarios");
+});
