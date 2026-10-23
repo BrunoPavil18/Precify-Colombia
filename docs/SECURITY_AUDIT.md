@@ -73,3 +73,17 @@ El usuario proporcionó logs de una nueva validación local después de implemen
 **Nuevo total: 35 pruebas escritas, 34 ejecutadas y aprobadas antes de este ajuste; la última prueba y compilación posterior al ajuste todavía no fueron ejecutadas.** Repetir los comandos locales antes de declarar la PR homologada.
 
 La nueva evidencia **no incluye un `pnpm audit` repetido después de la traducción**; el último audit reportado exitosamente fue en la validación anterior. Los diccionarios estáticos no agregaron dependencias, pero ello no sustituye la auditoría final.
+
+## 6. Homologación automatizada más reciente — evidencia local del propietario
+
+**Nueva ejecución en PowerShell (tras el ajuste del borrador traducido):**
+
+- `pnpm.cmd typecheck`: correcto, `packages/core` y `apps/web`.
+- `pnpm.cmd lint`: correcto, ambos paquetes; sigue basado en `tsc` y no constituye una auditoría ESLint.
+- `pnpm.cmd test`: **35 tests / 35 aprobados / 0 fallos / 0 omitidos**; 22 tests de core y 13 tests web.
+- `pnpm.cmd build`: correcto; Vite **8.3.4**, 27 módulos transformados, JS final **320,32 kB** (~**96,62 kB gzip**).
+- `pnpm.cmd audit --audit-level moderate`: **"No known vulnerabilities found"**, sin que esto pruebe ausencia absoluta de vulnerabilidades.
+
+**Situación:** validación automática **aprobada** en el equipo del propietario. Las pruebas browser E2E de escenarios, backup/restauración, flujo de edición, accesibilidad, dispositivos móviles y cancelación de confirmaciones siguen **pendientes de evidencia**. El nuevo test contra el falso estado "descartar cambios" pasó a nivel de contrato estático, pero también debe verificarse manualmente en el navegador.
+
+La rama permanece en PR Draft; sin merge a `main`, sin release ni ejecución voluntaria de GitHub Actions. No se requieren nuevas dependencias por esta actualización documental.
