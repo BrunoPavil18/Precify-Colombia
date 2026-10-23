@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1] — unreleased candidate, under validation
+
+- Fixed campaign projected profit to account for projected refunds, separated attributed ROAS and projected ROAS, and exposed attribution mismatch and reconciliation data.
+- Corrected COD failed-attempt cost incidence to dispatched-but-undelivered orders, exposed cancellations, unpaid deliveries and per-shipped-order profit.
+- Preserved mathematical PUM output and added separately truncated two-decimal SIC-oriented presentation, with exact fraction and conditional legal guidance.
+- Fixed constant-mix break-even to use exact aggregate ratios instead of a prematurely rounded mean.
+- Updated user interface metrics, ES/PT/EN translations, package version, PWA static cache identifier and regression cases.
+- Preserved `suggestPrice`/discount margin-target contract, local workspace/backups and all v2.0.0 releases.
+
+**Not yet verified locally:** patch typecheck, lint, tests, build, audit, E2E/offline browser and independent tax/legal certification. GitHub PR remains open until acceptance.
+
+
 ## [2.0.0] — 2026-10-23 (merged into `main`; release/tag published separately)
 
 ### Added
