@@ -221,3 +221,9 @@ tbody th small{display:block;color:#8b9e96;margin-top:5px}
  .sidebar nav{grid-template-columns:repeat(3,minmax(0,1fr))}
  .nav-link{font-size:11px}
 }
+
+.modal-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(6,28,31,.62);display:grid;place-items:center;padding:20px}
+.confirmation-dialog{background:#fff;color:#17333d;width:min(100%,520px);max-height:calc(100vh - 40px);overflow:auto;padding:26px;border-radius:16px;box-shadow:0 20px 80px rgba(0,0,0,.2)}
+.confirmation-dialog p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.confirmation-dialog .actions{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
+.confirmation-dialog button:focus-visible{outline:3px solid #17ad96;outline-offset:2px}
