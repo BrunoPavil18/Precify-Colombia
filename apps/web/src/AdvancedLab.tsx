@@ -11,7 +11,7 @@ const initialCampaign={impressions:"1000",conversionPercent:"2.00",advertisingSp
 type Pane="cod"|"campaign"|"pum"|"consumer"|"portfolio";
 const panes:Pane[]=["cod","campaign","pum","consumer","portfolio"];
 export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
- workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>void;
+ workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>boolean;
  onDelete:(id:string)=>void;onDirty:(dirty:boolean)=>void
 }){
  const t=useTranslator();
@@ -44,7 +44,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
    kind:pane,productId:(pane==="cod"||pane==="campaign")?product?.id??null:null,
    at:new Date().toISOString(),label:pane+" · "+new Date().toLocaleDateString(),inputs
   };
-  onSave(record);onDirty(false);
+  if(onSave(record))onDirty(false);
  }
  function load(record:AdvancedSimulationRecord){
   setPane(record.kind);
