@@ -242,5 +242,12 @@ export const en: Record<string,string> = {
   " (copia)": " (copy)",
   "manual": "manual",
   "estimado": "estimated",
-  "confirmado": "confirmed"
+  "confirmado": "confirmed",
+  "Las proyecciones utilizan los costos guardados del producto seleccionado. Cambiar de producto no modifica sus datos.": "Projections use the selected product's saved costs. Switching products does not change their saved data.",
+  "Solo se guardan los gastos fijos y las unidades mensuales del producto elegido. Los escenarios se mantienen independientes.": "Only monthly fixed expenses and units are saved for the selected product. Scenarios remain independent.",
+  "Guarda un producto en el catálogo antes de calcular metas.": "Save a product in your catalog before calculating goals.",
+  "Selecciona un producto del catálogo para ver su punto de equilibrio.": "Select a catalog product to view its break-even point.",
+  "Hay cambios sin guardar en Metas. ¿Descartarlos para cambiar de producto?": "There are unsaved changes in Goals. Discard them to switch products?",
+  "Hay cambios sin guardar en Metas. ¿Salir sin guardarlos?": "There are unsaved changes in Goals. Leave without saving them?",
+  "Proyección mensual guardada para el producto seleccionado.": "Monthly projection saved for the selected product."
 };
