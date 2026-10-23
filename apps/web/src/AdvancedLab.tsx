@@ -79,7 +79,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   onDirty(false);
  }
  function field(label:string,value:string,onChange:(value:string)=>void){
-  return <label className="field" key={label}><span>{t(label)}</span><input type="text" inputMode="decimal" value={value} onChange={e=>{onChange(e.target.value);onDirty(true);}}/></label>;
+  return <label className="field" key={label}><span>{t(label)}</span><input type="text" inputMode="decimal" value={value} onChange={e=>{onChange(e.target.value);onDirty(true);}} onBlur={()=>{if(value.trim()===""){onChange("0");onDirty(true);}}}/></label>;
  }
  return <section className="main-card advanced-lab">
   <span className="eyebrow">{t("SIMULADORES FINANCIEROS AVANZADOS")}</span>
@@ -109,7 +109,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   <div className="advanced-results" aria-live="polite">
     <h3>{t("Resultados orientativos")}</h3>
     {"error" in outcome?<p role="alert">{t(outcome.error??"")}</p>:
-    <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>typeof v==="string"||typeof v==="number").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{displayAdvancedResult(key,value as string|number)}</dd></div>)}</dl>}
+    <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>(typeof v==="string"||typeof v==="number")&&k!=="revenueMethod"&&k!=="reconciliationNotice").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{displayAdvancedResult(key,value as string|number)}</dd></div>)}</dl>}
   </div>
   {pane==="campaign"&&"data" in outcome&&outcome.data&&"reconciliationNotice" in outcome.data&&
    <p className="muted" role="note">{t(String(outcome.data.reconciliationNotice))}</p>}
