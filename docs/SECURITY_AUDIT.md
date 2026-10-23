@@ -87,3 +87,11 @@ La nueva evidencia **no incluye un `pnpm audit` repetido después de la traducci
 **Situación:** validación automática **aprobada** en el equipo del propietario. Las pruebas browser E2E de escenarios, backup/restauración, flujo de edición, accesibilidad, dispositivos móviles y cancelación de confirmaciones siguen **pendientes de evidencia**. El nuevo test contra el falso estado "descartar cambios" pasó a nivel de contrato estático, pero también debe verificarse manualmente en el navegador.
 
 La rama permanece en PR Draft; sin merge a `main`, sin release ni ejecución voluntaria de GitHub Actions. No se requieren nuevas dependencias por esta actualización documental.
+
+## 7. Avances de homologación funcional (evidencia visual del propietario)
+
+**Escenarios y cálculos probados manualmente:** contribuciones Optimista/Esperado/Conservador de COP 51.000/49.000/46.000, persistencia tras recarga F5, datos originales sin alteraciones, reversión de rascunhos sin guardado, error de descuento superior a precio, venta neta cero, descuento del 100 %, impacto COD de COP 1.000 y precisión COP 89.900,50. Esas pruebas se consideraron exitosas respecto de los casos efectivamente observados.
+
+**Pendiente:** proyección mensual y punto de equilibrio en el panel Metas. El propietario había configurado las cifras en el formulario de edición de un escenario, no necesariamente en el panel Metas; se le indicó cargar el producto original en Productos > Editar antes de entrar en Metas. No hay evidencia todavía de exportación/reimportación completa, eliminación/cancelación, lector de pantalla ni diseño móvil.
+
+El estado automatizado previo continúa como **35/35 pruebas locales aprobadas**, sin alertas reportadas por `pnpm audit`. No se ejecutó CI remota ni Actions.
