@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EMPTY_INPUT, analyze, simulateCOD, simulateCampaign, pricePerMeasure,
- consumerPricePreview, simulatePortfolio } from "../dist/index.js";
+ consumerPricePreview, simulatePortfolio, parseLocalizedPercent } from "../dist/index.js";
 
 const base={...EMPTY_INPUT,acquisition:"50.00",packaging:"0",shippingCost:"0",fixedFee:"0",advertising:"0",currentPrice:"100.00",monthlyFixed:"0",monthlyUnits:"10"};
 test("margin denominator includes separately charged shipping and retains legacy",()=>{
@@ -48,4 +48,11 @@ test("campaign derived CAC and break-even ROAS",()=>{
  advertisingSpend:"100.00",attributedRevenue:"2000.00",refundPercent:"0.00"});
  assert.equal(r.conversions,"20");assert.equal(r.cac,"5.00");
  assert.equal(r.maxCAC,"50.00");assert.equal(r.breakEvenRoas,"2.00");
+});
+
+test("localized percentage accepts explicit comma or dot, never grouping or scientific",()=>{
+ assert.equal(parseLocalizedPercent("19,50"),"19.50");
+ assert.equal(parseLocalizedPercent("19.50"),"19.50");
+ for(const bad of ["1.000,00","1e2","19,500","-1","101","19.5.0"])
+  assert.throws(()=>parseLocalizedPercent(bad));
 });
