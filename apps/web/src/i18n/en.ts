@@ -1,4 +1,4 @@
-/** Static English translations for user-facing application copy. */
+/** Static English UI translation table. */
 export const en: Record<string,string> = {
   "Calculadora": "Calculator",
   "Precio recomendado": "Recommended price",
@@ -231,5 +231,16 @@ export const en: Record<string,string> = {
   "Margen: ": "Margin: ",
   " · Precio objetivo: ": " · Target price: ",
   "Margen ": "Margin ",
-  "Precio meta: ": "Target price: "
+  "Precio meta: ": "Target price: ",
+  "ID": "ID",
+  "Origen": "Source",
+  "Precio actual (COP)": "Current price (COP)",
+  "Contribución (COP)": "Contribution (COP)",
+  "Margen contribución (%)": "Contribution margin (%)",
+  "Fecha actualización": "Updated at",
+  "Producto ejemplo": "Sample product",
+  " (copia)": " (copy)",
+  "manual": "manual",
+  "estimado": "estimated",
+  "confirmado": "confirmed"
 };
