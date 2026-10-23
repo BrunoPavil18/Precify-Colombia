@@ -1,11 +1,11 @@
 # Precify Colombia 🇨🇴
 
-> **v2.0.0 development branch:** this branch contains advanced simulators and fixes that are not yet validated. The latest public stable release remains **v1.0.0**. Do not release v2 before compilation, real tests and maintainer approval. See the [implementation status](docs/V2_STATUS.md).
+> **Precify Colombia 2.0.0:** merged into `main` and functionally validated by the maintainer (53 automated tests passed). The v2.0.0 GitHub tag/release is published separately. See [status and limitations](docs/V2_STATUS.md).
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Version 1.0.0 · Free and open source · Apache License 2.0**
+**Version 2.0.0 · Free and open source · Apache License 2.0**
 
 Precify Colombia is an independent pricing and profitability application in **Colombian pesos (COP)**. It supports unit costs, shipping, advertising, percentage and fixed fees, cash-on-delivery (COD) reserves, discounts, target margins, suggested prices, break-even analysis, products, independent scenarios, reports, CSV export, and JSON backups. The interface supports Colombian Spanish, Brazilian Portuguese, and English.
 
