@@ -1,11 +1,11 @@
 # Precify Colombia 🇨🇴
 
-> **Rama de desarrollo v2.0.0:** esta rama incorpora simuladores avanzados y correcciones aún no homologadas. La versión pública estable sigue siendo **v1.0.0**. No debe publicarse v2 sin compilación, pruebas reales y aprobación del mantenedor. Consulte [estado y pendientes](docs/V2_STATUS.md).
+> **Precify Colombia 2.0.0:** versión integrada en `main` y homologada funcionalmente por el mantenedor (53 pruebas automatizadas aprobadas). La publicación de la etiqueta/release v2.0.0 se realiza por separado. Consulte [alcance y límites](docs/V2_STATUS.md).
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versión 1.0.0 · Aplicación gratuita y de código abierto · Apache License 2.0**
+**Versión 2.0.0 · Aplicación gratuita y de código abierto · Apache License 2.0**
 
 Precify Colombia calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
 
