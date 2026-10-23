@@ -54,3 +54,13 @@ pnpm.cmd dev
 Conteo de tests escrito en código: **25** (21 existentes + 2 tests de escenarios en core + 2 controles estáticos de UI). **No declarar 25/25 aprobados hasta recibir logs reales.**
 
 No se creó ni se disparó workflow de GitHub Actions.
+
+## 5. Estado técnico y siguientes verificaciones (última evidencia del propietario)
+
+El propietario ejecutó exitosamente `pnpm.cmd typecheck`, `pnpm.cmd lint`, `pnpm.cmd test` (**35/35**), `pnpm.cmd build` y `pnpm.cmd audit --audit-level moderate` (**sin avisos conocidos**). Los casos de usuario de este documento **no se consideran aprobados solo por esas pruebas automáticas**.
+
+**Próxima revisión funcional:** crear los tres escenarios por producto, confirmar sus contribuciones calculadas, verificar la independencia respecto del producto guardado y F5. Después, verificar «Descartar cambios» en ES/PT/EN y que cambiar de idioma sin tocar el producto de ejemplo **no** muestre falsamente ediciones pendientes.
+
+**Verificación de datos sin riesgo:** descargar copia JSON antes de probar restauración; probar primero importación de JSON corrupto (debe rechazarse sin mutación). Solo después probar una restauración válida, confirmando explícitamente. Evitar borrar datos de prueba hasta verificar el backup.
+
+Mantener el PR en Draft hasta reunir evidencias funcionales, de accesibilidad y de restauración.
