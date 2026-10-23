@@ -112,8 +112,10 @@ function ProductEditor({value,onChange,onDirty}:{value:PriceInput;onChange:(next
 }
 export default function App(){
  const initialized=useMemo(loadWorkspace,[]);
+ const wasStored=useRef<boolean>(typeof localStorage!=="undefined"&&localStorage.getItem(STORE_KEY)!==null);
  const [workspace,setWorkspace]=useState<Workspace>(initialized.state);
  const [locked,setLocked]=useState(initialized.locked);
+ useEffect(()=>{const onStorage=(event:StorageEvent)=>{if(event.key===STORE_KEY){setLocked(true);setNotice("Conflicto entre pestañas: cambios externos detectados. Recarga la página para continuar, después de exportar tus datos.");}};window.addEventListener("storage",onStorage);return()=>window.removeEventListener("storage",onStorage);},[]);
  const [notice,setNotice]=useState(initialized.error??"");
  const [dirtyMoney,setDirtyMoney]=useState<Set<string>>(()=>new Set());
  const markDirty=(key:string,dirty:boolean)=>setDirtyMoney(prev=>{const next=new Set(prev);if(dirty)next.add(key);else next.delete(key);return next;});
@@ -216,7 +218,7 @@ export default function App(){
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
    const next=validateWorkspace({...change(workspace),updatedAt:new Date().toISOString()});
-   persistWorkspace(next);setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
+   persistWorkspace(next,wasStored.current?workspace.updatedAt:undefined);wasStored.current=true;setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
   }catch(e){setNotice("No se pudieron guardar los cambios: "+(e instanceof Error?e.message:String(e)));return false;}
  }
  const result=useMemo(()=>{
