@@ -134,7 +134,7 @@ export default function App(){
  const scenariosForProduct=workspace.scenarios.filter(s=>s.productId===scenarioProduct?.id);
  const selectedScenario=workspace.scenarios.find(s=>s.id===scenarioId);
  const savedProduct=workspace.products.find(p=>p.id===activeId);
- const persistedDraft=page==="escenarios"&&selectedScenario?selectedScenario.values:savedProduct?.input??EMPTY_INPUT;
+ const persistedDraft=page==="escenarios"&&selectedScenario?selectedScenario.values:savedProduct?.input??{...EMPTY_INPUT,name:t("Producto ejemplo")};
  const hasUnsavedDraft=dirtyMoney.size>0||JSON.stringify(draft)!==JSON.stringify(persistedDraft);
  function restoreSavedDraft(){
   setDraft({...persistedDraft});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
