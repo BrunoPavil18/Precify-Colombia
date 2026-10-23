@@ -1,18 +1,57 @@
-# Auditoría técnica — 22/10/2026
+# Auditoría técnica — Precify Colombia 1.0.0
 
-Estado: inspección inicial; **no homologado**. Versiones directas revisadas: pnpm 10.34.7 (posterior a correcciones de advisories de agosto 2026), React/React DOM 19.3.1 (se evitó React inicial antiguo), Vite 8.3.4 y plugin React 6.1.2. La revisión estática **no** sustituye auditoría transitiva con lockfile.
+**Estado:** PR consolidada en Draft; `main` preservada. No se ha hecho merge, tag, release, deployment ni ejecución de GitHub Actions.
 
-Confirmado: se partió de main con solo LICENSE; no se copió código de referencias Precify. No se crearon workflows ni se invocó GitHub Actions. Validación de costos BigInt, esquema JSON versionado, límite de 2 MB, invalidación completa de backups corruptos, confirmación antes de reemplazo, CSV neutralizado y React sin dangerouslySetInnerHTML.
+## 1. Evidencia de validación local aportada por el propietario
 
-Pendiente: pnpm no está instalado y el shell no pudo acceder a GitHub/npm (DNS de github.com inaccesible); **no** se ejecutaron instalación, pruebas, typecheck, lint, build, audit de dependencias ni pruebas E2E/a11y reales. El lockfile no fue generado. No se puede afirmar CI verde ni ausencia de vulnerabilidades.
+Sobre Windows, con Node.js 24.19.0, pnpm 10.34.7, Vite 8.3.4:
 
-Obligatorio antes del merge: generar y revisar pnpm-lock.yaml con pnpm 9.15.9 y --lockfile-only --ignore-scripts; instalación --frozen-lockfile; typecheck, lint, tests, build y audit local; inspección de scripts pós-instalação; pruebas manuales de móvil, lector de pantalla/teclado, datos corruptos y backups. Revisar CSP/headers para cada host; marca y obligaciones tributarias quedan por validar externamente.
+- `pnpm install --lockfile-only --ignore-scripts`: aprobada; lockfile creado en la computadora del usuario.
+- `pnpm install --frozen-lockfile --ignore-scripts`: aprobada.
+- `pnpm typecheck`: aprobada para core y web.
+- `pnpm lint`: aprobada, **solo ejecuta `tsc`**, no un linter independiente.
+- `pnpm test`: **21/21** aprobadas en el primer ciclo.
+- `pnpm build`: aprobada, compilación estática de producción.
+- `pnpm audit --audit-level moderate`: `No known vulnerabilities found` en aquel conjunto de dependencias.
+- `pnpm dev`: servidor Vite inició y el usuario mostró las seis vistas en escritorio.
+- Pruebas funcionales observadas: alta, edición, duplicación y persistencia tras F5.
 
-Limitaciones conocidas: traducción PT/EN parcial, IVA ilustrativo, localStorage susceptible a borrado o extensiones, ausencia de sincronización. No se ha lanzado ninguna release.
+El propietario añadió el **pnpm-lock.yaml** real a la rama del PR después del primer ciclo. No se incluyeron credenciales ni servicios externos obligatorios.
 
+## 2. Cambios posteriores sin validación local
 
-## Evidencia de ejecución del propietario (23/10/2026)
+Tras el primer ciclo se incorporaron:
 
-En Windows, Node 24.19.0 y pnpm 10.34.7, se ejecutaron y aprobaron (logs aportados en conversación): install --lockfile-only, install --frozen-lockfile --ignore-scripts, typecheck, lint (actualmente alias a tsc), 21/21 tests originales, build Vite 8.3.4 y pnpm audit --audit-level moderate (sin vulnerabilidades conocidas reportadas). Vite dev inició y se revisaron capturas desktop. Se verificaron manualmente guardar producto, editar cifras, duplicar y persistencia tras F5.
+- Selector de producto, edición independiente de escenarios, botón de descartar y nueva vista previa.
+- Traducción estática integral de la UI al portugués brasileño e inglés, además del español colombiano preexistente.
+- Selector ES/PT/EN persistente, atributo HTML lang, mensajes financieros y de confirmación traducidos.
+- Informes CSV con encabezados y etiquetas de origen localizados; esquema de backup, dinero y tipos de core invariables.
+- **13 pruebas adicionales escritas**: 4 del flujo de escenarios, 8 comprobaciones de internacionalización y 1 de exportación CSV multilingüe. Total **34 tests definidos**.
 
-Posteriormente, se añadieron mejoras al editor y a Escenarios, además de **4 pruebas automatizadas nuevas**. Su resultado **NO está verificado aún** (total definido: 25 pruebas). Falta confirmar la versión actualizada en navegador y añadir el lockfile generado localmente a la PR. No se ejecutó GitHub Actions.
+**No se han ejecutado los 34 tests, typecheck, build ni audit posteriores a estos últimos cambios dentro del ambiente de la asistente.** Los resultados anteriores de 21/21 no implican que los cambios recientes estén aprobados. Se requiere repetir en la máquina del propietario.
+
+## 3. Diseño de seguridad y límites
+
+- Implementación original; no se copiaron archivos de otros proyectos Precify.
+- Core desacoplado de React; dinero COP en centavos BigInt y JSON de backup con esquema versionado.
+- Backup/importación con límites de tamaño, validación estricta y confirmación antes de sobrescritura.
+- CSV escapado y neutralizado contra inyección de fórmulas, incluso con columnas traducidas.
+- Copia local de textos estáticos PT/EN: no requiere DeepL, API key, redes ni telemetría.
+- Preferencia de idioma independiente del workspace financiero. No altera `currency: COP` ni `locale: es-CO` del backup (contrato de formato).
+- Los errores provenientes de extensiones o navegador pueden escapar al control del traductor propio.
+- `pnpm audit` sin avisos no prueba ausencia de vulnerabilidades; revisar lockfile, dependencias transitivas, CSP/headers del hosting y scripts instaladores.
+- La interfaz todavía requiere accesibilidad real, vista móvil, flujos de backup/restore y validación financiera independiente.
+
+## 4. Comandos obligatorios antes de cerrar el PR
+
+~~~powershell
+pnpm.cmd install --frozen-lockfile --ignore-scripts
+pnpm.cmd typecheck
+pnpm.cmd lint
+pnpm.cmd test
+pnpm.cmd build
+pnpm.cmd audit --audit-level moderate
+pnpm.cmd dev
+~~~
+
+Homologar también los pasos de [HOMOLOGACION_MANUAL.md](HOMOLOGACION_MANUAL.md) y [HOMOLOGACION_I18N.md](HOMOLOGACION_I18N.md). Mantener la `main` intacta y no disparar GitHub Actions sin autorización expresa.
