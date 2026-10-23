@@ -201,7 +201,7 @@ export default function App(){
    resetGoalDraft();
   }
   if(target==="metas"&&target!==page){
-   const selected=workspace.products.find(p=>p.id===activeId)??workspace.products[0];
+   const selected=workspace.products.find(p=>p.id===goalProductId)??workspace.products.find(p=>p.id===activeId)??workspace.products[0];
    setGoalProductId(selected?.id??"");resetGoalDraft();
   }
   setPage(target);
@@ -240,7 +240,7 @@ export default function App(){
   });
   if(ok){setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
  }
- function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
  function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  function deleteProduct(p:Product){
   if(!window.confirm(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos.")))return;
