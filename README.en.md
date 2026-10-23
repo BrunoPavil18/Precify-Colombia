@@ -7,6 +7,11 @@
 
 **Version 2.0.0 · Free and open source · Apache License 2.0**
 
+## What's new in v2.0.0
+
+Version 2 retains the v1 features and adds interactive **COD risk simulation** (created, shipped, delivered, and paid orders), **advertising/CAC/ROAS**, **price per unit of measure** (kg, L, m, each), an **estimated consumer checkout total** (included or additional tax), and **multi-product portfolio profitability** with shared fixed expenses deducted only once. Saved simulations are grouped by module and exported through JSON backup v2; v1 backups remain importable. Explicit margin bases, commercial versus contribution markup, and zero-contribution viability checks improve clarity. Localized percentage entry, accessible confirmation dialogs, a PWA offline resource shell, and opt-in updates complete the interface changes. Taxes and logistics assumptions remain user-configurable and illustrative.
+
+
 Precify Colombia is an independent pricing and profitability application in **Colombian pesos (COP)**. It supports unit costs, shipping, advertising, percentage and fixed fees, cash-on-delivery (COD) reserves, discounts, target margins, suggested prices, break-even analysis, products, independent scenarios, reports, CSV export, and JSON backups. The interface supports Colombian Spanish, Brazilian Portuguese, and English.
 
 ## Where does user data live?
@@ -37,10 +42,11 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
+pnpm verify:core
 pnpm audit --audit-level moderate
 ```
 
-The current `lint` script performs TypeScript checks, **not a dedicated ESLint run**. The static production build is **`apps/web/dist/`**. Deploy its contents using an HTTPS static-file host with proper MIME types and security headers. Do **not** use the Vite development server for production. No account, API key, paid host, or custom backend is required for core operation.
+`pnpm lint` runs a dedicated TypeScript AST source-policy checker followed by typechecking; it is not ESLint or Biome.
 
 ## Configuration and usage
 
@@ -80,10 +86,16 @@ console.log(result.contribution); // "49000.00" given the other example costs
 console.log(suggestPrice(input).price);
 ```
 
-Within this pnpm monorepo, depend on `"@precify-colombia/core": "workspace:*"`. **Version 1.0.0 does not publish an npm package**, and the package exports TypeScript sources rather than a portable precompiled npm distribution. External projects must vendor/fork the Apache 2.0 source and configure TypeScript/bundling; public `npm install @precify-colombia/core` is **not** guaranteed. A native WordPress/PHP integration would require a custom JavaScript bridge or backend adapter: **no official WordPress plugin or HTTP API exists**.
+Within this pnpm monorepo, depend on `"@precify-colombia/core": "workspace:*"`. **Version 2.0.0 · Free and open source · Apache License 2.0**.
 
 To reuse external store data, map it to `PriceInput`, call `validateInput` and `analyze`, and handle `FinancialInputError`. Never expose store credentials to browser users or automatically change live store prices without authorization.
 
 See the [integration contract](docs/INTEGRATION_CONTRACT.md), [financial formulas](docs/FINANCIAL_FORMULAS.md), [architecture](docs/ARCHITECTURE.md), [security notes](docs/SECURITY_AUDIT.md), and [Apache 2.0 license](LICENSE).
 
 **Limits:** COP only; browser-local storage; no sign-in, backend, cross-device sync, automatic commerce integrations, checkout, or WordPress plugin. Results are illustrative, not accounting or tax advice. Source license rights do not grant third-party trademark rights.
+
+## Documentación técnica v2 / Technical v2 documentation
+
+- [Integration API v2](docs/INTEGRATION_V2.md)
+- [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
+- [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
