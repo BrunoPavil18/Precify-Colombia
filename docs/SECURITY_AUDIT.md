@@ -103,3 +103,18 @@ El estado automatizado previo continúa como **35/35 pruebas locales aprobadas**
 **Nueva implementación en la misma PR:** Metas ahora selecciona un producto del catálogo persistido, con disponibilidad después de F5. Cambiar de producto reemplaza solo el borrador mensual del panel Metas y nunca modifica otras entidades. Los formularios de Metas guardan exclusivamente `monthlyFixed` y `monthlyUnits` en el producto seleccionado, con entrada de historial; no cambian precios, costos variables ni escenarios. Se solicita confirmación al abandonar una proyección no guardada; «Descartar cambios» no muta el banco local. Con catálogo vacío se muestra estado vacío. Mensajes estáticos añadidos a es-CO/pt-BR/en.
 
 **Resultado real:** se añadieron **3 pruebas automatizadas** (2 contratos estáticos UI y 1 cálculo determinístico de metas). **38 tests escritos; los 35 anteriores están aprobados, los 3 nuevos y el build actualizado permanecen pendientes de ejecución local.** No declarar CI aprobada para estos cambios hasta recibir resultado. `main` no fue modificada, PR en Draft y no se ejecutó Actions.
+
+## 9. Verificación local de Metas multproducto (evidencia posterior)
+
+El usuario entregó capturas y logs posteriores al selector de Metas:
+- `pnpm.cmd typecheck` aprobado (core/web).
+- `pnpm.cmd test` **38/38 tests aprobados** (23 core, 15 web; fallos 0).
+- `pnpm.cmd build` aprobado con Vite 8.3.4 (27 módulos; JS 325,76 kB, gzip 97,69 kB).
+- Servidor `pnpm.cmd dev` inició en `127.0.0.1:5173`.
+- Metas, producto original: gastos fijos **COP 320.000**, 10 unidades y contribución unitaria **COP 49.000** → punto de equilibrio **7**, utilidad **COP 170.000**, margen **17,17%**.
+- Metas, producto duplicado: gastos fijos **COP 50.000**, 10 unidades y contribución unitaria **COP 49.000** → punto de equilibrio **2**, utilidad **COP 440.000**, margen **44,44%**.
+- La selección, guardado y aislamiento de escenarios/precios/costos variables funcionaron según las capturas y el relato del usuario.
+
+**Homologado manualmente:** selección del producto en Metas, cálculos mostrados y funcionamiento básico del guardado independiente. Confirmación al cambiar de producto con ediciones pendientes, entradas inválidas y accesibilidad móvil aún no fueron mostradas en esta ronda.
+
+**Siguientes pasos pendientes:** informes/ranking/CSV, perfiles de costos, backup JSON, rechazo de archivo inválido, cancelación de restauración y restauración total verificada. No se ejecutaron workflows de GitHub Actions. La última auditoría de dependencias comunicada corresponde a la ronda anterior; no se repitió `pnpm audit` en los últimos logs.
