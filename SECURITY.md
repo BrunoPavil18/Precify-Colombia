@@ -1,24 +1,39 @@
-# Seguridad — Precify Colombia
+# Security policy — Precify Colombia
 
-**Última actualización:** 23/10/2026. La release v1.0.0 está publicada. La branch de v2.0.0 se encuentra en desarrollo y **no está homologada**.
+**Updated:** 2026-10-23. **Code version:** 2.0.0 in `main`; GitHub Release publication is a separate step. See [Changelog](CHANGELOG.md).
 
-## Modelo de datos
+## Data and privacy
+Precify operates without mandatory user accounts, cloud storage, advertising integrations or API keys. Workspace data live in the user's origin-scoped `localStorage` under `precify-colombia:workspace:v1` (the storage **key remains v1 intentionally for compatibility**); backups exported in v2 format import version 1 and 2 records. Local storage is accessible to other scripts running on the same origin and browser profile; it is not encrypted, synchronized, or protected against shared-device access. Do not save sensitive client personal information or secrets. Export backups and safeguard them outside the browser.
 
-No se requiere backend, cuenta, geolocalización ni servicio comercial externo. Productos, escenarios y preferencias permanecen en `localStorage` vinculado al origen/perfil del navegador; otros scripts con acceso al mismo origen pueden leer esos datos. No guarde secretos, información de clientes ni credenciales allí. Haga backups periódicos fuera del navegador. El uso de `localStorage` no exime obligaciones de protección de datos.
+## Implemented safeguards
+- Exact COP decimal-string/BigInt financial arithmetic and input validation.
+- 2 MB JSON backup limit, schema validation, and atomic-in-application rejection before replacing workspace contents.
+- CSV spreadsheet formula neutralization and ordinary React text escaping.
+- Confirmation dialogs: cancellation and Escape must not mutate data.
+- Detect stale browser tabs using `storage` events and pre-write comparison of full validated workspace snapshots.
+- PWA caches public static shell/assets only; financial data are not intentionally stored in the service-worker cache.
+- All new features remain local and user-configurable, without third-party network accounts.
 
-## Controles
+## Security limitations
+- Snapshot comparison + `localStorage` setItem **does not provide atomic compare-and-swap** for truly simultaneous multi-tab writes.
+- Dependency scan results are time-bounded: latest maintainer `pnpm audit --audit-level moderate` reported no known vulnerabilities; this is not a guarantee.
+- Production hosts should configure HTTPS, appropriate CSP and `frame-ancestors`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, restrictive Permissions-Policy, and deliberate iframe access where applicable; adapt headers to actual deployment.
+- PWA updates and offline functionality require browser/runtime compatibility and should be tested on the deployment origin.
+- Regulatory and tax guides are informative, not legal certification.
 
-- Dinero canónico en COP con centavos BigInt.
-- Validación de productos y límites de tamaño/cantidad en backups JSON.
-- Los CSV neutralizan fórmulas inicialmente peligrosas.
-- La nueva protección de concurrencia detecta revisiones externas y bloquea mutaciones de la pestaña desactualizada; no constituye sincronización multiusuario transaccional.
-- PWA experimental almacena únicamente shell HTML, archivos estáticos y recursos públicos. Nunca responder con datos financieros ni llamadas API cacheadas.
-- No introducir dependencia, código ejecutable desconocido, credenciales o scripts de instalación no auditados.
+## Report a vulnerability
+Avoid disclosing live exploits or personal data in public issues. Use GitHub private vulnerability reporting, if enabled, or an appropriate private maintainer channel. Provide the impacted version, minimal reproduction steps and potential impact.
 
-## Reportar fallos
+## Local verification
 
-Evite divulgar exploits activos y datos sensibles en issues públicos. Utilice reporte privado de vulnerabilidades en GitHub si está habilitado, o un contacto privado del mantenedor, indicando versión afectada, impacto y reproducción segura.
+```bash
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm verify:core
+pnpm audit --audit-level moderate
+```
 
-## Pendencias obligatorias antes de v2
-
-Revisión de dependencias/lockfile, lint independiente real, build/tests locales y E2E, multi-tab concurrente, backup malformado, escape de texto, PWA offline/actualización, CSP y headers de hosting. La ausencia de alertas en un scanner no prueba seguridad absoluta.
+No GitHub Actions runs or paid infrastructure are required.
