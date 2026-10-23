@@ -122,6 +122,11 @@ export default function App(){
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
  const [scenarioProductId,setScenarioProductId]=useState("");
+ const [goalProductId,setGoalProductId]=useState("");
+ const [goalFixedOverride,setGoalFixedOverride]=useState<string|null>(null);
+ const [goalUnitsOverride,setGoalUnitsOverride]=useState<string|null>(null);
+ const [goalMoneyUnvalidated,setGoalMoneyUnvalidated]=useState(false);
+ const [goalEditorRevision,setGoalEditorRevision]=useState(0);
  const [editorRevision,setEditorRevision]=useState(0);
  const [locale,setLocale]=useState<Locale>(readLocale);
  useEffect(()=>{document.documentElement.lang=locale;document.title="Precify Colombia — "+translate(locale,"Calculadora");},[locale]);
@@ -136,6 +141,46 @@ export default function App(){
  const savedProduct=workspace.products.find(p=>p.id===activeId);
  const persistedDraft=page==="escenarios"&&selectedScenario?selectedScenario.values:savedProduct?.input??{...EMPTY_INPUT,name:t("Producto ejemplo")};
  const hasUnsavedDraft=dirtyMoney.size>0||JSON.stringify(draft)!==JSON.stringify(persistedDraft);
+ const goalProduct=workspace.products.find(p=>p.id===goalProductId)??workspace.products.find(p=>p.id===activeId)??workspace.products[0];
+ const goalInput=useMemo(()=>goalProduct?{
+  ...goalProduct.input,
+  monthlyFixed:goalFixedOverride??goalProduct.input.monthlyFixed,
+  monthlyUnits:goalUnitsOverride??goalProduct.input.monthlyUnits
+ }:null,[goalProduct,goalFixedOverride,goalUnitsOverride]);
+ const goalDirty=goalMoneyUnvalidated||!!goalProduct&&(
+  (goalFixedOverride!==null&&goalFixedOverride!==goalProduct.input.monthlyFixed)||
+  (goalUnitsOverride!==null&&goalUnitsOverride!==goalProduct.input.monthlyUnits)
+ );
+ const goalResult=useMemo(()=>{
+  if(!goalInput)return {breakdown:null,error:null as string|null};
+  try{return {breakdown:analyze(goalInput),error:null as string|null};}
+  catch(e){return {breakdown:null,error:e instanceof Error?e.message:String(e)};}
+ },[goalInput]);
+ function resetGoalDraft(){
+  setGoalFixedOverride(null);setGoalUnitsOverride(null);setGoalMoneyUnvalidated(false);
+  setGoalEditorRevision(n=>n+1);
+ }
+ function selectGoalProduct(id:string){
+  if(goalDirty&&!window.confirm(t("Hay cambios sin guardar en Metas. ¿Descartarlos para cambiar de producto?")))return;
+  setGoalProductId(id);resetGoalDraft();
+ }
+ function saveGoalChanges(){
+  if(!goalProduct||!goalInput)return;
+  if(goalMoneyUnvalidated){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
+  try{validateInput(goalInput);}catch(e){setNotice("Corrige los campos: "+String(e));return;}
+  const now=new Date().toISOString();
+  const ok=commit(w=>({
+   ...w,
+   products:w.products.map(p=>p.id!==goalProduct.id?p:{
+    ...p,updatedAt:now,input:{...p.input,monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits}
+   }),
+   history:[...w.history,{
+    id:makeId(),productId:goalProduct.id,at:now,action:"Actualización",
+    snapshot:{...goalProduct.input,monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits}
+   }].slice(-3000)
+  }));
+  if(ok){resetGoalDraft();setNotice("Proyección mensual guardada para el producto seleccionado.");}
+ }
  function restoreSavedDraft(){
   setDraft({...persistedDraft});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
   setNotice("Se descartaron los cambios sin guardar. La versión guardada permanece intacta.");
@@ -145,6 +190,14 @@ export default function App(){
    if(hasUnsavedDraft&&!window.confirm(t("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?")))return;
    if(savedProduct)setDraft({...savedProduct.input});
    setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  }
+  if(target!==page&&page==="metas"&&goalDirty){
+   if(!window.confirm(t("Hay cambios sin guardar en Metas. ¿Salir sin guardarlos?")))return;
+   resetGoalDraft();
+  }
+  if(target==="metas"&&target!==page){
+   const selected=workspace.products.find(p=>p.id===activeId)??workspace.products[0];
+   setGoalProductId(selected?.id??"");resetGoalDraft();
   }
   setPage(target);
  }
@@ -315,7 +368,55 @@ export default function App(){
        </div>:<p className="muted">{t("Selecciona una tarjeta para editarla, guardar y comparar resultados sin cambiar el producto original.")}</p>}
       </>}
      </section>}
-     {page==="metas"&&<><div className="two-column"><div className="main-card"><span className="eyebrow">{t("PROYECCIÓN MENSUAL")}</span><h2>{t("La meta de tu negocio")}</h2><p className="muted">{t("Modifica gastos fijos y unidades para calcular cuándo la contribución cubre la operación.")}</p><div className="form-grid"><MoneyField label="Gastos fijos al mes" value={draft.monthlyFixed} help="Arriendo, salarios y gastos mensuales." onDirty={flag=>markDirty("monthlyFixed",flag)} onCommit={v=>setDraft(d=>({...d,monthlyFixed:v}))}/><label className="field"><span>{t("Unidades vendidas por mes")}</span><input inputMode="numeric" value={draft.monthlyUnits} onChange={e=>setDraft(d=>({...d,monthlyUnits:e.target.value}))}/><small>{t("Volumen estimado, no ventas confirmadas.")}</small></label></div><button className="primary" onClick={saveProduct}>{t("Guardar cambios en producto")}</button></div><div className="results-card"><span className="eyebrow">{t("ESTIMACIÓN DE RENTABILIDAD")}</span>{result.error?<p role="alert">{result.error}</p>:result.breakdown&&<><div className="goal-number"><span>{t("PUNTO DE EQUILIBRIO")}</span><strong>{result.breakdown.breakEvenUnits??"No calculable"}</strong><small>{t("unidades mensuales")}</small></div><div className="kpi-grid"><Kpi label="Contribución por unidad" value={fmt(result.breakdown.contribution)} detail="Antes de gastos fijos"/><Kpi label="Utilidad mensual estimada" value={fmt(result.breakdown.monthlyNet)} detail="Al volumen indicado" attention={result.breakdown.monthlyNet.startsWith("-")}/><Kpi label="Margen neto mensual" value={(result.breakdown.monthlyNetMargin??"N/D")+"%"} detail="Utilidad / ingreso mensual estimado"/></div><p className="muted">{t("Para varios productos utiliza la contribución promedio ponderada del mix real. No supone demanda estable.")}</p></>}</div></div></>}
+     {page==="metas"&&<div className="two-column">
+      <section className="main-card">
+       <span className="eyebrow">{t("PROYECCIÓN MENSUAL")}</span><h2>{t("La meta de tu negocio")}</h2>
+       <p className="muted">{t("Modifica gastos fijos y unidades para calcular cuándo la contribución cubre la operación.")}</p>
+       {goalProduct&&goalInput?<>
+        <label className="goal-product-selector"><span>{t("Producto que deseas analizar")}</span>
+         <select value={goalProduct.id} onChange={e=>selectGoalProduct(e.target.value)}>
+          {workspace.products.map(p=><option key={p.id} value={p.id}>{p.input.name} · {fmt(p.input.currentPrice)}</option>)}
+         </select>
+        </label>
+        <p className="muted goal-help">{t("Las proyecciones utilizan los costos guardados del producto seleccionado. Cambiar de producto no modifica sus datos.")}</p>
+        <div className="form-grid">
+         <MoneyField key={"goal-fixed-"+goalProduct.id+"-"+goalEditorRevision}
+          label="Gastos fijos al mes" value={goalInput.monthlyFixed}
+          help="Arriendo, salarios y gastos mensuales."
+          onDirty={setGoalMoneyUnvalidated}
+          onCommit={v=>setGoalFixedOverride(v===goalProduct.input.monthlyFixed?null:v)}/>
+         <label className="field"><span>{t("Unidades vendidas por mes")}</span>
+          <input inputMode="numeric" value={goalInput.monthlyUnits}
+           onChange={e=>setGoalUnitsOverride(e.target.value===goalProduct.input.monthlyUnits?null:e.target.value)}/>
+          <small>{t("Volumen estimado, no ventas confirmadas.")}</small>
+         </label>
+        </div>
+        <div className="actions goals-actions">
+         <button className="secondary" disabled={!goalDirty} onClick={resetGoalDraft}>{t("Descartar cambios")}</button>
+         <button className="primary" disabled={!goalDirty||goalMoneyUnvalidated||!!goalResult.error} onClick={saveGoalChanges}>{t("Guardar cambios en producto")}</button>
+        </div>
+        <p className="muted goal-help">{t("Solo se guardan los gastos fijos y las unidades mensuales del producto elegido. Los escenarios se mantienen independientes.")}</p>
+       </>:<div className="empty-state"><h3>{t("Primero guarda un producto")}</h3>
+        <p>{t("Guarda un producto en el catálogo antes de calcular metas.")}</p>
+        <button onClick={()=>navigate("calculadora")}>{t("Ir a la calculadora")}</button></div>}
+      </section>
+      <aside className="results-card">
+       <span className="eyebrow">{t("ESTIMACIÓN DE RENTABILIDAD")}</span>
+       {!goalProduct?<p className="muted">{t("Selecciona un producto del catálogo para ver su punto de equilibrio.")}</p>
+        :goalResult.error?<div className="error-box" role="alert">{t(goalResult.error)}</div>
+        :goalResult.breakdown&&<>
+         <div className="goal-number"><span>{t("PUNTO DE EQUILIBRIO")}</span>
+          <strong>{goalResult.breakdown.breakEvenUnits??t("No calculable")}</strong>
+          <small>{t("unidades mensuales")}</small></div>
+         <div className="kpi-grid">
+          <Kpi label="Contribución por unidad" value={fmt(goalResult.breakdown.contribution)} detail="Antes de gastos fijos"/>
+          <Kpi label="Utilidad mensual estimada" value={fmt(goalResult.breakdown.monthlyNet)} detail="Al volumen indicado" attention={goalResult.breakdown.monthlyNet.startsWith("-")}/>
+          <Kpi label="Margen neto mensual" value={(goalResult.breakdown.monthlyNetMargin??"N/D")+"%"} detail="Utilidad / ingreso mensual estimado"/>
+         </div>
+         <p className="muted">{t("Para varios productos utiliza la contribución promedio ponderada del mix real. No supone demanda estable.")}</p>
+        </>}
+      </aside>
+     </div>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t("Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
  origin:{manual:t("Ingreso manual"),estimado:t("Estimación"),confirmado:t("Declarado confirmado")}
