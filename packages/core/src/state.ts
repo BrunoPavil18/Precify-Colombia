@@ -1,3 +1,4 @@
+import { simulateCOD, simulateCampaign, pricePerMeasure, consumerPricePreview, simulatePortfolio, type PUMUnit } from "./advanced.js";
 import { FinancialInputError, parseDecimal } from "./money.js";
 import { analyze, validateInput, type PriceInput } from "./pricing.js";
 export const STORE_KEY = "precify-colombia:workspace:v1";
@@ -78,6 +79,24 @@ export function validateWorkspace(value:unknown):Workspace {
    throw new FinancialInputError("Entradas de simulación desconocidas.");
   const inputs:Record<string,string>={};
   for(const [key,value] of Object.entries(raw))inputs[key]=safeText(value,"Valor de simulación",1200);
+  // A restored simulation must be computationally valid before replacing any workspace.
+  if(kind==="cod"||kind==="campaign"){
+   const product=products.find(p=>p.id===productId);
+   if(!product)throw new FinancialInputError("Simulación sin producto asociado.");
+   if(kind==="cod")simulateCOD({...inputs,product:product.input} as Parameters<typeof simulateCOD>[0]);
+   else simulateCampaign({...inputs,product:product.input} as Parameters<typeof simulateCampaign>[0]);
+  }else if(kind==="pum"){
+   pricePerMeasure(inputs.price!,inputs.quantity!,inputs.unit as PUMUnit);
+  }else if(kind==="consumer"){
+   consumerPricePreview(inputs as unknown as Parameters<typeof consumerPricePreview>[0]);
+  }else {
+   const parsed=JSON.parse(inputs.quantities??"null") as unknown;
+   const quantities=obj(parsed,"Volúmenes de cartera");
+   if(Object.keys(quantities).some(key=>!productIds.has(key))||
+      Object.values(quantities).some(value=>typeof value!=="string"||!/^(0|[1-9]\\d{0,7})$/.test(value)))
+    throw new FinancialInputError("Volúmenes de cartera inválidos.");
+   simulatePortfolio(products.map(p=>({product:p.input,monthlyUnits:String(quantities[p.id]??"0")})),inputs.monthlyFixed!);
+  }
   return {id:id(row.id),kind,productId,at:safeDate(row.at,"Fecha"),label:safeText(row.label,"Nombre de simulación",100),inputs};
  });
  if(new Set(advancedSimulations.map(x=>x.id)).size!==advancedSimulations.length)
