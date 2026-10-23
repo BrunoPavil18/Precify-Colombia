@@ -179,7 +179,12 @@ export default function App(){
     snapshot:{...goalProduct.input,monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits}
    }].slice(-3000)
   }));
-  if(ok){resetGoalDraft();setNotice("Proyección mensual guardada para el producto seleccionado.");}
+  if(ok){
+   if(activeId===goalProduct.id&&JSON.stringify(draft)===JSON.stringify(goalProduct.input)){
+    setDraft(d=>({...d,monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits}));
+   }
+   resetGoalDraft();setNotice("Proyección mensual guardada para el producto seleccionado.");
+  }
  }
  function restoreSavedDraft(){
   setDraft({...persistedDraft});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
