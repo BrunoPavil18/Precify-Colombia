@@ -114,3 +114,38 @@ test("portfolio break-even avoids prematurely rounded average",()=>{
  assert.equal(r.totalContribution,"0.03");
  assert.equal(simulatePortfolio([{product:low,monthlyUnits:"0"}],"0.02").breakEvenUnits,null);
 });
+
+test("COD charged only on transport events even with partial shipment and delivered unpaid",()=>{
+ const params={product:base,createdOrders:"100",shippedPercent:"50",deliveredPercentOfShipped:"80",
+ paidPercentOfDelivered:"50",failedAttemptCost:"7.00",returnShippingCost:"4.00",
+ advertisingPerCreatedOrder:"1.00",extraCODFeePerPaidOrder:"2.00",lossReservePerFailedOrder:"3.00"};
+ const r=simulateCOD(params);
+ assert.equal(r.cancelledBeforeShipping,"50");
+ assert.equal(r.deliveryFailures,"10");
+ assert.equal(r.deliveredUnpaid,"20");
+ assert.equal(r.paidOrders,"20");
+ // 20*(50-2) - 100*1 - 10*7 - 80*3 - 30*4 = 430
+ assert.equal(r.expectedProfit,"430.00");
+ assert.equal(r.profitPerShippedOrder,"8.60");
+});
+test("campaign keeps attributed revenue separate from projected orders",()=>{
+ const params={product:base,impressions:"100",conversionPercent:"10",advertisingSpend:"100.00",attributedRevenue:"3000.00",refundPercent:"20"};
+ const r=simulateCampaign(params);
+ assert.equal(r.conversions,"10");
+ assert.equal(r.projectedRevenue,"1000.00");
+ assert.equal(r.projectedRefunds,"200.00");
+ assert.equal(r.projectedProfit,"200.00");
+ assert.equal(r.attributedRevenueAfterRefunds,"2400.00");
+ assert.equal(r.roas,"24.00");
+ assert.equal(r.projectedRoas,"8.00");
+ assert.equal(r.attributionMismatch,true);
+});
+test("fixed mix portfolio break-even uses exact aggregate contribution, not rounded average",()=>{
+ const a={...base,acquisition:"99.97"};
+ const b={...base,acquisition:"99.99"};
+ const result=simulatePortfolio([{product:a,monthlyUnits:"1"},{product:b,monthlyUnits:"2"}],"0.03");
+ // Three units contribute five centavos: ceil(3*3/5)=2
+ assert.equal(result.totalContribution,"0.05");
+ assert.equal(result.breakEvenUnits,"2");
+ assert.equal(result.fixedMixAssumption,true);
+});
