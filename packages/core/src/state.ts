@@ -93,7 +93,7 @@ export function validateWorkspace(value:unknown):Workspace {
    const parsed=JSON.parse(inputs.quantities??"null") as unknown;
    const quantities=obj(parsed,"Volúmenes de cartera");
    if(Object.keys(quantities).some(key=>!productIds.has(key))||
-      Object.values(quantities).some(value=>typeof value!=="string"||!/^(0|[1-9]\\d{0,7})$/.test(value)))
+      Object.values(quantities).some(value=>typeof value!=="string"||!/^(0|[1-9]\d{0,7})$/.test(value)))
     throw new FinancialInputError("Volúmenes de cartera inválidos.");
    simulatePortfolio(products.map(p=>({product:p.input,monthlyUnits:String(quantities[p.id]??"0")})),inputs.monthlyFixed!);
   }
