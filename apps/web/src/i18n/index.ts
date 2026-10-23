@@ -21,6 +21,7 @@ export function translate(locale:Locale,original:string):string {
  if(locale==="es-CO")return original;
  const dict=dictionary[locale];
  if(Object.prototype.hasOwnProperty.call(dict,original))return dict[original]!;
+ if(original.startsWith("FinancialInputError: "))return translate(locale,original.slice("FinancialInputError: ".length));
  // Validation errors with a field name followed by a stable Spanish message.
  const dynamic=original.match(/^([^:]+): (use formato decimal 1234\.50 sin separadores de miles\.|valor demasiado grande\.|use porcentaje explícito entre 0 y 100 \(ej\.: 19\.5\)\.|no puede superar 100%\.|objeto inválido\.|texto inválido\.|fecha inválida\.|lista inválida o excesiva\.|identificadores duplicados\.)$/);
  if(dynamic)return translate(locale,dynamic[1]!)+": "+translate(locale,dynamic[2]!);
@@ -32,7 +33,7 @@ export function translate(locale:Locale,original:string):string {
   "Datos locales dañados o inaccesibles. No se sobrescribirán automáticamente. Exporta una copia desde el navegador antes de continuar. "
  ];
  for(const prefix of prefixes)if(original.startsWith(prefix))
-   return dict[prefix]+original.slice(prefix.length);
+   return (dict[prefix]??prefix)+translate(locale,original.slice(prefix.length));
  return original;
 }
 export function useTranslator() {
