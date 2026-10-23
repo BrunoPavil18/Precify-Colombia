@@ -117,10 +117,36 @@ export default function App(){
  const [draft,setDraft]=useState<PriceInput>({...EMPTY_INPUT});
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
+ const [scenarioProductId,setScenarioProductId]=useState("");
+ const [editorRevision,setEditorRevision]=useState(0);
  const [locale,setLocale]=useState<Locale>("es-CO");
  const [showTips,setShowTips]=useState(true);
  const uploadRef=useRef<HTMLInputElement>(null);
  const t=dictionaries[locale];
+ const scenarioProduct=workspace.products.find(p=>p.id===scenarioProductId)??workspace.products[0];
+ const scenariosForProduct=workspace.scenarios.filter(s=>s.productId===scenarioProduct?.id);
+ const selectedScenario=workspace.scenarios.find(s=>s.id===scenarioId);
+ const savedProduct=workspace.products.find(p=>p.id===activeId);
+ const persistedDraft=page==="escenarios"&&selectedScenario?selectedScenario.values:savedProduct?.input??EMPTY_INPUT;
+ const hasUnsavedDraft=dirtyMoney.size>0||JSON.stringify(draft)!==JSON.stringify(persistedDraft);
+ function restoreSavedDraft(){
+  setDraft({...persistedDraft});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  setNotice("Se descartaron los cambios sin guardar. La versión guardada permanece intacta.");
+ }
+ function navigate(target:Page){
+  if(target!==page&&page==="escenarios"&&scenarioId){
+   if(hasUnsavedDraft&&!window.confirm("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?"))return;
+   if(savedProduct)setDraft({...savedProduct.input});
+   setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  }
+  setPage(target);
+ }
+ function switchScenarioProduct(id:string){
+  if(scenarioId&&hasUnsavedDraft&&!window.confirm("Hay cambios sin guardar en este escenario. ¿Descartarlos?"))return;
+  setScenarioProductId(id);setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  const selected=workspace.products.find(p=>p.id===id);
+  if(selected){setActiveId(selected.id);setDraft({...selected.input});}
+ }
  function commit(change:(prior:Workspace)=>Workspace){
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
@@ -147,28 +173,42 @@ export default function App(){
    return {...w,products:exists?w.products.map(row=>row.id===id?p:row):[...w.products,p],
     history:[...w.history,{id:makeId(),productId:id,at:now,action:exists?"Actualización":"Creación",snapshot:{...draft}}].slice(-3000)};
   });
-  if(ok){setActiveId(id);setPage("productos");}
+  if(ok){setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
  }
- function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
- function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setPage("calculadora");}
+ function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  function deleteProduct(p:Product){
   if(!window.confirm("¿Eliminar «"+p.input.name+"» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos."))return;
   const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id)}));
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  function createScenarios(){
-  if(!activeId){setNotice("Guarda primero el producto para vincular escenarios.");return;}
-  try{validateInput(draft);}catch(e){setNotice("Corrige el producto antes de crear escenarios: "+String(e));return;}
-  const presets=defaultScenarios(draft).map(s=>({id:makeId(),productId:activeId,title:s.name,note:s.note,values:{...s.values}}));
-  if(commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){setScenarioId(presets[1]?.id??null);setPage("escenarios");}
+  if(scenarioId&&hasUnsavedDraft&&!window.confirm("¿Descartar los cambios no guardados antes de crear escenarios?"))return;
+  const product=scenarioProduct;
+  if(!product){setNotice("Guarda primero un producto para crear escenarios.");return;}
+  const existing=workspace.scenarios.filter(s=>s.productId===product.id);
+  const presets=defaultScenarios(product.input)
+   .filter(template=>!existing.some(s=>s.title===template.name))
+   .map(template=>({id:makeId(),productId:product.id,title:template.name,note:template.note,values:{...template.values}}));
+  if(!presets.length){setNotice("Este producto ya tiene los tres escenarios. Selecciona uno para editarlo.");return;}
+  if(commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){
+   const first=presets.find(p=>p.title==="Esperado")??presets[0];
+   if(first){setScenarioId(first.id);setActiveId(product.id);setScenarioProductId(product.id);
+    setDraft({...first.values});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}
+   setPage("escenarios");
+  }
  }
  function saveScenario(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   if(!scenarioId||!activeId){setNotice("Selecciona un escenario vinculado a un producto.");return;}
   try{validateInput(draft);}catch(e){setNotice("Escenario inválido: "+String(e));return;}
-  commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)}));
+  if(commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
  }
- function openScenario(s:SavedScenario){setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setDraft({...s.values});setPage("escenarios");}
+ function openScenario(s:SavedScenario){
+  if(scenarioId!==s.id&&scenarioId&&hasUnsavedDraft&&!window.confirm("Hay cambios sin guardar. ¿Descartarlos y abrir otro escenario?"))return;
+  setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setScenarioProductId(s.productId);
+  setDraft({...s.values});setEditorRevision(n=>n+1);setPage("escenarios");
+ }
  function saveProfile(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Perfil inválido: "+String(e));return;}
@@ -184,14 +224,14 @@ export default function App(){
   try{
    const valid=decodeBackup(await file.text());
    if(!window.confirm("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales."))return;
-   persistWorkspace(valid);setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});
+   persistWorkspace(valid);setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
    setNotice("Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.");setPage("productos");
   }catch(e){setNotice("Respaldo rechazado, sin modificaciones: "+String(e instanceof Error?e.message:e));}
   finally{if(uploadRef.current)uploadRef.current.value="";}
  }
  function reset(){
   if(!window.confirm("¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes."))return;
-  try{localStorage.removeItem(STORE_KEY);setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setNotice("Datos locales borrados.");}
+  try{localStorage.removeItem(STORE_KEY);setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
   catch(e){setNotice("No se pudieron borrar los datos: "+String(e));}
  }
  function rawBackup(){
@@ -209,11 +249,11 @@ export default function App(){
  }),[workspace.products]);
  return <div className="app-shell">
    <aside className="sidebar">
-    <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage("calculadora");}} aria-label="Precify Colombia, inicio">
+    <a className="brand" href="#" onClick={e=>{e.preventDefault();navigate("calculadora");}} aria-label="Precify Colombia, inicio">
      <span className="brand-mark" aria-hidden="true">P<span>₵</span></span><span><strong>precify<span className="brand-accent">.</span></strong><small>COLOMBIA</small></span>
     </a>
     <div className="nav-caption">ESPACIO DE TRABAJO</div>
-    <nav aria-label="Navegación principal">{nav.map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>setPage(item.id)}><span className="nav-icon" aria-hidden="true">{item.icon}</span><span>{item.label}<small>{item.description}</small></span></button>)}</nav>
+    <nav aria-label="Navegación principal">{nav.map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="nav-icon" aria-hidden="true">{item.icon}</span><span>{item.label}<small>{item.description}</small></span></button>)}</nav>
     <div className="sidebar-bottom"><span className="privacy-dot"></span><span>Sin cuenta · 100% local</span><small>Open source · Apache 2.0</small></div>
    </aside>
    <div className="content-column">
@@ -223,8 +263,8 @@ export default function App(){
      {notice&&<div role="status" aria-live="polite" className={"notice"+(locked?" notice-danger":"")}><span>{notice}</span><button aria-label="Cerrar aviso" onClick={()=>setNotice("")}>×</button></div>}
      {locked&&<div className="critical"><strong>Protección de datos activa</strong><p>La información local existente está dañada o inaccesible. Se bloquea el guardado para no sobrescribirla silenciosamente.</p><button onClick={rawBackup}>Descargar datos originales sin validar</button> <button className="ghost" onClick={()=>setPage("datos")}>Opciones de recuperación</button></div>}
      {page==="calculadora"&&<>
-      <div className="action-strip"><div><span className="eyebrow">SIMULACIÓN ACTIVA</span><strong>{activeId?"Editando producto guardado":"Nuevo producto · borrador"}</strong></div><div className="actions"><button className="secondary" onClick={()=>{setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);}}>+ Nuevo</button><button className="primary" onClick={saveProduct}>Guardar producto <span aria-hidden="true">↗</span></button></div></div>
-      <div className="two-column"><div><ProductEditor value={draft} onChange={setDraft} onDirty={markDirty}/></div><div className="results-column"><div className="results-card"><div className="results-label"><span>RESULTADOS EN TIEMPO REAL</span><span className="live-dot">●</span></div>{result.error?<div role="alert" className="error-box"><strong>Revisa los datos</strong><p>{result.error}</p></div>:result.breakdown&&result.suggestion&&<>
+      <div className="action-strip"><div><span className="eyebrow">SIMULACIÓN ACTIVA</span><strong>{activeId?"Editando producto guardado":"Nuevo producto · borrador"}</strong></div><div className="actions"><button className="secondary" onClick={()=>{setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);}}>+ Nuevo</button>{(activeId||hasUnsavedDraft)&&<button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>Descartar cambios</button>}<button className="primary" onClick={saveProduct}>Guardar producto <span aria-hidden="true">↗</span></button></div></div>
+      <div className="two-column"><div><ProductEditor key={"product-"+activeId+"-"+editorRevision} value={draft} onChange={setDraft} onDirty={markDirty}/></div><div className="results-column"><div className="results-card"><div className="results-label"><span>RESULTADOS EN TIEMPO REAL</span><span className="live-dot">●</span></div>{result.error?<div role="alert" className="error-box"><strong>Revisa los datos</strong><p>{result.error}</p></div>:result.breakdown&&result.suggestion&&<>
        <div className="suggested"><span>PRECIO SUGERIDO</span><strong>{fmt(result.suggestion.price)}</strong><small>Con margen meta del {draft.targetMargin}% · después de descuentos y redondeo</small></div>
        <div className="kpi-grid"><Kpi label="Contribución actual" value={fmt(result.breakdown.contribution)} detail="Por venta, después de costos variables" attention={!result.breakdown.feasible}/><Kpi label="Margen de contribución" value={(result.breakdown.marginPercent??"N/D")+"%"} detail="Sobre venta neta del producto" attention={!result.breakdown.feasible}/><Kpi label="Ingresos cobrados" value={fmt(result.breakdown.collected)} detail="Producto neto + envío cobrado"/><Kpi label="Markup de contribución" value={(result.breakdown.markupPercent??"N/D")+"%"} detail="Contribución / costo variable"/><Kpi label="Deducciones + IVA" value={fmt(result.breakdown.deductions)} detail="Porcentajes configurados por el usuario"/></div>
        <div className="result-details"><div><span>Descuento aplicado</span><strong>{fmt(result.breakdown.discount)}</strong></div><div><span>Costos variables</span><strong>{fmt(result.breakdown.variableCost)}</strong></div><div><span>IVA incluido ilustrativo</span><strong>{fmt(result.breakdown.ivaIncluded)}</strong></div><div><span>Máximo descuento orientativo*</span><strong>{result.limit===null?"No disponible":result.limit+"%"}</strong></div></div>
@@ -233,17 +273,39 @@ export default function App(){
       </>}</div>
       <div className="aside-info"><div className="info-symbol">i</div><div><strong>¿Cómo se calcula?</strong><p>Trabajamos con centavos exactos. La contribución es lo cobrado menos costos variables, comisiones y supuestos tributarios. Los gastos fijos mensuales se restan después.</p><button className="linklike" onClick={()=>setShowTips(!showTips)} aria-expanded={showTips}>Ver premisas {showTips?"−":"+"}</button>{showTips&&result.breakdown&&<ul>{result.breakdown.assumptions.map(t=><li key={t}>{t}</li>)}</ul>}</div></div></div></div>
      </>}
-     {page==="productos"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">CATÁLOGO</span><h2>{workspace.products.length} productos guardados</h2></div><button className="primary" onClick={()=>{setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setPage("calculadora");}}>+ Agregar producto</button></div>
-      {workspace.products.length===0?<div className="empty-state"><div className="empty-icon">▦</div><h3>Tu catálogo empieza aquí</h3><p>Guarda tu primera simulación para crear productos comparables.</p></div>:<div className="product-grid">{workspace.products.map(p=><article className="product-card" key={p.id}><span className="product-category">{p.input.category||"Sin categoría"}</span><h3>{p.input.name}</h3><p>{p.input.origin==="estimado"?"Estimación":p.input.origin==="confirmado"?"Declarado confirmado":"Ingreso manual"} · {date(p.updatedAt)}</p><strong>{fmt(p.input.currentPrice)}</strong><div className="card-actions"><button onClick={()=>openProduct(p)}>Editar</button><button onClick={()=>duplicateProduct(p)}>Duplicar</button><button className="danger-link" onClick={()=>deleteProduct(p)}>Eliminar</button></div></article>)}</div>}
+     {page==="productos"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">CATÁLOGO</span><h2>{workspace.products.length} {workspace.products.length===1?"producto guardado":"productos guardados"}</h2></div><button className="primary" onClick={()=>{setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setPage("calculadora");}}>+ Agregar producto</button></div>
+      {workspace.products.length===0?<div className="empty-state"><div className="empty-icon">▦</div><h3>Tu catálogo empieza aquí</h3><p>Guarda tu primera simulación para crear productos comparables.</p></div>:<div className="product-grid">{workspace.products.map(p=><article className="product-card" key={p.id}><span className="product-category">{p.input.category||"Sin categoría"}</span><h3>{p.input.name}</h3><p>{p.input.origin==="estimado"?"Estimación":p.input.origin==="confirmado"?"Declarado confirmado":"Ingreso manual"} · {date(p.updatedAt)}</p><strong>{fmt(p.input.currentPrice)}</strong><div className="card-actions"><button onClick={()=>openProduct(p)}>Editar</button><button onClick={()=>{setScenarioProductId(p.id);setScenarioId(null);setActiveId(p.id);setDraft({...p.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);setPage("escenarios");}}>Escenarios</button><button onClick={()=>duplicateProduct(p)}>Duplicar</button><button className="danger-link" onClick={()=>deleteProduct(p)}>Eliminar</button></div></article>)}</div>}
       <div className="section-head profiles-head"><div><span className="eyebrow">PERFILES REUTILIZABLES</span><h2>Plantillas de costos</h2></div><button className="secondary" onClick={saveProfile}>Guardar configuración actual</button></div>
       {workspace.profiles.length===0?<p className="muted">No hay perfiles todavía. Guarda una configuración para reutilizar tasas y costos.</p>:<div className="stack-list">{workspace.profiles.map(p=><div key={p.id} className="list-row"><span>{p.name}</span><div><button onClick={()=>restoreProfile(p.id)}>Aplicar</button><button className="danger-link" onClick={()=>commit(w=>({...w,profiles:w.profiles.filter(x=>x.id!==p.id)}))}>Eliminar</button></div></div>)}</div>}
      </section>}
-     {page==="escenarios"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">ANÁLISIS DE RIESGO</span><h2>Comparaciones de escenarios</h2></div><button className="primary" onClick={createScenarios}>+ Crear 3 escenarios</button></div><p className="muted">Las plantillas optimista, esperado y conservador empiezan con los mismos valores. Ajusta cada una para incorporar hipótesis diferentes; nunca se inventan tasas.</p>
-      {workspace.scenarios.length===0?<div className="empty-state"><h3>Aún no hay escenarios</h3><p>Guarda un producto y crea escenarios para comparar sus resultados.</p><button onClick={()=>setPage("calculadora")}>Ir a la calculadora</button></div>:<>
-       <div className="scenario-grid">{workspace.scenarios.map(s=>{let contribution="No calculable",recommended="No calculable",margin="N/D";try{const r=analyze(s.values);contribution=fmt(r.contribution);margin=(r.marginPercent??"N/D")+"%";recommended=fmt(suggestPrice(s.values).price);}catch{}return <button className={"scenario-tile"+(s.id===scenarioId?" chosen":"")} key={s.id} onClick={()=>openScenario(s)}><span>{s.title}</span><strong>{contribution}</strong><small>Margen: {margin} · Precio meta: {recommended}</small><small>{s.note}</small></button>;})}</div>
-       {scenarioId&&<div className="scenario-edit"><div className="section-head"><h3>Editar escenario seleccionado</h3><div className="actions"><button className="secondary" onClick={()=>{const s=workspace.scenarios.find(s=>s.id===scenarioId);if(s)commit(w=>({...w,scenarios:[...w.scenarios,{...s,id:makeId(),title:s.title+" (copia)"}]}));}}>Duplicar</button><button className="primary" onClick={saveScenario}>Guardar escenario</button><button className="danger-link" onClick={()=>{if(window.confirm("¿Eliminar este escenario?")&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)})))setScenarioId(null);}}>Eliminar</button></div></div>
-        <ProductEditor key={scenarioId} value={draft} onChange={setDraft} onDirty={markDirty}/>
-       </div>}
+     {page==="escenarios"&&<section className="main-card">
+      <div className="section-head"><div><span className="eyebrow">ANÁLISIS DE RIESGO</span><h2>Compara posibles resultados</h2></div><button className="primary" disabled={!scenarioProduct} onClick={createScenarios}>+ Crear escenarios faltantes</button></div>
+      <div className="scenario-intro">
+       <p><strong>¿Qué es un escenario?</strong> Es una versión alternativa de los costos y precios de un producto. Puedes probar un proveedor más barato (optimista), los valores actuales (esperado) o mayores gastos (conservador), sin cambiar el producto original.</p>
+       <p>Las tres versiones comienzan con los costos guardados de tu producto. Tú eliges qué cambiar. No se inventan costos o tasas.</p>
+      </div>
+      {scenarioProduct?<label className="scenario-selector"><span>Producto que deseas analizar</span><select value={scenarioProduct.id} onChange={e=>switchScenarioProduct(e.target.value)}>{workspace.products.map(p=><option key={p.id} value={p.id}>{p.input.name} · {fmt(p.input.currentPrice)}</option>)}</select></label>:<div className="empty-state"><h3>Primero guarda un producto</h3><p>Los escenarios necesitan estar vinculados a un producto de tu catálogo.</p><button onClick={()=>navigate("calculadora")}>Ir a la calculadora</button></div>}
+      {scenarioProduct&&scenariosForProduct.length===0&&<div className="scenario-empty"><strong>Este producto todavía no tiene escenarios.</strong><p>Presiona «Crear escenarios faltantes» y ajusta cada simulación. El producto original conserva sus valores.</p></div>}
+      {scenarioProduct&&scenariosForProduct.length>0&&<>
+       <div className="scenario-grid">{scenariosForProduct.map(s=>{let contribution="No calculable",recommended="No calculable",margin="N/D";try{const r=analyze(s.values);contribution=fmt(r.contribution);margin=(r.marginPercent??"N/D")+"%";recommended=fmt(suggestPrice(s.values).price);}catch{}return <button className={"scenario-tile"+(s.id===scenarioId?" chosen":"")} key={s.id} aria-pressed={s.id===scenarioId} onClick={()=>openScenario(s)}><span>{s.title}</span><strong>{contribution}</strong><small>Contribución por venta</small><small>Margen: {margin} · Precio objetivo: {recommended}</small><small>{s.note}</small></button>;})}</div>
+       {selectedScenario&&selectedScenario.productId===scenarioProduct.id?<div className="scenario-edit">
+        <div className="section-head"><div><span className="eyebrow">EDICIÓN INDEPENDIENTE</span><h3>{selectedScenario.title} · {scenarioProduct.input.name}</h3><p className="muted">Los cambios solo afectan a este escenario cuando presionas Guardar escenario.</p></div>
+         <div className="actions">
+          <button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>Descartar cambios</button>
+          <button className="secondary" onClick={()=>{if(hasUnsavedDraft&&!window.confirm("¿Descartar los cambios no guardados antes de duplicar?"))return;commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>Duplicar</button>
+          <button className="primary" onClick={saveScenario}>Guardar escenario</button>
+          <button className="danger-link" onClick={()=>{if(window.confirm("¿Eliminar este escenario?")&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>Eliminar</button>
+         </div></div>
+        <div className="scenario-preview" aria-live="polite">
+         <span className="eyebrow">VISTA PREVIA DE ESTE ESCENARIO · AÚN SIN GUARDAR</span>
+         {result.error?<p role="alert">{result.error}</p>:result.breakdown&&result.suggestion&&<div className="scenario-preview-stats">
+          <div><small>Contribución por venta</small><strong>{fmt(result.breakdown.contribution)}</strong></div>
+          <div><small>Margen de contribución</small><strong>{result.breakdown.marginPercent??"N/D"}%</strong></div>
+          <div><small>Precio recomendado</small><strong>{fmt(result.suggestion.price)}</strong></div>
+         </div>}
+        </div>
+        <ProductEditor key={scenarioId+"-"+editorRevision} value={draft} onChange={setDraft} onDirty={markDirty}/>
+       </div>:<p className="muted">Selecciona una tarjeta para editarla, guardar y comparar resultados sin cambiar el producto original.</p>}
       </>}
      </section>}
      {page==="metas"&&<><div className="two-column"><div className="main-card"><span className="eyebrow">PROYECCIÓN MENSUAL</span><h2>La meta de tu negocio</h2><p className="muted">Modifica gastos fijos y unidades para calcular cuándo la contribución cubre la operación.</p><div className="form-grid"><MoneyField label="Gastos fijos al mes" value={draft.monthlyFixed} help="Arriendo, salarios y gastos mensuales." onDirty={flag=>markDirty("monthlyFixed",flag)} onCommit={v=>setDraft(d=>({...d,monthlyFixed:v}))}/><label className="field"><span>Unidades vendidas por mes</span><input inputMode="numeric" value={draft.monthlyUnits} onChange={e=>setDraft(d=>({...d,monthlyUnits:e.target.value}))}/><small>Volumen estimado, no ventas confirmadas.</small></label></div><button className="primary" onClick={saveProduct}>Guardar cambios en producto</button></div><div className="results-card"><span className="eyebrow">ESTIMACIÓN DE RENTABILIDAD</span>{result.error?<p role="alert">{result.error}</p>:result.breakdown&&<><div className="goal-number"><span>PUNTO DE EQUILIBRIO</span><strong>{result.breakdown.breakEvenUnits??"No calculable"}</strong><small>unidades mensuales</small></div><div className="kpi-grid"><Kpi label="Contribución por unidad" value={fmt(result.breakdown.contribution)} detail="Antes de gastos fijos"/><Kpi label="Utilidad mensual estimada" value={fmt(result.breakdown.monthlyNet)} detail="Al volumen indicado" attention={result.breakdown.monthlyNet.startsWith("-")}/><Kpi label="Margen neto mensual" value={(result.breakdown.monthlyNetMargin??"N/D")+"%"} detail="Utilidad / ingreso mensual estimado"/></div><p className="muted">Para varios productos utiliza la contribución promedio ponderada del mix real. No supone demanda estable.</p></>}</div></div></>}

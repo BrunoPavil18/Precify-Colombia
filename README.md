@@ -50,3 +50,7 @@ Abra Calculadora, ajuste costos, margen, tasas, descuentos y redondeo; guarde el
 Documentación: docs/ARCHITECTURE.md, docs/COP_POLICY.md, docs/FINANCIAL_FORMULAS.md, docs/SECURITY_AUDIT.md, docs/INTEGRATION_CONTRACT.md.
 
 Ningún código se tomó de repositorios Precify ajenos. La licencia de código no implica derechos sobre marcas de terceros.
+
+## Homologación funcional de escenarios
+
+Consulta [docs/HOMOLOGACION_MANUAL.md](docs/HOMOLOGACION_MANUAL.md) para probar la selección de un producto después de F5, las simulaciones optimista/esperada/conservadora, la vista previa en tiempo real y el botón **Descartar cambios**. Los escenarios no modifican el producto guardado. Esta mejora se encuentra en evaluación de navegador.

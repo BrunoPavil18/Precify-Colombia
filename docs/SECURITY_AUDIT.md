@@ -9,3 +9,10 @@ Pendiente: pnpm no está instalado y el shell no pudo acceder a GitHub/npm (DNS 
 Obligatorio antes del merge: generar y revisar pnpm-lock.yaml con pnpm 9.15.9 y --lockfile-only --ignore-scripts; instalación --frozen-lockfile; typecheck, lint, tests, build y audit local; inspección de scripts pós-instalação; pruebas manuales de móvil, lector de pantalla/teclado, datos corruptos y backups. Revisar CSP/headers para cada host; marca y obligaciones tributarias quedan por validar externamente.
 
 Limitaciones conocidas: traducción PT/EN parcial, IVA ilustrativo, localStorage susceptible a borrado o extensiones, ausencia de sincronización. No se ha lanzado ninguna release.
+
+
+## Evidencia de ejecución del propietario (23/10/2026)
+
+En Windows, Node 24.19.0 y pnpm 10.34.7, se ejecutaron y aprobaron (logs aportados en conversación): install --lockfile-only, install --frozen-lockfile --ignore-scripts, typecheck, lint (actualmente alias a tsc), 21/21 tests originales, build Vite 8.3.4 y pnpm audit --audit-level moderate (sin vulnerabilidades conocidas reportadas). Vite dev inició y se revisaron capturas desktop. Se verificaron manualmente guardar producto, editar cifras, duplicar y persistencia tras F5.
+
+Posteriormente, se añadieron mejoras al editor y a Escenarios, además de **4 pruebas automatizadas nuevas**. Su resultado **NO está verificado aún** (total definido: 25 pruebas). Falta confirmar la versión actualizada en navegador y añadir el lockfile generado localmente a la PR. No se ejecutó GitHub Actions.
