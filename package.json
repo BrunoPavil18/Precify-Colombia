@@ -12,6 +12,7 @@
     "lint": "pnpm --filter @precify-colombia/core build && node scripts/lint.mjs && pnpm -r typecheck",
     "test": "pnpm -r test",
     "build": "pnpm -r build",
-    "verify": "node scripts/verify-local.mjs"
+    "verify": "node scripts/verify-local.mjs",
+    "verify:core": "pnpm --filter @precify-colombia/core build && node scripts/verify-core-package.mjs"
   }
 }
