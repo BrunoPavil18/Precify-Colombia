@@ -372,5 +372,12 @@ export const en: Record<string,string> = {
   "No equivale a una tarifa publicada por transportadoras.": "This is not a published carrier rate.",
   "La adquisición de mercancía no recuperada debe modelarse dentro de la reserva de pérdidas.": "Unrecovered merchandise must be accounted for in the loss reserve.",
   "revenueMethod": "Revenue methodology",
-  "reconciliationNotice": "Reconciliation notice"
+  "reconciliationNotice": "Reconciliation notice",
+  "Unidad de comparación del PUM": "PUM comparison unit",
+  "La unidad de contenido es distinta de la unidad de comparación: selecciona si deseas precio por g o kg, ml o l, cm o m. Compara productos similares usando la misma unidad. La aplicación de la norma SIC es contextual.": "Content units and comparison units are different: choose price per g or kg, ml or L, cm or m. Compare similar products using the same unit. SIC requirements depend on context.",
+  "Unidad de referencia inválida.": "Invalid reference unit.",
+  "Las unidades de contenido y comparación deben ser compatibles.": "Content and comparison units must be compatible.",
+  "sourceUnit": "Content unit",
+  "referenceUnit": "Comparison unit",
+  "quantity": "Entered quantity"
 };
