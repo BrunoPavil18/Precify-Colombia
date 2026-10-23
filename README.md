@@ -1,56 +1,94 @@
 # Precify Colombia 🇨🇴
 
-Aplicación libre e independiente para calcular precios y rentabilidad en COP. Código original bajo Apache-2.0. Sin cuentas, claves, backend, tarifas obligatorias ni integración Mastershop/Vezura.
+[Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Estado: candidato 1.0.0 — no homologado ni publicado como release.**
+**Versión 1.0.0 · Aplicación gratuita y de código abierto · Apache License 2.0**
 
-## Funcionalidades
-- Motor financiero desacoplado y tipado, cálculos monetarios en centavos enteros (BigInt), políticas de redondeo al alza.
-- Costos, comisiones, precios sugeridos, descuentos, logística y reservas COD configurables.
-- IVA opcional e ilustrativo, sin presumir una tasa universal.
-- Productos, escenarios, perfiles, metas, punto de equilibrio, historial, comparador, CSV y backup JSON local.
-- Interfaz en español colombiano (ES), portugués brasileño (PT) e inglés (EN), con diccionarios estáticos, idioma persistente y mensajes financieros traducidos; el cálculo siempre permanece en COP.
+Precify Colombia calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
 
-## Desarrollo local
+## Privacidad: cada instalación comienza vacía
 
-Requisitos: Node.js >=20.19, pnpm 10.34.7.
+Los productos, escenarios, perfiles y eventos se guardan en el **localStorage del navegador de cada usuario**, bajo la clave `precify-colombia:workspace:v1`. El repositorio y el build estático **no incluyen los datos que cargue el desarrollador en su propia computadora**. Si no hay datos locales, la aplicación inicia sin productos guardados. «Producto ejemplo» es solo un borrador demostrativo de la calculadora.
 
-~~~sh
+El almacenamiento está separado por origen (protocolo + dominio + puerto); usuarios distintos del mismo equipo y navegador/perfil podrían compartirlo. No es una base de datos multiusuario. Borrar datos del sitio o usar navegación privada puede eliminar los datos: **exporte respaldos periódicamente**. No se envían los datos a un backend de Precify Colombia.
+
+## Instalación para desarrollo
+
+Requisitos: **Node.js >=20.19** y **pnpm 10.34.7**; Git para clonar.
+
+```bash
+git clone https://github.com/BrunoPavil18/Precify-Colombia.git
+cd Precify-Colombia
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
 pnpm dev
-~~~
+```
 
-Abra el servidor local anunciado por Vite. No requiere internet para usar la app después de instalar sus dependencias y generar el build estático.
+Abra la URL local indicada por Vite (normalmente `http://127.0.0.1:5173/`). En Windows, si `corepack enable` produce EPERM, use Corepack con un directorio de shims del usuario (consulte las instrucciones de Corepack); no necesita instalar globalmente con privilegios elevados. En PowerShell puede ejecutar `pnpm.cmd` en lugar de `pnpm`.
 
-El lockfile real fue generado por el propietario en Windows, instalado con --frozen-lockfile y añadido a la branch consolidada. Si añade dependencias, regenere y revise el lockfile antes de publicarlas.
+### Comprobación y distribución estática
 
-## Validación
-
-~~~sh
+```bash
 pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
 pnpm audit --audit-level moderate
-node scripts/verify-local.mjs
-~~~
+```
 
-No declare los comandos aprobados sin ejecutarlos. El build Vite se exporta a apps/web/dist. Inspeccione el despliegue para definir CSP/cabeceras HTTP.
+El script `lint` actual ejecuta TypeScript, **no ESLint**. La web compilada está en `apps/web/dist/`. Publique el contenido de esa carpeta mediante cualquier servidor HTTPS de archivos estáticos, configurando el tipo MIME correcto y cabeceras de seguridad. **No publique `node_modules` ni los archivos fuente como servidor de producción.** La compilación estática funciona sin cuentas y no requiere una API externa. El servidor Vite de desarrollo no es un servidor de producción.
 
-## Uso
+## Configuración
 
-Introduzca valores COP visibles como 89.900,50 (ochenta y nueve mil novecientos pesos con cincuenta centavos). Las tasas son porcentajes explícitos: 19 significa 19 %, no una fracción decimal inferida.
+Abra la Calculadora y establezca adquisición, empaque, envío, comisión fija y porcentual, publicidad, reservas COD, descuentos, IVA ilustrativo, precio de venta, margen objetivo y redondeo. Las tarifas e impuestos **no se infieren automáticamente**: deben ingresarse como hipótesis explícitas y confirmarse con asesores competentes.
 
-Abra Calculadora, ajuste costos, margen, tasas, descuentos y redondeo; guarde el producto. En Escenarios pruebe hipótesis independientes. Metas calcula el punto de equilibrio; Informes permite comparar resultados y exportar. Datos permite descargar, validar y restaurar copias JSON antes de sobrescribir o borrar datos.
+**Formato de entrada de la interfaz:** `89.900,50` COP. **Formato canónico del motor:** `89900.50` (decimal con punto, sin separador de miles). Los porcentajes canónicos, por ejemplo `3.00`, representan 3%. Todas las monedas siguen siendo COP aunque se cambie el idioma visual.
 
-**Advertencia:** localStorage puede perderse si se limpian datos del sitio, cambia de navegador/dispositivo o se usa modo incógnito. Descargue respaldos periódicos. Esta aplicación no es asesoría contable o fiscal colombiana.
+En Productos guarde y duplique fichas y perfiles. Escenarios crea variantes independientes. Metas selecciona un producto y permite editar solo sus gastos fijos mensuales y unidades proyectadas. Informes exporta CSV y Datos descarga/restaura el respaldo JSON validado (hasta 2 MB). No cambie manualmente los metadatos de formato del respaldo (`currency: COP`, `locale: es-CO`).
 
-Documentación: docs/ARCHITECTURE.md, docs/COP_POLICY.md, docs/FINANCIAL_FORMULAS.md, docs/SECURITY_AUDIT.md, docs/INTEGRATION_CONTRACT.md, [idiomas](docs/I18N.md) y [homologación multilingüe](docs/HOMOLOGACION_I18N.md).
+## Integración con otros sitios
 
-Ningún código se tomó de repositorios Precify ajenos. La licencia de código no implica derechos sobre marcas de terceros.
+### 1. Insertar la aplicación completa (Node.js, WordPress u otro sitio)
 
-## Homologación funcional de escenarios
+Publique primero `apps/web/dist/` en un **origen HTTPS propio** (por ejemplo, `https://calculadora.ejemplo.com/`), luego incorpórela en una página con un iframe:
 
-Consulta [docs/HOMOLOGACION_MANUAL.md](docs/HOMOLOGACION_MANUAL.md) para probar la selección de un producto después de F5, las simulaciones optimista/esperada/conservadora, la vista previa en tiempo real y el botón **Descartar cambios**. Los escenarios no modifican el producto guardado. Esta mejora se encuentra en evaluación de navegador.
+```html
+<iframe
+  src="https://calculadora.ejemplo.com/"
+  title="Precify Colombia"
+  loading="lazy"
+  style="width:100%;height:850px;border:0"
+></iframe>
+```
+
+En **WordPress**, utilice un bloque **HTML personalizado** si la política del sitio permite iframes. También puede enlazar directamente a la aplicación alojada. Si configura CSP `frame-ancestors` o `X-Frame-Options`, permita expresamente el sitio que la incorporará. La navegación del iframe conserva los datos **en el origen de la aplicación**, sujeto a las políticas de almacenamiento de terceros de cada navegador; esto no es sincronización con WordPress ni una integración de usuarios o productos.
+
+### 2. Reutilizar cálculos en Node.js / TypeScript
+
+El workspace `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, `maxDiscountPercent` y tipos. En un monorepo pnpm puede declarar `"@precify-colombia/core": "workspace:*"`. Ejemplo *dentro de este repositorio*:
+
+```ts
+import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-colombia/core";
+
+const input = { ...EMPTY_INPUT, acquisition: "37000.00", currentPrice: "99000.00" };
+const result = analyze(input);
+console.log(result.contribution); // "49000.00" con los otros costos del ejemplo
+console.log(suggestPrice(input).price);
+```
+
+**Nota técnica:** en 1.0.0 el paquete `@precify-colombia/core` es un **workspace de código fuente TypeScript**, no un paquete publicado en npm con distribución universal precompilada. Para otro repositorio, copie o incorpore el core bajo Apache 2.0, configure su compilador/bundler y resuelva sus exports `.ts`; no presuponga que `npm install @precify-colombia/core` funciona públicamente. Para una integración con WordPress/PHP sin iframe hace falta desarrollar un adaptador JS o API propio; **no existe un plugin WordPress ni una API HTTP oficial** en 1.0.0.
+
+### 3. Integración de datos
+
+Use un adaptador específico que traduzca su modelo de producto a `PriceInput`, invoque `validateInput` y `analyze`, y trate `FinancialInputError`. No transmita claves de API al navegador. No modifique precios de tiendas automáticamente sin autorización. Lea [el contrato técnico](docs/INTEGRATION_CONTRACT.md) y [las fórmulas](docs/FINANCIAL_FORMULAS.md).
+
+## Arquitectura y límites
+
+- `packages/core`: motor financiero y serialización de backup, independientes de React.
+- `apps/web`: React + Vite, presentación accesible y almacenamiento local.
+- Solo COP, interfaz `es-CO` por defecto, `pt-BR` y `en` disponibles.
+- Sin backend, registro obligatorio, WordPress plugin, checkout, sincronización entre dispositivos ni conversión de divisas.
+- Resultados informativos, no asesoría financiera/tributaria. IVA y COD dependen de parámetros ingresados por el usuario.
+
+Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [seguridad](docs/SECURITY_AUDIT.md) y [licencia Apache 2.0](LICENSE). La licencia del código no concede derechos sobre marcas de terceros.
