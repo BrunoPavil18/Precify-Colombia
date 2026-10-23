@@ -142,6 +142,22 @@ export default function App(){
  const [locale,setLocale]=useState<Locale>(readLocale);
  useEffect(()=>{document.documentElement.lang=locale;document.title="Precify Colombia — "+translate(locale,"Calculadora");},[locale]);
  const [showTips,setShowTips]=useState(true);
+ const [updateReady,setUpdateReady]=useState(false);
+ useEffect(()=>{
+  const onReady=()=>setUpdateReady(true);
+  window.addEventListener("precify:update-ready",onReady);
+  navigator.serviceWorker?.getRegistration?.().then(r=>{if(r?.waiting)setUpdateReady(true);}).catch(()=>{});
+  return()=>window.removeEventListener("precify:update-ready",onReady);
+ },[]);
+ function activateUpdate(){
+  if(hasUnsavedDraft||advancedDirty||goalDirty){setNotice("Guarda o descarta tus cambios antes de actualizar la aplicación.");return;}
+  if(!window.confirm(t("Hay una actualización disponible. Guarda una copia de seguridad antes de instalarla. ¿Actualizar ahora?")))return;
+  navigator.serviceWorker?.getRegistration?.().then(reg=>{
+   if(!reg?.waiting)return;
+   navigator.serviceWorker.addEventListener("controllerchange",()=>window.location.reload(),{once:true});
+   reg.waiting.postMessage({type:"ACTIVATE_UPDATE"});
+  }).catch(()=>setNotice("La actualización no pudo activarse."));
+ }
  const [advancedDirty,setAdvancedDirty]=useState(false);
  const uploadRef=useRef<HTMLInputElement>(null);
  const t=(key:string)=>translate(locale,key);
