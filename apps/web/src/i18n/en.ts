@@ -359,5 +359,6 @@ export const en: Record<string,string> = {
   "Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.": "Break-even assumes a constant product mix; quantities are estimated.",
   "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "Entered attributed revenue does not equal conversions times unit revenue. Attributed ROAS and projected profit use separate bases.",
   "La facturación atribuida coincide con la proyección bruta.": "Attributed revenue matches the gross projection.",
-  "VERSIÓN 2.0.1": "VERSION 2.0.1"
+  "VERSIÓN 2.0.1": "VERSION 2.0.1",
+  "Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO": "Precify Colombia 2.0.1 · Independent project · Apache-2.0 · COP / es-CO"
 };
