@@ -69,3 +69,16 @@ test("saved workspace writes compare complete state before mutation",()=>{
  assert.ok(storage.includes('JSON.stringify(current)!==JSON.stringify(validateWorkspace(expected))'));
  assert.ok(app.includes('persistWorkspace(next,wasStored.current?workspace:undefined)'));
 });
+
+
+test("advanced calculations do not expose internal reconciliation metadata in result cards",()=>{
+ const lab=readFileSync(new URL("../src/AdvancedLab.tsx",import.meta.url),"utf8");
+ assert.ok(lab.includes('k!=="revenueMethod"&&k!=="reconciliationNotice"'));
+ assert.ok(lab.includes('role="note"'));
+ assert.ok(lab.includes('t(String(outcome.data.reconciliationNotice))'));
+});
+test("empty advanced numeric fields normalize to zero on blur, not during typing",()=>{
+ const lab=readFileSync(new URL("../src/AdvancedLab.tsx",import.meta.url),"utf8");
+ assert.ok(lab.includes('onBlur={()=>{if(value.trim()===""){onChange("0");onDirty(true);}}}'));
+ assert.ok(lab.includes('onChange(e.target.value);onDirty(true);'));
+});
