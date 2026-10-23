@@ -4,7 +4,7 @@ import {pathToFileURL} from "node:url";
 import assert from "node:assert/strict";
 const base=resolve("packages/core");
 const p=JSON.parse(readFileSync(resolve(base,"package.json"),"utf8"));
-assert.equal(p.version,"2.0.0");
+assert.equal(p.version,"2.0.1");
 assert.equal(p.exports["."].default,"./dist/index.js");
 assert.equal(p.exports["."].types,"./dist/index.d.ts");
 for(const relative of ["dist/index.js","dist/index.d.ts"])
