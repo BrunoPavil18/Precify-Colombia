@@ -242,5 +242,12 @@ export const ptBR: Record<string,string> = {
   " (copia)": " (cópia)",
   "manual": "manual",
   "estimado": "estimado",
-  "confirmado": "confirmado"
+  "confirmado": "confirmado",
+  "Las proyecciones utilizan los costos guardados del producto seleccionado. Cambiar de producto no modifica sus datos.": "As projeções utilizam os custos salvos do produto selecionado. Trocar de produto não modifica os dados cadastrados.",
+  "Solo se guardan los gastos fijos y las unidades mensuales del producto elegido. Los escenarios se mantienen independientes.": "Somente as despesas fixas e as unidades mensais do produto selecionado serão salvas. Os cenários continuam independentes.",
+  "Guarda un producto en el catálogo antes de calcular metas.": "Salve um produto no catálogo antes de calcular metas.",
+  "Selecciona un producto del catálogo para ver su punto de equilibrio.": "Selecione um produto do catálogo para consultar seu ponto de equilíbrio.",
+  "Hay cambios sin guardar en Metas. ¿Descartarlos para cambiar de producto?": "Há alterações não salvas em Metas. Descartá-las para trocar de produto?",
+  "Hay cambios sin guardar en Metas. ¿Salir sin guardarlos?": "Há alterações não salvas em Metas. Sair sem salvá-las?",
+  "Proyección mensual guardada para el producto seleccionado.": "Projeção mensal salva para o produto selecionado."
 };
