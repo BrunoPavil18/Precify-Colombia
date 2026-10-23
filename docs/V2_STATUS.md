@@ -98,3 +98,27 @@ Estas verificaciones sustituyen la anotación anterior de ausencia de ejecución
 **Observación de alcance:** no consta ejecución de `pnpm pack` ni consumo desde un proyecto externo; continúa pendiente la revisión especializada de bases fiscales, escenarios financieros extremos y conformidad jurídica. `window.confirm` aún figura en flujos de la UI y la protección multiaba basada en `updatedAt` no es una transacción atómica. Estas limitaciones deben ser aceptadas expresamente o subsanadas antes de merge/release.
 
 La PR #2 sigue Draft. No existe autorización de merge/release y no se solicitó GitHub Actions.
+
+## Cierre técnico adicional de la PR — posterior a 51/51
+
+Se sustituyeron todas las invocaciones detectadas de `window.confirm` en la interfaz por un diálogo propio con `role="alertdialog"`, foco inicial en Cancelar, Escape para cancelar y contención de Tab entre las dos acciones. **Cancelar no ejecuta la mutación**; los handlers confirman antes de escribir o eliminar. Pendiente comprobación manual de foco, lectores de pantalla y navegación.
+
+La protección multiaba ahora compara el **workspace validado completo** antes de escribir, evitando colisiones por `updatedAt` idéntico. **Límite persistente:** localStorage no ofrece compare-and-swap atómico para carreras verdaderamente simultáneas; no se debe prometer serialización fuerte de escritura. En navegadores con varias pestañas el evento `storage` continúa bloqueando las obsoletas. Se necesitaría migrar a IndexedDB con transacciones o un sistema de exclusión confiable para garantías más fuertes.
+
+Se agregó `pnpm.cmd verify:core`, que compila el núcleo ESM y verifica entrada, tipos y cálculos desde el archivo distribuible, pero **aún no se ha ejecutado** ni equivale a instalación externa real. No se publicó npm.
+
+**Cumplimiento colombiano:** la calculadora es informativa, tasas de IVA configurables con cero por defecto, y el estudio legal en `docs/COLOMBIA_LEGAL_V2.md` no es certificación. El asesoramiento profesional por categoría/régimen permanece fuera del alcance de una herramienta genérica y no debe presentarse como validación jurídica exhaustiva.
+
+Se agregaron **dos pruebas de contrato UI** para diálogo y comparación de snapshot. Si antes eran 51 pruebas, el código actual define potencialmente **53**; no declarar ese total aprobado sin nuevos logs.
+
+La revisión final del mantenedor deberá ejecutar:
+```powershell
+pnpm.cmd typecheck
+pnpm.cmd lint
+pnpm.cmd test
+pnpm.cmd build
+pnpm.cmd verify:core
+pnpm.cmd audit --audit-level moderate
+```
+
+Después verificar Cancelar y Confirmar en eliminación, importación, reset, cambio de producto/escenario, modal por teclado y conflictos entre dos pestañas. Nada de merge/release/Actions sin autorización.
