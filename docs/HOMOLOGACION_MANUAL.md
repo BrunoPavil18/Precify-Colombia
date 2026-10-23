@@ -64,3 +64,30 @@ El propietario ejecutó exitosamente `pnpm.cmd typecheck`, `pnpm.cmd lint`, `pnp
 **Verificación de datos sin riesgo:** descargar copia JSON antes de probar restauración; probar primero importación de JSON corrupto (debe rechazarse sin mutación). Solo después probar una restauración válida, confirmando explícitamente. Evitar borrar datos de prueba hasta verificar el backup.
 
 Mantener el PR en Draft hasta reunir evidencias funcionales, de accesibilidad y de restauración.
+
+## 6. Evidencias funcionales de escenarios y validación de entradas (23/10/2026)
+
+El propietario proporcionó capturas y confirmó manualmente lo siguiente:
+
+- Escenarios del producto original guardados con contribuciones correctas: Optimista COP 51.000 (adquisición 35.000), Esperado COP 49.000 (adquisición 37.000), Conservador COP 46.000 (adquisición 40.000), con precio actual COP 99.000 y demás parámetros de ejemplo constantes.
+- Los escenarios permanecen después de F5 y **no** cambian el producto original.
+- «Descartar alterações» en portugués restaura correctamente la última versión guardada; F5 con cambios sin guardar recupera los valores anteriores.
+- Descuento fijo COP 100.000 contra precio COP 99.000: la interfaz muestra correctamente un error de descuento superior al precio.
+- Descuento fijo igual al precio COP 99.000: contribución negativa COP 50.000 y margen no disponible para venta neta cero.
+- Descuento porcentual de 100 %: el sistema señala que no encuentra precio viable.
+- Reserva COD por COP 1.000: contribución baja COP 49.000 → COP 48.000, con el resto fijo.
+- Entrada es-CO COP 89.900,50: el cálculo conserva los centavos y presenta la contribución negativa esperada (COP -4.900,50 bajo los costos mostrados).
+
+**Estado:** escenarios, persistencia, aislamiento y descarte **homologados manualmente** en las rutas ejercitadas. El usuario se detuvo antes de validar Metas y punto de equilibrio; estos permanecen pendientes.
+
+### Prueba de Metas pendiente — instrucciones exactas
+
+Los campos `monthlyFixed` y `monthlyUnits` también aparecen dentro del editor de Escenarios, pero el panel específico de punto de equilibrio está en **Metas**. Tras F5, el producto activo puede restablecerse como borrador aunque el catálogo persista. Por eso:
+
+1. Abrir **Productos → Producto ejemplo → Editar**; NO seleccionar el editor de escenario.
+2. Configurar precio de venta 99.000, adquisición 37.000, empaque 2.000, costo envío 7.000, comisión fija 1.000, publicidad 3.000, tarifas/IVA/descuentos/reservas cero. Confirmar contribución COP 49.000.
+3. Abrir **Metas**. Configurar gastos fijos mensuales COP 490.000 y unidades 10. Esperado: **equilibrio 10, utilidad COP 0, margen neto 0,00%**.
+4. Cambiar SOLO unidades a 15. Esperado: **equilibrio 10, utilidad COP 245.000, margen neto ≈16,50%**.
+5. Verificar comportamiento de botones de guardado, validaciones de unidades y persistencia del producto si el usuario decide guardar.
+
+No etiquetar esta última etapa como homologada sin resultado del usuario.
