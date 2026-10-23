@@ -95,3 +95,11 @@ La rama permanece en PR Draft; sin merge a `main`, sin release ni ejecución vol
 **Pendiente:** proyección mensual y punto de equilibrio en el panel Metas. El propietario había configurado las cifras en el formulario de edición de un escenario, no necesariamente en el panel Metas; se le indicó cargar el producto original en Productos > Editar antes de entrar en Metas. No hay evidencia todavía de exportación/reimportación completa, eliminación/cancelación, lector de pantalla ni diseño móvil.
 
 El estado automatizado previo continúa como **35/35 pruebas locales aprobadas**, sin alertas reportadas por `pnpm audit`. No se ejecutó CI remota ni Actions.
+
+## 8. Selector de producto para Metas — cambio de interfaz sin migración
+
+**Validación manual anterior:** el propietario confirmó equilibrio COP 490.000 / COP 49.000 = **10 unidades**, utilidad COP 0 para 10 unidades y COP 245.000 para 15 unidades, margen neto 16,50%; los dos paneles son correctos.
+
+**Nueva implementación en la misma PR:** Metas ahora selecciona un producto del catálogo persistido, con disponibilidad después de F5. Cambiar de producto reemplaza solo el borrador mensual del panel Metas y nunca modifica otras entidades. Los formularios de Metas guardan exclusivamente `monthlyFixed` y `monthlyUnits` en el producto seleccionado, con entrada de historial; no cambian precios, costos variables ni escenarios. Se solicita confirmación al abandonar una proyección no guardada; «Descartar cambios» no muta el banco local. Con catálogo vacío se muestra estado vacío. Mensajes estáticos añadidos a es-CO/pt-BR/en.
+
+**Resultado real:** se añadieron **3 pruebas automatizadas** (2 contratos estáticos UI y 1 cálculo determinístico de metas). **38 tests escritos; los 35 anteriores están aprobados, los 3 nuevos y el build actualizado permanecen pendientes de ejecución local.** No declarar CI aprobada para estos cambios hasta recibir resultado. `main` no fue modificada, PR en Draft y no se ejecutó Actions.
