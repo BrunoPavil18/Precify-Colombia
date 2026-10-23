@@ -258,7 +258,7 @@ export default function App(){
  function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  function deleteProduct(p:Product){
   if(!window.confirm(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos.")))return;
-  const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id)}));
+  const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id),advancedSimulations:w.advancedSimulations.filter(x=>x.productId!==p.id)}));
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  function createScenarios(){
