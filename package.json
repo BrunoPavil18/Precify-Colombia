@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "pnpm --filter @precify-colombia/core build && pnpm --filter @precify-colombia/web dev",
     "typecheck": "pnpm --filter @precify-colombia/core build && pnpm -r typecheck",
-    "lint": "node scripts/lint.mjs && pnpm -r typecheck",
+    "lint": "pnpm --filter @precify-colombia/core build && node scripts/lint.mjs && pnpm -r typecheck",
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "verify": "node scripts/verify-local.mjs"
