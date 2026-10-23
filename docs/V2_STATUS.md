@@ -10,8 +10,8 @@
 1. **Finanzas:** `analyze` conserva las propiedades históricas `marginPercent` (contribución / venta neta de producto) y `markupPercent` (contribución / costo variable), pero incorpora denominadores explícitos: `marginOnCollectedPercent`, `marginOnProductPercent`, `commercialMarkupPercent`, `contributionMarkupPercent`, estado de viabilidad y `canCoverFixedCosts`. La contribución cero deja de ser viable. La función `suggestPrice` mantiene temporalmente el denominador legado, documentado, sin cambiar en silencio la fórmula de recomendaciones.
 2. **Simuladores nuevos:** `packages/core/src/advanced.ts` ofrece COD probabilístico, campañas/CAC/ROAS, PUM (masa/volumen/longitud/unidad), vista previa del precio público y mix multiproducto. No se descargan tarifas de transportadoras ni impuestos oficiales.
 3. **Interfaz:** `apps/web/src/AdvancedLab.tsx`, sección Avanzado en navegación, ES/PT/EN, campos editables y resultados. Simulaciones guardadas en el workspace, cargables después de F5, exportables mediante backup y eliminables explícitamente.
-4. **Persistencia:** formato aditivo `advancedSimulations` validado; importación de backups **v1 y v2**, nuevo respaldo v2 sin descartar información v1. Escrituras comparan `updatedAt` para detectar cambios concurrentes; el evento `storage` bloquea pestaña desactualizada. La detección NO equivale a bloqueo transaccional: dos escrituras simultáneas pueden superar la verificación y requieren validación E2E.
-5. **PWA inicial:** manifest, icono, service worker de cache de shell/recursos estáticos y registro en producción. No hay caché de API ni datos de comerciantes. Falta completar y validar notificación/activación controlada de nuevas versiones, escenarios offline/online y limpieza de caches antiguos.
+4. **Persistencia:** formato aditivo `advancedSimulations` validado; importación de backups **v1 y v2**, nuevo respaldo v2 sin descartar información v1. Escrituras comparan `updatedAt` para detectar cambios concurrentes; el evento `storage` bloquea pestaña desactualizada. La detección NO equivale a bloqueo transaccional: dos escrituras simultáneas pueden superar la verificación y requieren validación E2E. Los registros de simulación se validan con los parsers financieros durante importación.
+5. **PWA inicial:** manifest, icono, service worker de cache de shell/recursos estáticos y registro en producción. No hay caché de API ni datos de comerciantes. Se añadió aviso de actualización pendiente y botón explícito para activar el nuevo SW, además de limpieza de cachés antiguos de la app. Todavía falta homologar las actualizaciones en navegador y probar offline/online.
 6. **Compatibilidad de biblioteca:** paquete `@precify-colombia/core` apunta a `dist/index.js` + `dist/index.d.ts`. Scripts root preparados para compilar core antes de dev/typecheck. No se hizo paquete npm ni publicación.
 7. **COP y porcentajes:** parser localizado acepta `19,50` o `19.50`, canonicaliza `19.50`. El motor mantiene BigInt em centavos; no cambia moneda por idioma.
 8. **Móvil:** navegación inferior de sidebar en pantalla estrecha cambia a grid flexible evitando scrollbar horizontal anterior.
@@ -66,3 +66,7 @@ Se algum comando falhar, corrigir na mesma PR antes de homologar. O `lint` atual
 ## Restrições preservadas
 
 `main` não alterada, tag/release `v1.0.0` intocadas, nenhuma Vezura/Mastershop modificada, sem contas, nuvem obrigatória, taxa presumida de 19%, deploy pago ou workflow automático. **Não fazer merge nem publicar v2 enquanto houver pendências bloqueantes.**
+
+## Auditoría por hallazgo
+
+Consultar [V2_AUDIT_MATRIX.md](V2_AUDIT_MATRIX.md) para el mapa F-01...F-11 y el estado no homologado por módulo.
