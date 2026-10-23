@@ -1,0 +1,19 @@
+{
+  "name": "Precify Colombia",
+  "short_name": "Precify",
+  "description": "Precios y rentabilidad en pesos colombianos, sin registro.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9f8",
+  "theme_color": "#103039",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
