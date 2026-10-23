@@ -1,11 +1,24 @@
-# Política de seguridad
+# Seguridad — Precify Colombia
 
-Estado: candidato 1.0.0. La web usa almacenamiento local sin cuentas ni backend; ello no garantiza seguridad absoluta.
+**Última actualización:** 23/10/2026. La release v1.0.0 está publicada. La branch de v2.0.0 se encuentra en desarrollo y **no está homologada**.
 
-No publique exploits o datos sensibles en issues. Utilice reporte privado de vulnerabilidades de GitHub si está disponible o un canal privado del mantenedor. Incluya impacto, versión y pasos mínimos.
+## Modelo de datos
 
-Controles: cálculos en BigInt, validación estricta, backup versionado (máximo 2 MB), importación íntegra antes de reemplazo, JSON sin ejecución, React con texto escapado, CSV neutralizado contra fórmulas, sin secretos ni analytics deliberados.
+No se requiere backend, cuenta, geolocalización ni servicio comercial externo. Productos, escenarios y preferencias permanecen en `localStorage` vinculado al origen/perfil del navegador; otros scripts con acceso al mismo origen pueden leer esos datos. No guarde secretos, información de clientes ni credenciales allí. Haga backups periódicos fuera del navegador. El uso de `localStorage` no exime obligaciones de protección de datos.
 
-**Pendientes:** lockfile y revisión de dependencias, scripts de instalación, build/test, pruebas E2E y de lector de pantalla, revisión CSP/cabeceras del host seleccionado. Un scanner sin alertas no demuestra ausencia absoluta de fallos.
+## Controles
 
-No introduzca información personal, claves ni archivos confidenciales en campos del simulador.
+- Dinero canónico en COP con centavos BigInt.
+- Validación de productos y límites de tamaño/cantidad en backups JSON.
+- Los CSV neutralizan fórmulas inicialmente peligrosas.
+- La nueva protección de concurrencia detecta revisiones externas y bloquea mutaciones de la pestaña desactualizada; no constituye sincronización multiusuario transaccional.
+- PWA experimental almacena únicamente shell HTML, archivos estáticos y recursos públicos. Nunca responder con datos financieros ni llamadas API cacheadas.
+- No introducir dependencia, código ejecutable desconocido, credenciales o scripts de instalación no auditados.
+
+## Reportar fallos
+
+Evite divulgar exploits activos y datos sensibles en issues públicos. Utilice reporte privado de vulnerabilidades en GitHub si está habilitado, o un contacto privado del mantenedor, indicando versión afectada, impacto y reproducción segura.
+
+## Pendencias obligatorias antes de v2
+
+Revisión de dependencias/lockfile, lint independiente real, build/tests locales y E2E, multi-tab concurrente, backup malformado, escape de texto, PWA offline/actualización, CSP y headers de hosting. La ausencia de alertas en un scanner no prueba seguridad absoluta.
