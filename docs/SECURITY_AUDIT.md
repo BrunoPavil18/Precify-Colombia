@@ -55,3 +55,21 @@ pnpm.cmd dev
 ~~~
 
 Homologar también los pasos de [HOMOLOGACION_MANUAL.md](HOMOLOGACION_MANUAL.md) y [HOMOLOGACION_I18N.md](HOMOLOGACION_I18N.md). Mantener la `main` intacta y no disparar GitHub Actions sin autorización expresa.
+
+
+## 5. Nueva evidencia del propietario — traducciones ES/PT/EN
+
+El usuario proporcionó logs de una nueva validación local después de implementar internacionalización:
+
+- `pnpm.cmd typecheck`: core y web correctos.
+- `pnpm.cmd lint`: ambos paquetes correctos (script basado en TypeScript; no implica reglas ESLint).
+- `pnpm.cmd test`: **34/34 aprobados** (22 core + 12 web), sin fallos ni tests omitidos.
+- `pnpm.cmd build`: producción compilada, Vite 8.3.4, 27 módulos transformados; JavaScript comprimido con gzip ~96,62 kB.
+- `pnpm.cmd dev`: servidor local Vite iniciado.
+- Capturas del usuario: ES, PT y EN visualmente operativos, resultados financieros COP estables; catálogo y datos locales conservados.
+
+**Problema de UX detectado en captura:** un producto nuevo sin editar mostraba «Descartar cambios» tras seleccionar PT/EN. Causa: el nombre de ejemplo traducido se comparaba con el nombre español de `EMPTY_INPUT`, provocando un falso positivo de cambios pendientes. Se cambió `persistedDraft` para usar el nombre de ejemplo traducido al idioma activo y se añadió una prueba de regresión estática.
+
+**Nuevo total: 35 pruebas escritas, 34 ejecutadas y aprobadas antes de este ajuste; la última prueba y compilación posterior al ajuste todavía no fueron ejecutadas.** Repetir los comandos locales antes de declarar la PR homologada.
+
+La nueva evidencia **no incluye un `pnpm audit` repetido después de la traducción**; el último audit reportado exitosamente fue en la validación anterior. Los diccionarios estáticos no agregaron dependencias, pero ello no sustituye la auditoría final.
