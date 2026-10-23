@@ -345,5 +345,18 @@ export const en: Record<string,string> = {
   "Confirmar operación": "Confirm action",
   "Cancelar": "Cancel",
   "Confirmar": "Confirm",
-  "VERSIÓN 2.0.0": "VERSION 2.0.0"
+  "VERSIÓN 2.0.0": "VERSION 2.0.0",
+  "attributionDifference": "Attribution difference",
+  "projectedRevenue": "Projected revenue",
+  "projectedRefunds": "Projected refunds",
+  "projectedRoas": "Projected ROAS",
+  "profitPerShippedOrder": "Profit per shipped order",
+  "cancelledBeforeShipping": "Cancelled before shipping",
+  "deliveryFailures": "Delivery failures",
+  "deliveredUnpaid": "Delivered but unpaid",
+  "regulatoryTruncatedPrice": "Truncated PUM (where applicable)",
+  "PUM: cálculo matemático redondeado y presentación truncada a dos decimales; la obligatoriedad depende de la categoría y de la norma SIC aplicable.": "PUM: mathematically rounded value and separately truncated two-decimal presentation; the legal requirement depends on category and applicable SIC rule.",
+  "Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.": "Break-even assumes a constant product mix; quantities are estimated.",
+  "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "Entered attributed revenue does not equal conversions times unit revenue. Attributed ROAS and projected profit use separate bases.",
+  "La facturación atribuida coincide con la proyección bruta.": "Attributed revenue matches the gross projection."
 };
