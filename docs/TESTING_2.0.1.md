@@ -25,3 +25,16 @@ Manual acceptance should use an **exported backup first**, then check:
 5. Switch ES/PT/EN and check warnings; save/reload simulations and restore v1/v2 backups; cancel destructive modals; check PWA offline after loading static assets; verify 2.0.1 version label.
 
 No GitHub Actions or release publishing is authorized. Record exceptions (including external browser E2E, full regulatory consolidations and simultaneous-write race tests) in PR notes.
+
+## Focused PUM audit after visual report
+
+The maintainer observed that selecting **g** displayed **kg** without explanation. This was historically intentional normalization, but confusing UX. Test both choices on the new **comparison unit** selector:
+
+- Enter COP 1000 and content **500 g**. Output per **g** must be COP 2; change reference to **kg**, output COP 2000. The input must remain 500 g.
+- Enter COP 1000 and **1500 ml**; expect COP 0.67/ml or COP 666.67/l.
+- Enter COP 1000 and **150 cm**; expect COP 6.67/cm or COP 666.67/m.
+- Switch source families: g only offers g/kg, ml only ml/l, cm only cm/m. Incompatible choices are rejected by core.
+- Reopen existing saved PUM simulations from v2.0.0 (no `referenceUnit` field): they must load with a clear, matching source-unit comparison selected by default. Backup v1/v2 data structures are unchanged.
+- Verify static translations in Spanish, Portuguese and English; mathematical and SIC-style truncated values remain distinct.
+
+This change requires a new local typecheck, test and build after the commit; do not rely on prior green results.
