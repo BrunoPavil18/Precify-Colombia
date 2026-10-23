@@ -1,48 +1,79 @@
-# Contrato técnico de integración — Precify Colombia v2.0.0 (en desarrollo)
+# Precify Colombia v2.0.0 — Integration guide
 
-**Estado:** API candidata sin estabilidad garantizada; pendiente de build, validación de `npm pack` y prueba por un consumidor externo. No está publicada en npm.
+**Status:** code merged into `main`, maintainer functional QA passed. This guide documents the shipped source API; no claim of independent commercial-platform certification or npm publication.
 
-## Motor desacoplado
+## Requirements and build
 
-Compilar primero:
+- Node.js >=20.19 and pnpm 10.34.7.
+- Run from the repository root:
 
 ```bash
+corepack enable
+corepack prepare pnpm@10.34.7 --activate
+pnpm install --frozen-lockfile --ignore-scripts
 pnpm --filter @precify-colombia/core build
+pnpm verify:core
 ```
 
-El workspace `packages/core` genera `dist/index.js` (ESM) y `dist/index.d.ts` (tipos). El `exports` principal apunta al build compilado. En un monorepo pnpm consumidor, la dependencia puede ser `"@precify-colombia/core":"workspace:*"`. En otro repositorio, use un paquete local producido con `pnpm pack`, tras revisar su contenido, o incluya el código bajo Apache 2.0. No presuma una publicación pública en npm.
+The reusable `packages/core` package exposes ESM `dist/index.js` and type declarations `dist/index.d.ts`, with `exports["."]` resolving both. The source repository uses `"@precify-colombia/core": "workspace:*"`. It is **not published on npm**. External projects should either integrate the Apache-2.0 source or produce/test a local package (e.g., via `pnpm pack`); the maintainer validated ESM outputs, **not an npm registry installation or external consumer test**.
+
+## Using the core
 
 ```ts
-import {EMPTY_INPUT, analyze, suggestPrice, simulateCOD, simulatePortfolio} from "@precify-colombia/core";
+import {
+  EMPTY_INPUT, analyze, suggestPrice, simulateCOD,
+  simulateCampaign, pricePerMeasure, consumerPricePreview, simulatePortfolio
+} from "@precify-colombia/core";
 
-const input={...EMPTY_INPUT,acquisition:"37000.00",currentPrice:"99000.00"};
-const current=analyze(input);
-console.log(current.contribution, current.marginOnCollectedPercent);
-const price=suggestPrice(input).price;
-const mix=simulatePortfolio([{product:input,monthlyUnits:"10"}],"320000.00");
+const product = {
+  ...EMPTY_INPUT,
+  acquisition: "37000.00",
+  currentPrice: "99000.00",
+};
+
+const result = analyze(product);
+console.log(result.contribution, result.marginOnCollectedPercent);
+const suggestion = suggestPrice(product).price;
+const unitPrice = pricePerMeasure("10000.00", "500.00", "g");
+const portfolio = simulatePortfolio([{ product, monthlyUnits: "10" }], "320000.00");
 ```
 
-### Contratos
+Money: COP decimal strings with two fractional digits (`"89900.50"`). Percentages: explicit percentage strings (`"19.00"` is 19%, not 0.19%). Display in `es-CO` is separate from canonical integration format. Do not use binary floats for monetary arithmetic.
 
-- `PriceInput`: moneda COP, importes en string decimal canónico (`89900.50`), porcentajes explícitos (`19.00`) y cantidad mensual como string de entero.
-- `analyze`: `marginPercent` sigue usando la **venta neta del producto** por compatibilidad con v1. `marginOnCollectedPercent` usa toda la recaudación (producto + flete recibido), `commercialMarkupPercent` se basa en precio neto/costo variable; `viability` distingue `positive`, `zero`, `negative`.
-- `suggestPrice`: sigue buscando la meta de margen legado (venta neta del producto) hasta que exista una política explícita y migración contractual.
-- `simulateCOD`: fracciones condicionales de pedidos enviados, entregados y pagados; no atribuye probabilidades típicas colombianas.
-- `simulateCampaign`: CAC, ROAS y equilibrio estimados; no lee cuentas de anuncios.
-- `pricePerMeasure`: PUM orientativo por kg/L/m/unidad.
-- `consumerPricePreview`: IVA incluido/adicional/ninguno definido expresamente, sin duplicar IVA incluido.
-- `simulatePortfolio`: una sola deducción de gasto fijo del negocio.
-- `encodeBackup`: versión 2; `decodeBackup`: admite formatos versionados 1 y 2, conforme validación. Workspace mantiene la clave de almacenamiento v1 para preservar productos locales existentes.
-- **No** API HTTP, WordPress plugin, Mastershop checkout ni credenciales.
+### Margin and pricing contracts
+- `analyze().marginPercent` (legacy) and `marginOnProductPercent`: contribution / net product sale.
+- `marginOnCollectedPercent`: contribution / total collected revenue, including separately charged shipping.
+- `commercialMarkupPercent` and `contributionMarkupPercent`: explicit, distinct markup indicators. Ratios may be null if denominators are zero.
+- `analyze().viability` is `"positive"`, `"zero"`, or `"negative"`. Zero contribution does not cover fixed costs.
+- `suggestPrice` preserves the v1 denominator for margin targets; integrators must not silently reinterpret targets as a total-revenue margin.
 
-## Segurança / seguridad / security
+### Advanced calculators
+- `simulateCOD`: conditional shipped/created, delivered/shipped and paid/delivered percentages, with explicit reverse-logistics, advertising and operational-loss assumptions.
+- `simulateCampaign`: hypothetical conversion, CAC, break-even ROAS, and projected return, **not measured advertising attribution**.
+- `pricePerMeasure`: PUM comparison across mass, volume, linear measures, and items; legal applicability depends on product/category.
+- `consumerPricePreview`: tax handling `included | additional | none`, declared fees/shipping and consumer-facing total. No automatic tax regime classification.
+- `simulatePortfolio`: combined variable contribution and one shared monthly fixed-cost deduction.
 
-No aceptar valores no confiables sin pasar por `validateInput`, `decodeBackup` y las validaciones de las funciones. Los resultados de COD, campañas, IVA y PUM son **estimaciones**, no cumplimiento normativo ni decisiones fiscales automatizadas. No publicar precios ni mutar pedidos sin autorización y verificación del comerciante.
+### Workspace and backup contracts
+- Local storage key: `precify-colombia:workspace:v1` (preserved intentionally for existing users).
+- JSON backup export: version **2**; `decodeBackup` accepts v1 or v2 and validates all data before accepting it.
+- The workspace includes saved advanced simulations; records are tagged by module.
+- Tab-conflict detection compares full validated workspace snapshots, **not an atomic multiuser transaction**.
 
-## Responsabilidades del integrador
+## Web embedding, WordPress, and PWA
 
-- Identificar fuente y vigencia de costos, tasas, volúmenes y tratamiento tributario.
-- Mostrar siempre la unidad y denominador de margen.
-- Mantener backups protegidos y no incorporar información personal al repositorio.
-- No tratar un iframe como integración de sesión/productos.
-- Verificar comportamiento frente a navegadores sin soporte de almacenamiento offline.
+Run `pnpm build` and host `apps/web/dist/` on a static HTTPS origin. For a separate site, embed it via a permitted iframe:
+
+```html
+<iframe src="https://calculator.example.com/" title="Precify Colombia" loading="lazy" style="width:100%;height:850px;border:0"></iframe>
+```
+
+For WordPress, use a Custom HTML block or link to the deployed app. The iframe **does not share products, sessions, or orders**. Embedded localStorage is subject to browser third-party storage policies, and CSP/`frame-ancestors` must allow intended hosts.
+
+The PWA service worker caches static public resources. It does not synchronize business data, and availability of offline install/update depends on the browser. In production, deploy over HTTPS with appropriate CSP and security headers.
+
+## Limitations, safety and compliance
+
+- No commercial platform integration, Mastershop/Vezura modification, checkout, webhook, remote user database, mandatory external API or npm publication.
+- Financial outcomes are estimates based on user assumptions. Taxes remain configurable; there is **no universal automatic 19% IVA**.
+- Colombian legal references: [COLOMBIA_LEGAL_V2.md](COLOMBIA_LEGAL_V2.md). Security policy: [../SECURITY.md](../SECURITY.md). Release notes: [RELEASE_NOTES_2.0.0.md](RELEASE_NOTES_2.0.0.md).
