@@ -91,3 +91,23 @@ Los campos `monthlyFixed` y `monthlyUnits` también aparecen dentro del editor d
 5. Verificar comportamiento de botones de guardado, validaciones de unidades y persistencia del producto si el usuario decide guardar.
 
 No etiquetar esta última etapa como homologada sin resultado del usuario.
+
+## 7. Mejora de Metas — seleccionar producto guardado (pendiente de ejecución local)
+
+**Resultado de prueba previo aportado por el propietario:** pantalla Metas con contribución COP 49.000; gastos fijos COP 490.000 y 10 unidades → equilibrio 10, utilidad COP 0, margen neto 0,00%. Al subir a 15 unidades manteniendo gastos fijos, equilibrio 10, utilidad COP 245.000, margen neto 16,50%. Estos resultados **ya fueron verificados visualmente**.
+
+El usuario solicitó escoger el producto directamente en Metas. Se agregó un selector conectado a los productos guardados. Ahora los resultados de Metas utilizan los costos **persistidos del producto elegido**, no el borrador global ni el escenario activo. Las proyecciones mensuales se editan en un borrador independiente.
+
+**Pruebas para la nueva funcionalidad**:
+1. Reiniciar la app (F5) y abrir Metas: si existen productos guardados, el selector debe mostrar un producto real, con resultados de sus costos sin tener que visitar Productos → Editar.
+2. Guardar dos productos con costos distintos. Seleccionar uno, observar contribución y equilibrio; seleccionar el otro, comprobar que cambian; volver al primero y verificar sus datos originales.
+3. En un producto de precio COP 99.000 y contribución COP 49.000, introducir gastos fijos COP 490.000 y 10 unidades: equilibrio **10**, utilidad **COP 0**. Cambiar a 15 unidades: utilidad **COP 245.000**, margen neto **16,50%**.
+4. **Sin guardar**, cambiar de producto: la aplicación debe solicitar confirmar descarte. Cancelar debe preservar el producto y la proyección; aceptar cambia al otro producto sin grabar el primero.
+5. Presionar «Descartar cambios» debe restaurar las dos cifras mensuales del producto seleccionado. También debe descartar un campo COP aún sin validar.
+6. Editar los valores mensuales y presionar «Guardar cambios en producto». Comprobar que **solo** gastos fijos y unidades mensuales fueron guardados; costos variables, precio y escenarios mantienen sus valores.
+7. Después de F5, elegir el producto guardado y comprobar que las proyecciones mensuales persisten. Cambiar de idioma ES/PT/EN y verificar selector, mensajes y cálculos idénticos.
+8. Con cero productos guardados, Metas debe mostrar un mensaje de estado vacío y enlace a la calculadora, sin grabar automáticamente ningún producto.
+9. Introducir unidades inválidas (por ejemplo letras) o un campo de gastos fijos COP malformado: no guardar; mostrar error.
+10. Probar en móvil: selector, botones y tarjetas deben ajustarse sin solaparse.
+
+**Antes de probar:** actualizar la branch, respaldar datos y repetir `pnpm.cmd typecheck`, `pnpm.cmd test`, `pnpm.cmd build`. Las tres pruebas nuevas escritas aún no están ejecutadas; total de pruebas definidas en el PR: **38**. Ningún GitHub Actions fue iniciado.
