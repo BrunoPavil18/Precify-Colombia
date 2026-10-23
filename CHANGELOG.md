@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.1] — unreleased candidate, under validation
+## [2.0.1] — merged release preparation (2026-10-23)
 
 - Fixed campaign projected profit to account for projected refunds, separated attributed ROAS and projected ROAS, and exposed attribution mismatch and reconciliation data.
 - Corrected COD failed-attempt cost incidence to dispatched-but-undelivered orders, exposed cancellations, unpaid deliveries and per-shipped-order profit.
@@ -8,8 +8,10 @@
 - Fixed constant-mix break-even to use exact aggregate ratios instead of a prematurely rounded mean.
 - Updated user interface metrics, ES/PT/EN translations, package version, PWA static cache identifier and regression cases.
 - Preserved `suggestPrice`/discount margin-target contract, local workspace/backups and all v2.0.0 releases.
+- Added an optional PUM comparison unit parameter (g/kg, ml/L, cm/m) and explicit selection in the UI; historical three-argument API behavior remains unchanged.
+- Improved ES/PT/EN reconciliation messages, removed internal diagnostic keys from displayed cards, and made cleared advanced numeric inputs normalize to zero on blur.
 
-**Not yet verified locally:** patch typecheck, lint, tests, build, audit, E2E/offline browser and independent tax/legal certification. GitHub PR remains open until acceptance.
+**Maintainer validation:** 63/63 automated tests (42 core, 21 web), typecheck, AST lint and production build passed. ESM packaging and dependency audit passed before the final PUM/UI edits; no new dependencies added. Production browser/PWA E2E, simultaneous-write race certification and professional legal review were not performed.
 
 
 ## [2.0.0] — 2026-10-23 (merged into `main`; release/tag published separately)
