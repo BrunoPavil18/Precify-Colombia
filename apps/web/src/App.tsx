@@ -437,7 +437,7 @@ export default function App(){
       </aside>
      </div>}
      {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
-      onSave={(record:AdvancedSimulationRecord)=>{if(commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}))){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}}}
+      onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
       onDelete={id=>{if(window.confirm(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t("Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
