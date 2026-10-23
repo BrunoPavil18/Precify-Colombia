@@ -1,9 +1,9 @@
 # Precify Colombia v2.0.0 — estado de implementación consolidada
 
 **Branch:** `feat/precify-colombia-v2`  
-**PR única:** [#2](https://github.com/BrunoPavil18/Precify-Colombia/pull/2) — Draft  
+**PR única:** [#2](https://github.com/BrunoPavil18/Precify-Colombia/pull/2) — merged into `main` on 2026-10-23  
 **Base:** `main` idéntica al tag público `v1.0.0` al crear el branch.  
-**Estado:** DESARROLLO / NO HOMOLOGADO. La release v1.0.0 permanece intacta.
+**Estado actual:** v2.0.0 merged into `main`, with maintainer QA (53 automated tests, 24 manual checks). GitHub tag/release publication is managed separately. Previous chronological entries below document the development process and should be read as historical snapshots.
 
 ## Implementaciones realizadas en código
 
