@@ -10,7 +10,17 @@ export function loadWorkspace():ReadResult {
   return{state:emptyWorkspace(),locked:true,error:"Datos locales dañados o inaccesibles. No se sobrescribirán automáticamente. Exporta una copia desde el navegador antes de continuar. "+String(e)};
  }
 }
-export function persistWorkspace(state:Workspace):void {
+/** Optimistic revision guard: refuse stale writes from another browser tab. */
+export function persistWorkspace(state:Workspace,expectedUpdatedAt?:string):void {
+ if(expectedUpdatedAt!==undefined){
+  const raw=localStorage.getItem(STORE_KEY);
+  if(raw===null)throw new Error("Conflicto entre pestañas: los datos cambiaron o fueron borrados. Actualiza y exporta una copia antes de continuar.");
+  if(new TextEncoder().encode(raw).length>MAX_BACKUP_BYTES)throw new Error("Conflicto entre pestañas: almacenamiento inesperado.");
+  const current=validateWorkspace(JSON.parse(raw));
+  if(current.updatedAt!==expectedUpdatedAt)
+   throw new Error("Conflicto entre pestañas: cambios externos detectados. No se sobrescribieron datos.");
+ }
+
  const data=JSON.stringify(validateWorkspace(state));
  if(new TextEncoder().encode(data).length>MAX_BACKUP_BYTES)throw new Error("Límite local de 2 MB. Exporta un respaldo y reduce tu historial.");
  localStorage.setItem(STORE_KEY,data);
