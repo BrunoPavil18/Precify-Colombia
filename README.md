@@ -1,5 +1,8 @@
 # Precify Colombia 🇨🇴
 
+> **Rama de desarrollo v2.0.0:** esta rama incorpora simuladores avanzados y correcciones aún no homologadas. La versión pública estable sigue siendo **v1.0.0**. No debe publicarse v2 sin compilación, pruebas reales y aprobación del mantenedor. Consulte [estado y pendientes](docs/V2_STATUS.md).
+
+
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
 **Versión 1.0.0 · Aplicación gratuita y de código abierto · Apache License 2.0**
