@@ -334,5 +334,10 @@ export const ptBR: Record<string,string> = {
   "Hay cambios sin guardar. ¿Descartarlos antes de duplicar?": "Há alterações não salvas. Descartá-las antes de duplicar?",
   "Hay cambios sin guardar. ¿Aplicar el perfil y descartarlos?": "Há alterações não salvas. Aplicar o perfil e descartá-las?",
   "Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?": "Há alterações não salvas. Descartá-las para trocar o produto dos cenários?",
-  "Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?": "Há alterações não salvas. Descartá-las para criar um novo produto?"
+  "Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?": "Há alterações não salvas. Descartá-las para criar um novo produto?",
+  "Hay una actualización disponible para uso offline.": "Uma atualização está disponível para uso offline.",
+  "Instalar actualización": "Instalar atualização",
+  "Guarda o descarta tus cambios antes de actualizar la aplicación.": "Salve ou descarte suas alterações antes de atualizar o aplicativo.",
+  "Hay una actualización disponible. Guarda una copia de seguridad antes de instalarla. ¿Actualizar ahora?": "Há uma atualização disponível. Faça um backup antes de instalá-la. Atualizar agora?",
+  "La actualización no pudo activarse.": "Não foi possível ativar a atualização."
 };
