@@ -38,3 +38,7 @@ The maintainer observed that selecting **g** displayed **kg** without explanatio
 - Verify static translations in Spanish, Portuguese and English; mathematical and SIC-style truncated values remain distinct.
 
 This change requires a new local typecheck, test and build after the commit; do not rely on prior green results.
+
+## Latest maintainer validation (2026-10-23)
+
+After the optional PUM reference-unit update, the maintainer reported **63/63 automated tests passing** (42 core, 21 web), `pnpm.cmd typecheck`, `pnpm.cmd lint` (15 TS source files plus typecheck), and `pnpm.cmd build` (Vite 8.3.4, 29 modules, 108.52 kB gzip JS). These results do not substantiate unexecuted E2E/production offline and simultaneous multi-tab races. Earlier `verify:core` and moderate dependency audit passed before the PUM change; no dependencies were added.
