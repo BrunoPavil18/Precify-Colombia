@@ -18,7 +18,12 @@ self.addEventListener("install",event=>{
  })());
 });
 self.addEventListener("activate",event=>{
- event.waitUntil(self.clients.claim());
+ event.waitUntil((async()=>{
+  for(const key of await caches.keys()){
+   if(key.startsWith("precify-colombia-v2-assets-")&&key!==VERSION)await caches.delete(key);
+  }
+  await self.clients.claim();
+ })());
 });
 self.addEventListener("message",event=>{
  if(event.data?.type==="ACTIVATE_UPDATE")self.skipWaiting();
