@@ -1,6 +1,6 @@
-# Precify Colombia v2.0.0 — Integration guide
+# Precify Colombia v2.0.1 — Integration guide
 
-**Status:** code merged into `main`, maintainer functional QA passed. This guide documents the shipped source API; no claim of independent commercial-platform certification or npm publication.
+**Status:** v2.0.1 patch validated locally by the maintainer (42 core + 21 web tests; typecheck, AST lint and production build passed). Merge/release is controlled independently. No claim of independent commercial-platform certification or npm publication.
 
 ## Requirements and build
 
@@ -77,3 +77,7 @@ The PWA service worker caches static public resources. It does not synchronize b
 - No commercial platform integration, Mastershop/Vezura modification, checkout, webhook, remote user database, mandatory external API or npm publication.
 - Financial outcomes are estimates based on user assumptions. Taxes remain configurable; there is **no universal automatic 19% IVA**.
 - Colombian legal references: [COLOMBIA_LEGAL_V2.md](COLOMBIA_LEGAL_V2.md). Security policy: [../SECURITY.md](../SECURITY.md). Release notes: [RELEASE_NOTES_2.0.0.md](RELEASE_NOTES_2.0.0.md).
+
+## PUM reference units in v2.0.1
+
+`pricePerMeasure(price, quantity, contentUnit, referenceUnit?)` accepts an **optional fourth argument** selecting the unit in the denominator. For example `pricePerMeasure("1000.00","500.00","g","g")` returns `2.00` COP/g while using `"kg"` returns `2000.00` COP/kg. Compatible pairs are g/kg, ml/l, cm/m; items compare per `unit`. An incompatible dimension is rejected. Existing three-argument calls retain v2.0.0 normalization (g → kg, ml → l, cm → m) for backwards compatibility. UI callers explicitly select both units. `pricePerUnit` stays mathematically rounded and `regulatoryTruncatedPrice` is a separate informative presentation where the SIC context applies. Saved v2 backups with no `referenceUnit` still load.

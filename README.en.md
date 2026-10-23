@@ -1,11 +1,15 @@
 # Precify Colombia 🇨🇴
 
-> **Precify Colombia 2.0.0:** merged into `main` and functionally validated by the maintainer (53 automated tests passed). The v2.0.0 GitHub tag/release is published separately. See [status and limitations](docs/V2_STATUS.md).
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Version 2.0.0 · Free and open source · Apache License 2.0**
+**Version 2.0.1 · Free and open source · Apache License 2.0**
+
+## Version 2.0.1 update
+
+Version 2.0.1 stabilizes attributed versus projected campaign ROAS, stage-specific COD costs, PUM with **explicit content and comparison units** (g/kg, ml/L, cm/m), exact portfolio break-even and ES/PT/EN translations. Version 1/2 backups and previous API contracts remain compatible; legacy three-argument PUM calls retain their historical reference units. See the [integration guide](docs/INTEGRATION_V2.md), [Colombian legal scope](docs/COLOMBIA_LEGAL_V2_0_1.md), and [2.0.1 release notes](docs/RELEASE_NOTES_2.0.1.md).
+
 
 ## What's new in v2.0.0
 

@@ -23,20 +23,22 @@ export function simulateCOD(input:CODSimulationInput){
  const shipped=roundDiv(created*bps(input.shippedPercent),10000n);
  const delivered=roundDiv(shipped*bps(input.deliveredPercentOfShipped),10000n);
  const paid=roundDiv(delivered*bps(input.paidPercentOfDelivered),10000n);
- const failed=created-paid,shipFailures=shipped-delivered;
+ const failed=created-paid,notShipped=created-shipped,shipFailures=shipped-delivered,deliveredUnpaid=delivered-paid;
  const standard=signed(analyze(v).contribution);
  // Existing advertising and COD/returns reserves are NOT duplicated.
  const perPaid=standard-parseDecimal(v.advertising)-parseDecimal(v.codReserve)-parseDecimal(v.returnsReserve)
    -parseDecimal(input.extraCODFeePerPaidOrder);
  const ad=created*parseDecimal(input.advertisingPerCreatedOrder);
- const failures=failed*(parseDecimal(input.failedAttemptCost)+parseDecimal(input.lossReservePerFailedOrder));
- const reversals=shipFailures*parseDecimal(input.returnShippingCost);
+ const failures=shipFailures*parseDecimal(input.failedAttemptCost)+failed*parseDecimal(input.lossReservePerFailedOrder);
+ const reversals=(shipFailures+deliveredUnpaid)*parseDecimal(input.returnShippingCost);
  const total=paid*perPaid-ad-failures-reversals;
  return {
   createdOrders:created.toString(),shippedOrders:shipped.toString(),deliveredOrders:delivered.toString(),
-  paidOrders:paid.toString(),failedOrders:failed.toString(),
+  paidOrders:paid.toString(),failedOrders:failed.toString(),cancelledBeforeShipping:notShipped.toString(),
+  deliveryFailures:shipFailures.toString(),deliveredUnpaid:deliveredUnpaid.toString(),
   expectedProfit:fromCents(total),
   profitPerCreatedOrder:created===0n?null:fromCents(roundDiv(total,created)),
+  profitPerShippedOrder:shipped===0n?null:fromCents(roundDiv(total,shipped)),
   profitPerPaidOrder:paid===0n?null:fromCents(roundDiv(total,paid)),
   assumptions:["Las tasas y costos son hipótesis ingresadas por el usuario.","No equivale a una tarifa publicada por transportadoras.","La adquisición de mercancía no recuperada debe modelarse dentro de la reserva de pérdidas."]
  };
@@ -56,26 +58,47 @@ export function simulateCampaign(input:CampaignInput){
  const netAttributed=attributed-refunded;
  const breakdown=analyze({...p,advertising:"0.00"});
  const contribution=signed(breakdown.contribution);
- const projectedProfit=conversions*contribution-spend;
+ const projectedRevenue=conversions*parseDecimal(breakdown.collected);
+ const projectedRefunds=basisAmount(projectedRevenue,bps(input.refundPercent));
+ // A refunded sale loses its collected revenue, while costs already incurred remain.
+ const projectedProfit=conversions*contribution-projectedRefunds-spend;
+ const disagreement=attributed!==projectedRevenue;
  const maxCAC=contribution>0n?fromCents(contribution):null;
  const cac=conversions===0n?null:fromCents(roundDiv(spend,conversions));
  const roas=spend===0n?null:fromCents(roundDiv(netAttributed*100n,spend));
  const breakEvenRoas=contribution<=0n||parseDecimal(breakdown.collected)===0n?null:
   fromCents(roundDiv(parseDecimal(breakdown.collected)*100n,contribution));
  return {conversions:conversions.toString(),cac,maxCAC,roas,breakEvenRoas,
+   projectedRevenue:fromCents(projectedRevenue),projectedRefunds:fromCents(projectedRefunds),
+   projectedRoas:spend===0n?null:fromCents(roundDiv((projectedRevenue-projectedRefunds)*100n,spend)),
+   revenueMethod:"separate-observed-and-projected" as const,attributionMismatch:disagreement,
+   attributionDifference:fromCents(attributed-projectedRevenue),
+   reconciliationNotice:disagreement?"La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.":"La facturación atribuida coincide con la proyección bruta.",
    attributedRevenueAfterRefunds:fromCents(netAttributed),projectedProfit:fromCents(projectedProfit),
    estimated:true};
 }
 export type PUMUnit="g"|"kg"|"ml"|"l"|"cm"|"m"|"unit";
-export function pricePerMeasure(price:string,quantity:string,unit:PUMUnit){
+const unitFactor:Record<PUMUnit,bigint>={g:1n,kg:1000n,ml:1n,l:1000n,cm:1n,m:100n,unit:1n};
+const unitFamily:Record<PUMUnit,string>={g:"mass",kg:"mass",ml:"volume",l:"volume",cm:"length",m:"length",unit:"count"};
+/** Price per selected reference unit. Omitting referenceUnit retains the v2.0.0
+ * kilogram/liter/meter default and therefore does not change existing callers.
+ * UI callers must explicitly select the reference to avoid ambiguous displays.
+ */
+export function pricePerMeasure(price:string,quantity:string,unit:PUMUnit,referenceUnit?:PUMUnit){
  const cents=parseDecimal(price),q=parseDecimal(quantity);
  nonzero(q,"Cantidad");
- if(!["g","kg","ml","l","cm","m","unit"].includes(unit))throw new FinancialInputError("Unidad inválida.");
- // quantity carries two decimal digits. Per 1kg for g, per 1L for ml, otherwise per base unit.
- const scale=unit==="g"||unit==="ml"?1000n:unit==="cm"?100n:1n;
- const amount=roundDiv(cents*100n*scale,q);
- return {unit:unit==="g"?"kg":unit==="ml"?"l":unit==="cm"?"m":unit,
- pricePerUnit:fromCents(amount),informativeOnly:true};
+ if(!Object.prototype.hasOwnProperty.call(unitFactor,unit))throw new FinancialInputError("Unidad inválida.");
+ const reference=referenceUnit??(unit==="g"?"kg":unit==="ml"?"l":unit==="cm"?"m":unit);
+ if(!Object.prototype.hasOwnProperty.call(unitFactor,reference))throw new FinancialInputError("Unidad de referencia inválida.");
+ if(unitFamily[unit]!==unitFamily[reference])throw new FinancialInputError("Las unidades de contenido y comparación deben ser compatibles.");
+ // Values carry two decimal places. Ratio is exactly centavos * referenceFactor / inputFactor / quantity.
+ const numerator=cents*100n*unitFactor[reference];
+ const denominator=q*unitFactor[unit];
+ const amount=roundDiv(numerator,denominator),truncated=numerator/denominator;
+ return {unit:reference,sourceUnit:unit,referenceUnit:reference,quantity:fromCents(q),
+ pricePerUnit:fromCents(amount),regulatoryTruncatedPrice:fromCents(truncated),
+ exactPriceFraction:{numerator:numerator.toString(),denominator:denominator.toString()},
+ regulatoryPresentationConditional:true,informativeOnly:true};
 }
 export type ConsumerPriceInput={
  productPrice:string; discount:string; additionalFees:string; shippingCharged:string;
@@ -108,9 +131,11 @@ export function simulatePortfolio(items:MixLine[],monthlyFixed:string){
   return {name:product.name,units:monthlyUnits,contribution:fromCents(contribution),perUnit:r.contribution};
  });
  const average=totalUnits===0n?null:roundDiv(weighted,totalUnits);
+ const exactMixBreakEven=totalUnits===0n||weighted<=0n?null:ceilDiv(fixed*totalUnits,weighted);
  return {lines,totalUnits:totalUnits.toString(),totalContribution:fromCents(weighted),
   monthlyProfit:fromCents(weighted-fixed),
-  breakEvenUnits:average===null||average<=0n?null:ceilDiv(fixed,average).toString(),
+  breakEvenUnits:exactMixBreakEven===null?null:exactMixBreakEven.toString(),
+  fixedMixAssumption:true,breakEvenScaleNumerator:totalUnits.toString(),breakEvenScaleDenominator:weighted.toString(),
   weightedContribution:average===null?null:fromCents(average),
   netMargin:totalRevenue===0n?null:fromCents(roundDiv((weighted-fixed)*10000n,totalRevenue)),
   estimated:true};

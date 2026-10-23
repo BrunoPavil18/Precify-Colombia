@@ -1,11 +1,15 @@
 # Precify Colombia 🇨🇴
 
-> **Precify Colombia 2.0.0:** integrado à `main` e homologado funcionalmente pelo mantenedor (53 testes automatizados aprovados). A tag/release v2.0.0 é publicada separadamente. Consulte o [estado técnico e limitações](docs/V2_STATUS.md).
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versão 2.0.0 · Gratuito e open source · Apache License 2.0**
+**Versão 2.0.1 · Gratuito e open source · Apache License 2.0**
+
+## Atualização 2.0.1
+
+A v2.0.1 estabiliza campanhas (ROAS atribuído e projetado separados), custos COD por etapa, PUM com **unidade do conteúdo e unidade de comparação escolhidas separadamente** (g/kg, ml/L, cm/m), equilíbrio exato da carteira e traduções ES/PT/EN. Backups v1/v2 e contratos antigos continuam compatíveis; chamadas antigas do PUM com três parâmetros mantêm a referência histórica. Consulte a [integração](docs/INTEGRATION_V2.md), a [legislação](docs/COLOMBIA_LEGAL_V2_0_1.md) e as [notas 2.0.1](docs/RELEASE_NOTES_2.0.1.md).
+
 
 ## Novidades da versão 2.0.0
 

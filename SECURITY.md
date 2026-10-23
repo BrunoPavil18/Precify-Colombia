@@ -37,3 +37,9 @@ pnpm audit --audit-level moderate
 ```
 
 No GitHub Actions runs or paid infrastructure are required.
+
+
+
+## v2.0.1 security/stability delta
+
+This patch changes financial calculations and their labels without modifying the local storage key or backup schema, and revises the public offline cache identifier. No new remote accounts, dependencies, telemetry, third-party services or background Actions are introduced. Multi-tab comparison remains non-atomic; recommend periodic backups, especially before upgrades, with deliberate security headers on deployment. Dependency audit and browser/PWA E2E must be rerun on the exact patch before making a release claim.
