@@ -151,3 +151,17 @@ test("fixed mix portfolio break-even uses exact aggregate contribution, not roun
  assert.equal(result.breakEvenUnits,"2");
  assert.equal(result.fixedMixAssumption,true);
 });
+
+test("PUM explicitly selects source and reference units without silently changing v2 legacy output",()=>{
+ const legacy=pricePerMeasure("1000.00","500.00","g");
+ assert.equal(legacy.unit,"kg");assert.equal(legacy.pricePerUnit,"2000.00");
+ const perGram=pricePerMeasure("1000.00","500.00","g","g");
+ assert.equal(perGram.unit,"g");assert.equal(perGram.pricePerUnit,"2.00");
+ const perKg=pricePerMeasure("1000.00","500.00","g","kg");
+ assert.equal(perKg.pricePerUnit,"2000.00");
+ assert.equal(pricePerMeasure("1000.00","1500.00","ml","l").pricePerUnit,"666.67");
+ assert.equal(pricePerMeasure("1000.00","1500.00","ml","ml").pricePerUnit,"0.67");
+ assert.equal(pricePerMeasure("1000.00","150.00","cm","m").pricePerUnit,"666.67");
+ assert.throws(()=>pricePerMeasure("1000.00","500.00","g","l"));
+ assert.equal(pricePerMeasure("1000.00","6.00","unit","unit").regulatoryTruncatedPrice,"166.66");
+});
