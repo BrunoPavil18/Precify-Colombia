@@ -117,10 +117,36 @@ export default function App(){
  const [draft,setDraft]=useState<PriceInput>({...EMPTY_INPUT});
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
+ const [scenarioProductId,setScenarioProductId]=useState("");
+ const [editorRevision,setEditorRevision]=useState(0);
  const [locale,setLocale]=useState<Locale>("es-CO");
  const [showTips,setShowTips]=useState(true);
  const uploadRef=useRef<HTMLInputElement>(null);
  const t=dictionaries[locale];
+ const scenarioProduct=workspace.products.find(p=>p.id===scenarioProductId)??workspace.products[0];
+ const scenariosForProduct=workspace.scenarios.filter(s=>s.productId===scenarioProduct?.id);
+ const selectedScenario=workspace.scenarios.find(s=>s.id===scenarioId);
+ const savedProduct=workspace.products.find(p=>p.id===activeId);
+ const persistedDraft=page==="escenarios"&&selectedScenario?selectedScenario.values:savedProduct?.input??EMPTY_INPUT;
+ const hasUnsavedDraft=dirtyMoney.size>0||JSON.stringify(draft)!==JSON.stringify(persistedDraft);
+ function restoreSavedDraft(){
+  setDraft({...persistedDraft});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  setNotice("Se descartaron los cambios sin guardar. La versión guardada permanece intacta.");
+ }
+ function navigate(target:Page){
+  if(target!==page&&page==="escenarios"&&scenarioId){
+   if(hasUnsavedDraft&&!window.confirm("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?"))return;
+   if(savedProduct)setDraft({...savedProduct.input});
+   setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  }
+  setPage(target);
+ }
+ function switchScenarioProduct(id:string){
+  if(scenarioId&&hasUnsavedDraft&&!window.confirm("Hay cambios sin guardar en este escenario. ¿Descartarlos?"))return;
+  setScenarioProductId(id);setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+  const selected=workspace.products.find(p=>p.id===id);
+  if(selected){setActiveId(selected.id);setDraft({...selected.input});}
+ }
  function commit(change:(prior:Workspace)=>Workspace){
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
@@ -147,28 +173,41 @@ export default function App(){
    return {...w,products:exists?w.products.map(row=>row.id===id?p:row):[...w.products,p],
     history:[...w.history,{id:makeId(),productId:id,at:now,action:exists?"Actualización":"Creación",snapshot:{...draft}}].slice(-3000)};
   });
-  if(ok){setActiveId(id);setPage("productos");}
+  if(ok){setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
  }
- function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
- function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setPage("calculadora");}
+ function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  function deleteProduct(p:Product){
   if(!window.confirm("¿Eliminar «"+p.input.name+"» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos."))return;
   const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id)}));
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  function createScenarios(){
-  if(!activeId){setNotice("Guarda primero el producto para vincular escenarios.");return;}
-  try{validateInput(draft);}catch(e){setNotice("Corrige el producto antes de crear escenarios: "+String(e));return;}
-  const presets=defaultScenarios(draft).map(s=>({id:makeId(),productId:activeId,title:s.name,note:s.note,values:{...s.values}}));
-  if(commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){setScenarioId(presets[1]?.id??null);setPage("escenarios");}
+  const product=scenarioProduct;
+  if(!product){setNotice("Guarda primero un producto para crear escenarios.");return;}
+  const existing=workspace.scenarios.filter(s=>s.productId===product.id);
+  const presets=defaultScenarios(product.input)
+   .filter(template=>!existing.some(s=>s.title===template.name))
+   .map(template=>({id:makeId(),productId:product.id,title:template.name,note:template.note,values:{...template.values}}));
+  if(!presets.length){setNotice("Este producto ya tiene los tres escenarios. Selecciona uno para editarlo.");return;}
+  if(commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){
+   const first=presets.find(p=>p.title==="Esperado")??presets[0];
+   if(first){setScenarioId(first.id);setActiveId(product.id);setScenarioProductId(product.id);
+    setDraft({...first.values});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}
+   setPage("escenarios");
+  }
  }
  function saveScenario(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   if(!scenarioId||!activeId){setNotice("Selecciona un escenario vinculado a un producto.");return;}
   try{validateInput(draft);}catch(e){setNotice("Escenario inválido: "+String(e));return;}
-  commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)}));
+  if(commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
  }
- function openScenario(s:SavedScenario){setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setDraft({...s.values});setPage("escenarios");}
+ function openScenario(s:SavedScenario){
+  if(scenarioId!==s.id&&scenarioId&&hasUnsavedDraft&&!window.confirm("Hay cambios sin guardar. ¿Descartarlos y abrir otro escenario?"))return;
+  setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setScenarioProductId(s.productId);
+  setDraft({...s.values});setEditorRevision(n=>n+1);setPage("escenarios");
+ }
  function saveProfile(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Perfil inválido: "+String(e));return;}
@@ -184,14 +223,14 @@ export default function App(){
   try{
    const valid=decodeBackup(await file.text());
    if(!window.confirm("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales."))return;
-   persistWorkspace(valid);setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});
+   persistWorkspace(valid);setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
    setNotice("Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.");setPage("productos");
   }catch(e){setNotice("Respaldo rechazado, sin modificaciones: "+String(e instanceof Error?e.message:e));}
   finally{if(uploadRef.current)uploadRef.current.value="";}
  }
  function reset(){
   if(!window.confirm("¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes."))return;
-  try{localStorage.removeItem(STORE_KEY);setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setNotice("Datos locales borrados.");}
+  try{localStorage.removeItem(STORE_KEY);setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
   catch(e){setNotice("No se pudieron borrar los datos: "+String(e));}
  }
  function rawBackup(){
