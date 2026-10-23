@@ -86,7 +86,7 @@ console.log(result.contribution); // "49000.00" given the other example costs
 console.log(suggestPrice(input).price);
 ```
 
-Within this pnpm monorepo, depend on `"@precify-colombia/core": "workspace:*"`. **Version 2.0.0 · Free and open source · Apache License 2.0**.
+Within this pnpm monorepo, depend on `"@precify-colombia/core": "workspace:*"`. Version 2.0.0 builds portable ESM at `packages/core/dist/index.js` with TypeScript declarations at `dist/index.d.ts`. Run `pnpm --filter @precify-colombia/core build` and `pnpm verify:core` to verify the distributable output. **The core is not published to the public npm registry**. External applications must test a locally packaged build or incorporate Apache-2.0 source. There is no official WordPress plugin or HTTP API.
 
 To reuse external store data, map it to `PriceInput`, call `validateInput` and `analyze`, and handle `FinancialInputError`. Never expose store credentials to browser users or automatically change live store prices without authorization.
 
