@@ -66,3 +66,13 @@ export function moneyDisplay(value: string, prefix = "$ "): string {
   const fraction = cents % 100n;
   return prefix + integer + (fraction === 0n ? "" : "," + fraction.toString().padStart(2, "0"));
 }
+
+/** UI helper for decimal percentage entry: 19,50 (es-CO/pt-BR) or 19.50 (en).
+ * No grouping separators accepted; output is canonical 19.50 for the engine.
+ */
+export function parseLocalizedPercent(value:string):string {
+ if(typeof value!=="string" || !/^(?:0|[1-9]\d{0,2})(?:[.,]\d{1,2})?$/.test(value.trim()))
+  throw new FinancialInputError("Porcentaje inválido. Escribe 19,50 o 19.50.");
+ const normalized=value.trim().replace(",",".");
+ return fromCents(percentBps(normalized));
+}

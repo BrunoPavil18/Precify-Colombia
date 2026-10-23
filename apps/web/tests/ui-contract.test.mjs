@@ -21,7 +21,7 @@ test("Goals selects a persisted product independently of the calculator and scen
  for(const token of [
   'const goalProduct=workspace.products.find(p=>p.id===goalProductId)',
   '??workspace.products.find(p=>p.id===activeId)??workspace.products[0]',
-  'function selectGoalProduct(id:string)',
+  'async function selectGoalProduct(id:string)',
   'value={goalProduct.id} onChange={e=>selectGoalProduct(e.target.value)}',
   'const goalInput=useMemo(()=>goalProduct?{',
   'monthlyFixed:goalFixedOverride??goalProduct.input.monthlyFixed',
@@ -31,7 +31,7 @@ test("Goals selects a persisted product independently of the calculator and scen
 });
 test("Goals discards unsaved simulations and saves only monthly product fields",()=>{
  for(const token of [
-  'if(goalDirty&&!window.confirm(t("Hay cambios sin guardar en Metas.',
+  'if(goalDirty&&!(await askConfirmation(t("Hay cambios sin guardar en Metas.',
   'function saveGoalChanges(){',
   'if(goalMoneyUnvalidated)',
   'monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits',
@@ -43,4 +43,29 @@ test("Goals discards unsaved simulations and saves only monthly product fields",
  ])assert.ok(app.includes(token),token);
  assert.ok(!app.slice(app.indexOf('function saveGoalChanges(){'),app.indexOf('function restoreSavedDraft(){')).includes('scenarios:w.scenarios'),
   "saving a goal must never edit scenarios");
+});
+
+test("advanced saved simulations are scoped to the active section",()=>{
+ const lab=readFileSync(new URL("../src/AdvancedLab.tsx",import.meta.url),"utf8");
+ assert.ok(lab.includes('workspace.advancedSimulations.some(record=>record.kind===pane)'));
+ assert.ok(lab.includes('workspace.advancedSimulations.filter(row=>row.kind===pane).slice().reverse().map(row=>'));
+ assert.ok(lab.includes('onDelete(row.id)'));
+});
+
+test("advanced financial outputs carry clear COP, percentage and ROAS units",()=>{
+ const lab=readFileSync(new URL("../src/AdvancedLab.tsx",import.meta.url),"utf8");
+ for(const key of ['expectedProfit','pricePerUnit','totalContribution','monthlyProfit','netMargin','breakEvenRoas'])
+  assert.ok(lab.includes('"'+key+'"'),key);
+ assert.ok(lab.includes('displayAdvancedResult(key,value as string|number)'));
+ assert.ok(lab.includes('COP '));
+});
+
+test("native confirmation APIs are replaced by cancel-safe accessible dialogs",()=>{
+ assert.ok(!app.includes("window.confirm("));
+ for(const token of ['role="alertdialog"','aria-modal="true"','answerConfirmation(false)','event.key==="Escape"','data-confirm-button','askConfirmation('])assert.ok(app.includes(token),token);
+});
+test("saved workspace writes compare complete state before mutation",()=>{
+ const storage=readFileSync(new URL("../src/storage.ts",import.meta.url),"utf8");
+ assert.ok(storage.includes('JSON.stringify(current)!==JSON.stringify(validateWorkspace(expected))'));
+ assert.ok(app.includes('persistWorkspace(next,wasStored.current?workspace:undefined)'));
 });

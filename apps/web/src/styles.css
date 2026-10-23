@@ -193,3 +193,37 @@ tbody th small{display:block;color:#8b9e96;margin-top:5px}
 .goal-help{font-size:12px;line-height:1.65;margin:7px 0 18px}
 .goals-actions{margin:16px 0 8px;justify-content:flex-start}
 @media(max-width:420px){.goal-product-selector{max-width:100%}.goals-actions{align-items:stretch}.goals-actions button{flex:1}}
+
+
+/* v2 advanced simulation interface: horizontal controls become scrollable only when needed. */
+.advanced-lab{max-width:100%;overflow:hidden}
+.advanced-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}
+.advanced-tabs button{font-size:13px}
+.advanced-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0}
+.advanced-results{border:1px solid #cde7de;background:#f1faf5;border-radius:14px;padding:18px;margin:18px 0}
+.advanced-results dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.advanced-results dl>div{padding:12px;background:#fff;border-radius:9px;min-width:0}
+.advanced-results dt{font-size:12px;color:#56726c;overflow-wrap:anywhere}
+.advanced-results dd{font-size:18px;font-weight:700;margin:5px 0 0;overflow-wrap:anywhere}
+@media(max-width:720px){
+ .advanced-grid,.advanced-results dl{grid-template-columns:minmax(0,1fr)}
+ .advanced-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px}
+ .advanced-tabs button{white-space:nowrap}
+ .sidebar nav{scrollbar-width:thin}
+}
+
+/* Compact mobile navigation: no horizontal scrollbar, keyboard focus remains visible. */
+@media(max-width:720px){
+ .sidebar nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow-x:visible;gap:5px;padding-bottom:0}
+ .nav-link{min-width:0;width:100%;overflow-wrap:anywhere}
+}
+@media(max-width:420px){
+ .sidebar nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .nav-link{font-size:11px}
+}
+
+.modal-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(6,28,31,.62);display:grid;place-items:center;padding:20px}
+.confirmation-dialog{background:#fff;color:#17333d;width:min(100%,520px);max-height:calc(100vh - 40px);overflow:auto;padding:26px;border-radius:16px;box-shadow:0 20px 80px rgba(0,0,0,.2)}
+.confirmation-dialog p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.confirmation-dialog .actions{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
+.confirmation-dialog button:focus-visible{outline:3px solid #17ad96;outline-offset:2px}

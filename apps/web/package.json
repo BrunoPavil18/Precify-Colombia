@@ -1,1 +1,25 @@
-{"name":"@precify-colombia/web","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"vite --host 127.0.0.1","typecheck":"tsc -p tsconfig.json --noEmit","lint":"tsc -p tsconfig.json --noEmit","test":"node --test tests/*.test.mjs","build":"tsc -p tsconfig.json --noEmit && vite build"},"dependencies":{"@precify-colombia/core":"workspace:*","react":"19.3.1","react-dom":"19.3.1"},"devDependencies":{"@types/react":"19.3.0","@types/react-dom":"19.3.0","@vitejs/plugin-react":"6.1.2","typescript":"5.7.3","vite":"8.3.4"}}
+{
+  "name": "@precify-colombia/web",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "build": "tsc -p tsconfig.json --noEmit && vite build"
+  },
+  "dependencies": {
+    "@precify-colombia/core": "workspace:*",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "5.7.3",
+    "vite": "8.3.4"
+  }
+}

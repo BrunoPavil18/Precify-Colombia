@@ -67,9 +67,9 @@ test("input unit, currency and backup metadata remain Colombian and canonical",(
  assert.ok(app.includes('precify-colombia-backup.json'));
 });
 test("destructive dialogs are localized and static dictionaries need no network",()=>{
- assert.ok(app.includes('window.confirm(t("¿Borrar DEFINITIVAMENTE'));
- assert.ok(app.includes('window.confirm(t("¿Reemplazar TODOS'));
- assert.ok(app.includes('window.confirm(t("¿Eliminar «")'));
+ assert.ok(app.includes('askConfirmation(t("¿Borrar DEFINITIVAMENTE'));
+ assert.ok(app.includes('askConfirmation(t("¿Reemplazar TODOS'));
+ assert.ok(app.includes('askConfirmation(t("¿Eliminar «")'));
  for(const text of [app,i18n,read("../src/i18n/pt-BR.ts"),read("../src/i18n/en.ts")])
   for(const forbidden of ["fetch(","eval(","dangerouslySetInnerHTML","XMLHttpRequest"])
    assert.ok(!text.includes(forbidden),forbidden);

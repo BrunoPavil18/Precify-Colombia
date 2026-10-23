@@ -1,5 +1,8 @@
 # Precify Colombia 🇨🇴
 
+> **Branch de desenvolvimento v2.0.0:** este branch inclui simuladores avançados e correções ainda não homologadas. A versão pública estável continua sendo **v1.0.0**. Não publique v2 antes da compilação, validação real e aprovação do mantenedor. Consulte o [estado técnico](docs/V2_STATUS.md).
+
+
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
 **Versão 1.0.0 · Gratuito e open source · Apache License 2.0**
