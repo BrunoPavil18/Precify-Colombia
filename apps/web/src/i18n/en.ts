@@ -329,5 +329,10 @@ export const en: Record<string,string> = {
   "Margen sobre ingresos totales": "Margin on total collected revenue",
   "Contribución / producto neto más frete": "Contribution / net product sales plus shipping",
   "Markup comercial": "Commercial markup",
-  "(Producto neto - costo variable) / costo variable": "(Net product sales - variable costs) / variable costs"
+  "(Producto neto - costo variable) / costo variable": "(Net product sales - variable costs) / variable costs",
+  "Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?": "There are unsaved changes. Discard them to open another product?",
+  "Hay cambios sin guardar. ¿Descartarlos antes de duplicar?": "There are unsaved changes. Discard them before duplicating?",
+  "Hay cambios sin guardar. ¿Aplicar el perfil y descartarlos?": "There are unsaved changes. Discard them to apply this profile?",
+  "Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?": "There are unsaved changes. Discard them to switch scenario products?",
+  "Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?": "There are unsaved changes. Discard them to create a new product?"
 };
