@@ -344,5 +344,6 @@ export const en: Record<string,string> = {
   "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analyze COD, advertising, unit prices, and profitability across products.",
   "Confirmar operación": "Confirm action",
   "Cancelar": "Cancel",
-  "Confirmar": "Confirm"
+  "Confirmar": "Confirm",
+  "VERSIÓN 2.0.0": "VERSION 2.0.0"
 };
