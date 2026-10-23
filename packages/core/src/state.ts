@@ -67,7 +67,7 @@ export function validateWorkspace(value:unknown):Workspace {
   consumer:new Set(["productPrice","discount","additionalFees","shippingCharged","taxMode","taxPercent"]),
   portfolio:new Set(["monthlyFixed","quantities"])
  };
- const advancedSimulations=assertArray(v.advancedSimulations??[],"Simulaciones avanzadas",300).map(item=>{
+ const advancedSimulations:AdvancedSimulationRecord[]=assertArray(v.advancedSimulations??[],"Simulaciones avanzadas",300).map((item):AdvancedSimulationRecord=>{
   const row=obj(item,"Simulación avanzada");
   const kind=row.kind;
   if(kind!=="cod"&&kind!=="campaign"&&kind!=="pum"&&kind!=="consumer"&&kind!=="portfolio")
