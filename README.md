@@ -7,6 +7,11 @@
 
 **Versión 2.0.0 · Aplicación gratuita y de código abierto · Apache License 2.0**
 
+## Novedades de la versión 2.0.0
+
+Además de las funcionalidades de la v1, la v2 incorpora simuladores interactivos de **riesgo COD** (pedidos creados/enviados/entregados/pagados), **publicidad y CAC/ROAS**, **PUM** (kg, L, m y unidad), **vista previa del precio final al consumidor** (impuesto incluido/adicional/ninguno) y **cartera multiproducto** con costos fijos deducidos una sola vez. Las simulaciones se guardan por módulo y se respaldan mediante JSON v2, con importación compatible con backups v1. Incluye márgenes de distinta base, markup comercial, clasificación de contribución cero, porcentajes localizados, modales de confirmación accesibles y PWA con almacenamiento offline de recursos y actualizaciones consentidas. Las cifras tributarias/logísticas no son normas automáticas.
+
+
 Precify Colombia calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
 
 ## Privacidad: cada instalación comienza vacía
@@ -37,6 +42,7 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
+pnpm verify:core
 pnpm audit --audit-level moderate
 ```
 
@@ -80,7 +86,7 @@ console.log(result.contribution); // "49000.00" con los otros costos del ejemplo
 console.log(suggestPrice(input).price);
 ```
 
-**Nota técnica:** en 1.0.0 el paquete `@precify-colombia/core` es un **workspace de código fuente TypeScript**, no un paquete publicado en npm con distribución universal precompilada. Para otro repositorio, copie o incorpore el core bajo Apache 2.0, configure su compilador/bundler y resuelva sus exports `.ts`; no presuponga que `npm install @precify-colombia/core` funciona públicamente. Para una integración con WordPress/PHP sin iframe hace falta desarrollar un adaptador JS o API propio; **no existe un plugin WordPress ni una API HTTP oficial** en 1.0.0.
+**En v2.0.0**, el core genera ESM distribuible (`packages/core/dist/index.js`) y declaraciones de tipos (`dist/index.d.ts`) mediante `pnpm --filter @precify-colombia/core build`. Verifique los artefactos con `pnpm verify:core`. **No está publicado en npm**; puede empaquetarlo localmente y probarlo como dependencia, sin asumir instalación desde el registro público. Para WordPress/PHP se necesita un adaptador JavaScript o una API propia; no existe plugin oficial ni integración de pedidos.
 
 ### 3. Integración de datos
 
@@ -95,3 +101,9 @@ Use un adaptador específico que traduzca su modelo de producto a `PriceInput`, 
 - Resultados informativos, no asesoría financiera/tributaria. IVA y COD dependen de parámetros ingresados por el usuario.
 
 Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [seguridad](docs/SECURITY_AUDIT.md) y [licencia Apache 2.0](LICENSE). La licencia del código no concede derechos sobre marcas de terceros.
+
+## Documentación técnica v2 / Technical v2 documentation
+
+- [Integration API v2](docs/INTEGRATION_V2.md)
+- [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
+- [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
