@@ -1,6 +1,6 @@
 import {useMemo,useState} from "react";
 import {simulateCOD,simulateCampaign,pricePerMeasure,consumerPricePreview,simulatePortfolio,
- type Product,type Workspace,type CODSimulationInput,type CampaignInput,type PUMUnit} from "@precify-colombia/core";
+ type Product,type Workspace,type AdvancedSimulationRecord,type CODSimulationInput,type CampaignInput,type PUMUnit} from "@precify-colombia/core";
 import {useTranslator} from "./i18n";
 
 const controls=(type:"cod"|"campaign")=>type==="cod"
@@ -10,7 +10,10 @@ const initialCOD={createdOrders:"100",shippedPercent:"100",deliveredPercentOfShi
 const initialCampaign={impressions:"1000",conversionPercent:"2.00",advertisingSpend:"0",attributedRevenue:"0",refundPercent:"0"};
 type Pane="cod"|"campaign"|"pum"|"consumer"|"portfolio";
 const panes:Pane[]=["cod","campaign","pum","consumer","portfolio"];
-export function AdvancedLab({workspace}:{workspace:Workspace}){
+export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
+ workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>void;
+ onDelete:(id:string)=>void;onDirty:(dirty:boolean)=>void
+}){
  const t=useTranslator();
  const [pane,setPane]=useState<Pane>("cod");
  const [selected,setSelected]=useState("");
@@ -31,17 +34,44 @@ export function AdvancedLab({workspace}:{workspace:Workspace}){
    return {data:simulatePortfolio(workspace.products.map(p=>({product:p.input,monthlyUnits:quantities[p.id]??"0"})),fixed)};
   }catch(e){return {error:e instanceof Error?e.message:String(e)};}
  },[pane,product,cod,campaign,measure,preview,workspace.products,quantities,fixed]);
+ function snapshot(){
+  const inputs:Record<string,string>=pane==="cod"?{...cod}:pane==="campaign"?{...campaign}
+   :pane==="pum"?{...measure}
+   :pane==="consumer"?{...preview}
+   :{monthlyFixed:fixed,quantities:JSON.stringify(quantities)};
+  const record:AdvancedSimulationRecord={
+   id:globalThis.crypto?.randomUUID?.().replace(/-/g,"").slice(0,22)??("a"+Date.now().toString(36)),
+   kind:pane,productId:(pane==="cod"||pane==="campaign")?product?.id??null:null,
+   at:new Date().toISOString(),label:pane+" · "+new Date().toLocaleDateString(),inputs
+  };
+  onSave(record);onDirty(false);
+ }
+ function load(record:AdvancedSimulationRecord){
+  setPane(record.kind);
+  if(record.productId)setSelected(record.productId);
+  const v=record.inputs;
+  if(record.kind==="cod")setCOD({...initialCOD,...v});
+  if(record.kind==="campaign")setCampaign({...initialCampaign,...v});
+  if(record.kind==="pum")setMeasure({price:v.price??"0",quantity:v.quantity??"1",unit:(v.unit??"unit") as PUMUnit});
+  if(record.kind==="consumer")setPreview({productPrice:v.productPrice??"0",discount:v.discount??"0",additionalFees:v.additionalFees??"0",shippingCharged:v.shippingCharged??"0",taxPercent:v.taxPercent??"0",taxMode:(v.taxMode??"none") as typeof preview.taxMode});
+  if(record.kind==="portfolio"){
+   setFixed(v.monthlyFixed??"0");
+   try{const q=JSON.parse(v.quantities??"{}") as Record<string,string>;setQuantities(q);}
+   catch{setQuantities({});}
+  }
+  onDirty(false);
+ }
  function field(label:string,value:string,onChange:(value:string)=>void){
-  return <label className="field" key={label}><span>{t(label)}</span><input type="text" inputMode="decimal" value={value} onChange={e=>onChange(e.target.value)}/></label>;
+  return <label className="field" key={label}><span>{t(label)}</span><input type="text" inputMode="decimal" value={value} onChange={e=>{onChange(e.target.value);onDirty(true);}}/></label>;
  }
  return <section className="main-card advanced-lab">
   <span className="eyebrow">{t("SIMULADORES FINANCIEROS AVANZADOS")}</span>
   <h2>{t("Decisiones con supuestos explícitos")}</h2>
   <p className="muted">{t("Todos los valores son simulaciones ingresadas por el usuario, no tarifas oficiales. Los borradores de esta sección no modifican productos guardados.")}</p>
   <div className="advanced-tabs" role="group" aria-label={t("Tipo de simulación")}>
-   {panes.map(p=><button key={p} className={p===pane?"primary":"secondary"} aria-pressed={p===pane} onClick={()=>setPane(p)}>{t(({cod:"Riesgo COD",campaign:"Publicidad y CAC",pum:"Precio por unidad",consumer:"Precio al consumidor",portfolio:"Cartera multiproducto"} as Record<Pane,string>)[p])}</button>)}
+   {panes.map(p=><button key={p} className={p===pane?"primary":"secondary"} aria-pressed={p===pane} onClick={()=>{setPane(p);onDirty(true);}}>{t(({cod:"Riesgo COD",campaign:"Publicidad y CAC",pum:"Precio por unidad",consumer:"Precio al consumidor",portfolio:"Cartera multiproducto"} as Record<Pane,string>)[p])}</button>)}
   </div>
-  {(pane==="cod"||pane==="campaign")&&<label className="field"><span>{t("Producto que deseas analizar")}</span><select value={product?.id??""} onChange={e=>setSelected(e.target.value)}>
+  {(pane==="cod"||pane==="campaign")&&<label className="field"><span>{t("Producto que deseas analizar")}</span><select value={product?.id??""} onChange={e=>{setSelected(e.target.value);onDirty(true);}}>
    {workspace.products.length===0?<option value="">{t("Primero guarda un producto")}</option>:workspace.products.map(p=><option key={p.id} value={p.id}>{p.input.name}</option>)}
   </select></label>}
   <div className="advanced-grid">
@@ -49,11 +79,11 @@ export function AdvancedLab({workspace}:{workspace:Workspace}){
    {pane==="campaign"&&controls("campaign").map(x=>field(x.label,campaign[x.k as keyof typeof campaign],v=>setCampaign(a=>({...a,[x.k]:v}))))}
    {pane==="pum"&&<>{field("Precio total (COP)",measure.price,v=>setMeasure(a=>({...a,price:v})))}
     {field("Cantidad de contenido",measure.quantity,v=>setMeasure(a=>({...a,quantity:v})))}
-    <label className="field"><span>{t("Unidad de medida")}</span><select value={measure.unit} onChange={e=>setMeasure(a=>({...a,unit:e.target.value as PUMUnit}))}>
+    <label className="field"><span>{t("Unidad de medida")}</span><select value={measure.unit} onChange={e=>{setMeasure(a=>({...a,unit:e.target.value as PUMUnit}));onDirty(true);}}>
     {(["g","kg","ml","l","unit"] as const).map(u=><option key={u} value={u}>{u}</option>)}</select></label></>}
    {pane==="consumer"&&<>
     {(["productPrice","discount","additionalFees","shippingCharged","taxPercent"] as const).map((key,i)=>field(t(["Precio base (COP)","Descuento (COP)","Cargos adicionales (COP)","Frete (COP)","IVA configurado (%)"][i]!),preview[key],v=>setPreview(a=>({...a,[key]:v}))))}
-    <label className="field"><span>{t("Tratamiento tributario ilustrativo")}</span><select value={preview.taxMode} onChange={e=>setPreview(a=>({...a,taxMode:e.target.value as typeof preview.taxMode}))}>
+    <label className="field"><span>{t("Tratamiento tributario ilustrativo")}</span><select value={preview.taxMode} onChange={e=>{setPreview(a=>({...a,taxMode:e.target.value as typeof preview.taxMode}));onDirty(true);}}>
      <option value="included">{t("Impuesto incluido")}</option><option value="additional">{t("Impuesto adicional")}</option><option value="none">{t("Sin impuesto")}</option>
     </select></label></>}
    {pane==="portfolio"&&<>{field("Gastos fijos únicos del negocio (COP)",fixed,setFixed)}
@@ -64,6 +94,11 @@ export function AdvancedLab({workspace}:{workspace:Workspace}){
     {"error" in outcome?<p role="alert">{t(outcome.error??"")}</p>:
     <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>typeof v==="string"||typeof v==="number").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{String(value)}</dd></div>)}</dl>}
   </div>
+  <div className="advanced-actions"><button className="primary" onClick={snapshot} disabled={!!("error" in outcome)}>{t("Guardar simulación")}</button></div>
+  {workspace.advancedSimulations.length>0&&<section className="advanced-saved"><h3>{t("Simulaciones guardadas")}</h3>
+   {workspace.advancedSimulations.slice().reverse().map(row=><div key={row.id} className="list-row"><button className="secondary" onClick={()=>load(row)}>{row.label}</button>
+    <button className="danger" onClick={()=>onDelete(row.id)}>{t("Eliminar")}</button></div>)}
+  </section>}
   <p className="muted">{t("Estas estimaciones no certifican cumplimiento tributario ni legal. Confirma tarifas, tratamiento de IVA y obligaciones de información con asesores locales.")}</p>
  </section>;
 }
