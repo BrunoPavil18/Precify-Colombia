@@ -21,7 +21,7 @@ test("Goals selects a persisted product independently of the calculator and scen
  for(const token of [
   'const goalProduct=workspace.products.find(p=>p.id===goalProductId)',
   '??workspace.products.find(p=>p.id===activeId)??workspace.products[0]',
-  'function selectGoalProduct(id:string)',
+  'async function selectGoalProduct(id:string)',
   'value={goalProduct.id} onChange={e=>selectGoalProduct(e.target.value)}',
   'const goalInput=useMemo(()=>goalProduct?{',
   'monthlyFixed:goalFixedOverride??goalProduct.input.monthlyFixed',
@@ -31,7 +31,7 @@ test("Goals selects a persisted product independently of the calculator and scen
 });
 test("Goals discards unsaved simulations and saves only monthly product fields",()=>{
  for(const token of [
-  'if(goalDirty&&!window.confirm(t("Hay cambios sin guardar en Metas.',
+  'if(goalDirty&&!(await askConfirmation(t("Hay cambios sin guardar en Metas.',
   'function saveGoalChanges(){',
   'if(goalMoneyUnvalidated)',
   'monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits',
