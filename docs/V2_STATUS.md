@@ -122,3 +122,15 @@ pnpm.cmd audit --audit-level moderate
 ```
 
 Después verificar Cancelar y Confirmar en eliminación, importación, reset, cambio de producto/escenario, modal por teclado y conflictos entre dos pestañas. Nada de merge/release/Actions sin autorización.
+
+## Verificación posterior a la corrección de diálogos — 23/10/2026
+
+El mantenedor ejecutó el código actualizado en Windows:
+- `pnpm.cmd typecheck`: **aprobado** en core y web.
+- `pnpm.cmd lint`: **aprobado**, análisis AST de 15 archivos más TypeScript.
+- `pnpm.cmd test`: **53/53 aprobados** (34 core y 19 web), 0 fallos.
+- `pnpm.cmd build`: **aprobado** con Vite 8.3.4, 29 módulos, JS 356,83 kB / 106,15 kB gzip.
+
+Estas pruebas confirman que la corrección de los 17 errores de paréntesis y la actualización de los contratos de prueba pasan en el entorno del mantenedor. `verify:core` y `audit` aprobaron en la ronda inmediatamente anterior, antes de estos cambios limitados a interfaz/pruebas.
+
+**Sin embargo**, la sustitución por diálogos propios y su comportamiento real de cancelación, foco y accesibilidad todavía merecen una comprobación visual tras la última modificación; los tests web son mayoritariamente contratos estáticos de fuente. La exclusión mutua fuerte entre pestañas sigue sin transacciones atómicas. El proyecto continúa como candidato **sin autorización de merge ni de release**.
