@@ -95,8 +95,8 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
     <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>typeof v==="string"||typeof v==="number").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{String(value)}</dd></div>)}</dl>}
   </div>
   <div className="advanced-actions"><button className="primary" onClick={snapshot} disabled={!!("error" in outcome)}>{t("Guardar simulación")}</button></div>
-  {workspace.advancedSimulations.length>0&&<section className="advanced-saved"><h3>{t("Simulaciones guardadas")}</h3>
-   {workspace.advancedSimulations.slice().reverse().map(row=><div key={row.id} className="list-row"><button className="secondary" onClick={()=>load(row)}>{row.label}</button>
+  {workspace.advancedSimulations.some(record=>record.kind===pane)&&<section className="advanced-saved"><h3>{t("Simulaciones guardadas")}</h3>
+   {workspace.advancedSimulations.filter(row=>row.kind===pane).slice().reverse().map(row=><div key={row.id} className="list-row"><button className="secondary" onClick={()=>load(row)}>{row.label}</button>
     <button className="danger" onClick={()=>onDelete(row.id)}>{t("Eliminar")}</button></div>)}
   </section>}
   <p className="muted">{t("Estas estimaciones no certifican cumplimiento tributario ni legal. Confirma tarifas, tratamiento de IVA y obligaciones de información con asesores locales.")}</p>
