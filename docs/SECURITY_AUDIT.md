@@ -118,3 +118,15 @@ El usuario entregó capturas y logs posteriores al selector de Metas:
 **Homologado manualmente:** selección del producto en Metas, cálculos mostrados y funcionamiento básico del guardado independiente. Confirmación al cambiar de producto con ediciones pendientes, entradas inválidas y accesibilidad móvil aún no fueron mostradas en esta ronda.
 
 **Siguientes pasos pendientes:** informes/ranking/CSV, perfiles de costos, backup JSON, rechazo de archivo inválido, cancelación de restauración y restauración total verificada. No se ejecutaron workflows de GitHub Actions. La última auditoría de dependencias comunicada corresponde a la ronda anterior; no se repitió `pnpm audit` en los últimos logs.
+
+## 10. Homologación de respaldo restaurado — evidencia y comparación de archivos
+
+El propietario informó que exportó respaldos con la interfaz en portugués e inglés, borró los datos locales y consiguió **restaurar satisfactoriamente el conjunto de datos**. Se compararon mediante Python los dos archivos JSON aportados:
+- Formato `precify-colombia-backup`, versión 1, moneda COP y metadata `locale: es-CO` en ambos.
+- En ambos: **2 productos, 3 escenarios, 0 perfiles y 7 eventos de historial**.
+- El objeto `workspace` es **idéntico** en ambos archivos: se mantienen precios, ID, costos, configuraciones mensuales, escenarios y eventos.
+- La única diferencia de contenido es `exportedAt`: `2026-10-23T01:55:06.261Z` frente a `2026-10-23T01:55:23.510Z`; ello es esperado en exportaciones distintas.
+
+Esta comparación acredita consistencia entre los dos respaldos suministrados, **no** una comprobación técnica directa del navegador después de restaurar. La restauración efectiva es un resultado de homologación **declarado por el usuario** y coherente con el contenido respaldado.
+
+**Pendientes:** prueba de JSON inválido, cancelación de restauración y otras operaciones destructivas, perfiles de costos, exportación CSV en editor de texto (la generación del reporte se informó, pero no hay verificación detallada de las columnas), accesibilidad y móvil. La PR continúa en Draft; sin merge a main ni GitHub Actions voluntarios.
