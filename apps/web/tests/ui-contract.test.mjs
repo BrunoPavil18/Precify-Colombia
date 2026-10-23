@@ -51,3 +51,11 @@ test("advanced saved simulations are scoped to the active section",()=>{
  assert.ok(lab.includes('workspace.advancedSimulations.filter(row=>row.kind===pane).slice().reverse().map(row=>'));
  assert.ok(lab.includes('onDelete(row.id)'));
 });
+
+test("advanced financial outputs carry clear COP, percentage and ROAS units",()=>{
+ const lab=readFileSync(new URL("../src/AdvancedLab.tsx",import.meta.url),"utf8");
+ for(const key of ['expectedProfit','pricePerUnit','totalContribution','monthlyProfit','netMargin','breakEvenRoas'])
+  assert.ok(lab.includes('"'+key+'"'),key);
+ assert.ok(lab.includes('displayAdvancedResult(key,value as string|number)'));
+ assert.ok(lab.includes('COP '));
+});
