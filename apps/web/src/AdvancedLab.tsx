@@ -36,7 +36,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
  const [selected,setSelected]=useState("");
  const [cod,setCOD]=useState(initialCOD);
  const [campaign,setCampaign]=useState(initialCampaign);
- const [measure,setMeasure]=useState({price:"10000.00",quantity:"500.00",unit:"g" as PUMUnit});
+ const [measure,setMeasure]=useState({price:"10000.00",quantity:"500.00",unit:"g" as PUMUnit,referenceUnit:"g" as PUMUnit});
  const [preview,setPreview]=useState({productPrice:"99000.00",discount:"0",additionalFees:"0",shippingCharged:"0",taxMode:"included" as "included"|"additional"|"none",taxPercent:"0"});
  const [fixed,setFixed]=useState("0");
  const [quantities,setQuantities]=useState<Record<string,string>>({});
@@ -45,7 +45,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   try{
    if(pane==="cod"){if(!product)return {error:"Primero guarda un producto"};return {data:simulateCOD({...cod,product:product.input} as CODSimulationInput)};}
    if(pane==="campaign"){if(!product)return {error:"Primero guarda un producto"};return {data:simulateCampaign({...campaign,product:product.input} as CampaignInput)};}
-   if(pane==="pum")return {data:pricePerMeasure(measure.price,measure.quantity,measure.unit)};
+   if(pane==="pum")return {data:pricePerMeasure(measure.price,measure.quantity,measure.unit,measure.referenceUnit)};
    if(pane==="consumer")return {data:consumerPricePreview(preview)};
    if(workspace.products.length===0)return {error:"Primero guarda un producto"};
    return {data:simulatePortfolio(workspace.products.map(p=>({product:p.input,monthlyUnits:quantities[p.id]??"0"})),fixed)};
@@ -69,7 +69,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   const v=record.inputs;
   if(record.kind==="cod")setCOD({...initialCOD,...v});
   if(record.kind==="campaign")setCampaign({...initialCampaign,...v});
-  if(record.kind==="pum")setMeasure({price:v.price??"0",quantity:v.quantity??"1",unit:(v.unit??"unit") as PUMUnit});
+  if(record.kind==="pum")setMeasure({price:v.price??"0",quantity:v.quantity??"1",unit:(v.unit??"unit") as PUMUnit,referenceUnit:(v.referenceUnit??v.unit??"unit") as PUMUnit});
   if(record.kind==="consumer")setPreview({productPrice:v.productPrice??"0",discount:v.discount??"0",additionalFees:v.additionalFees??"0",shippingCharged:v.shippingCharged??"0",taxPercent:v.taxPercent??"0",taxMode:(v.taxMode??"none") as typeof preview.taxMode});
   if(record.kind==="portfolio"){
    setFixed(v.monthlyFixed??"0");
@@ -96,8 +96,10 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
    {pane==="campaign"&&controls("campaign").map(x=>field(x.label,campaign[x.k as keyof typeof campaign],v=>setCampaign(a=>({...a,[x.k]:v}))))}
    {pane==="pum"&&<>{field("Precio total (COP)",measure.price,v=>setMeasure(a=>({...a,price:v})))}
     {field("Cantidad de contenido",measure.quantity,v=>setMeasure(a=>({...a,quantity:v})))}
-    <label className="field"><span>{t("Unidad de medida")}</span><select value={measure.unit} onChange={e=>{setMeasure(a=>({...a,unit:e.target.value as PUMUnit}));onDirty(true);}}>
-    {(["g","kg","ml","l","cm","m","unit"] as const).map(u=><option key={u} value={u}>{u}</option>)}</select></label></>}
+    <label className="field"><span>{t("Unidad de medida")}</span><select value={measure.unit} onChange={e=>{setMeasure(a=>({...a,unit:e.target.value as PUMUnit,referenceUnit:e.target.value as PUMUnit}));onDirty(true);}}>
+    {(["g","kg","ml","l","cm","m","unit"] as const).map(u=><option key={u} value={u}>{u}</option>)}</select></label>
+    <label className="field"><span>{t("Unidad de comparación del PUM")}</span><select value={measure.referenceUnit} onChange={e=>{setMeasure(a=>({...a,referenceUnit:e.target.value as PUMUnit}));onDirty(true);}}>
+    {({g:["g","kg"],kg:["g","kg"],ml:["ml","l"],l:["ml","l"],cm:["cm","m"],m:["cm","m"],unit:["unit"]} as Record<PUMUnit,PUMUnit[]>)[measure.unit].map(u=><option key={u} value={u}>{u}</option>)}</select></label></>}
    {pane==="consumer"&&<>
     {(["productPrice","discount","additionalFees","shippingCharged","taxPercent"] as const).map((key,i)=>field(t(["Precio base (COP)","Descuento (COP)","Cargos adicionales (COP)","Frete (COP)","IVA configurado (%)"][i]!),preview[key],v=>setPreview(a=>({...a,[key]:v}))))}
     <label className="field"><span>{t("Tratamiento tributario ilustrativo")}</span><select value={preview.taxMode} onChange={e=>{setPreview(a=>({...a,taxMode:e.target.value as typeof preview.taxMode}));onDirty(true);}}>
@@ -113,7 +115,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   </div>
   {pane==="campaign"&&"data" in outcome&&outcome.data&&"reconciliationNotice" in outcome.data&&
    <p className="muted" role="note">{t(String(outcome.data.reconciliationNotice))}</p>}
-  {pane==="pum"&&<p className="muted">{t("PUM: cálculo matemático redondeado y presentación truncada a dos decimales; la obligatoriedad depende de la categoría y de la norma SIC aplicable.")}</p>}
+  {pane==="pum"&&<p className="muted">{t("La unidad de contenido es distinta de la unidad de comparación: selecciona si deseas precio por g o kg, ml o l, cm o m. Compara productos similares usando la misma unidad. La aplicación de la norma SIC es contextual.")}</p>}
   {pane==="portfolio"&&<p className="muted">{t("Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.")}</p>}
   <div className="advanced-actions"><button className="primary" onClick={snapshot} disabled={!!("error" in outcome)}>{t("Guardar simulación")}</button></div>
   {workspace.advancedSimulations.some(record=>record.kind===pane)&&<section className="advanced-saved"><h3>{t("Simulaciones guardadas")}</h3>
