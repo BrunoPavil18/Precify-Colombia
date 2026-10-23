@@ -275,7 +275,7 @@ export default function App(){
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
    const next=validateWorkspace({...change(workspace),updatedAt:new Date().toISOString()});
-   persistWorkspace(next,wasStored.current?workspace.updatedAt:undefined);wasStored.current=true;setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
+   persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
   }catch(e){setNotice("No se pudieron guardar los cambios: "+(e instanceof Error?e.message:String(e)));return false;}
  }
  const result=useMemo(()=>{
@@ -348,7 +348,7 @@ export default function App(){
   try{
    const valid=decodeBackup(await file.text());
    if(!(await askConfirmation(t("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales.")))return;
-   persistWorkspace(valid,wasStored.current?workspace.updatedAt:undefined);wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+   persistWorkspace(valid,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
    setNotice("Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.");setPage("productos");
   }catch(e){setNotice("Respaldo rechazado, sin modificaciones: "+String(e instanceof Error?e.message:e));}
   finally{if(uploadRef.current)uploadRef.current.value="";}
