@@ -221,6 +221,7 @@ export default function App(){
   setPage(target);
  }
  function switchScenarioProduct(id:string){
+  if(!scenarioId&&hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?")))return;
   if(scenarioId&&hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar en este escenario. ¿Descartarlos?")))return;
   setScenarioProductId(id);setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
   const selected=workspace.products.find(p=>p.id===id);
@@ -254,8 +255,8 @@ export default function App(){
   });
   if(ok){setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
  }
- function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
- function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
+ function openProduct(p:Product){if(hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?")))return;setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ function duplicateProduct(p:Product){if(hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar. ¿Descartarlos antes de duplicar?")))return;setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  function deleteProduct(p:Product){
   if(!window.confirm(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos.")))return;
   const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id),advancedSimulations:w.advancedSimulations.filter(x=>x.productId!==p.id)}));
@@ -295,7 +296,7 @@ export default function App(){
  }
  function restoreProfile(id:string){
   const profile=workspace.profiles.find(p=>p.id===id);
-  if(profile){setDraft(old=>({...profile.values,name:old.name,category:old.category,currentPrice:old.currentPrice}));setPage("calculadora");setNotice("Parámetros del perfil aplicados; guarda el producto para conservarlos.");}
+  if(profile){if(hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar. ¿Aplicar el perfil y descartarlos?")))return;setDraft(old=>({...profile.values,name:old.name,category:old.category,currentPrice:old.currentPrice}));setPage("calculadora");setNotice("Parámetros del perfil aplicados; guarda el producto para conservarlos.");}
  }
  async function importBackup(file:File|undefined){
   if(!file)return;
