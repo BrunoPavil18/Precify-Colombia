@@ -118,3 +118,20 @@ test("persisted scenarios survive backup and do not change original product",()=
  assert.equal(restored.scenarios[2].values.acquisition,"40000.00");
  assert.equal(restored.scenarios[0].productId,"original");
 });
+
+
+test("CSV translations preserve canonical COP amounts, safety, and backup compatibility",()=>{
+ const now=new Date().toISOString(),workspace=emptyWorkspace();
+ workspace.products.push({id:"p-test",createdAt:now,updatedAt:now,
+  input:{...EMPTY_INPUT,name:"=ALERT(1)",currentPrice:"89900.50",origin:"manual"}});
+ const headers=["ID","Produto","Categoria","Origem","Preço atual (COP)","Contribuição (COP)","Margem (%)","Data"];
+ const csv=exportProductsCsv(workspace,{headers,origin:{manual:"Entrada manual"}});
+ assert.ok(csv.includes('"Produto"'));
+ assert.ok(csv.includes('"Preço atual (COP)"'));
+ assert.ok(csv.includes('"Entrada manual"'));
+ assert.ok(csv.includes('"89900.50"'));
+ assert.ok(csv.includes('"\'=ALERT(1)"'));
+ assert.throws(()=>exportProductsCsv(workspace,{headers:["ID"]}),FinancialInputError);
+ const restored=decodeBackup(encodeBackup(workspace));
+ assert.equal(restored.products[0].input.currentPrice,"89900.50");
+});
