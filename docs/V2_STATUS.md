@@ -134,3 +134,11 @@ El mantenedor ejecutó el código actualizado en Windows:
 Estas pruebas confirman que la corrección de los 17 errores de paréntesis y la actualización de los contratos de prueba pasan en el entorno del mantenedor. `verify:core` y `audit` aprobaron en la ronda inmediatamente anterior, antes de estos cambios limitados a interfaz/pruebas.
 
 **Sin embargo**, la sustitución por diálogos propios y su comportamiento real de cancelación, foco y accesibilidad todavía merecen una comprobación visual tras la última modificación; los tests web son mayoritariamente contratos estáticos de fuente. La exclusión mutua fuerte entre pestañas sigue sin transacciones atómicas. El proyecto continúa como candidato **sin autorización de merge ni de release**.
+
+## Validación manual de diálogos — 23/10/2026
+
+El mantenedor informó **23/24 verificaciones aprobadas** en el checklist de aceptación: eliminación y recuperación de simulaciones, protección de borradores de calculadora y metas, cancelación de importación y eliminación general, navegación accesible con Tab/Escape/Enter, filtrado de simulaciones por módulo, formato COP/ROAS, localización ES/PT/EN y modal en móvil. **Pendiente:** probar cambiar a otro escenario con un costo editado sin guardar y cancelar el descarte. No se atribuye aprobación a esta comprobación no realizada.
+
+La captura de la vista de datos en móvil detectó el encabezado desactualizado «VERSIÓN 1.0.0»; se actualizó a «VERSIÓN 2.0.0» en App.tsx y se añadieron traducciones ES/PT/EN de la nueva etiqueta. Estos últimos commits **no tienen todavía ejecución de typecheck/lint/test/build posterior**.
+
+No se autorizó merge, publicación ni uso de GitHub Actions.
