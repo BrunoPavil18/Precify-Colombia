@@ -1,4 +1,4 @@
-/** Static pt-BR translations for user-facing application copy. */
+/** Static pt-BR UI translation table. */
 export const ptBR: Record<string,string> = {
   "Calculadora": "Calculadora",
   "Precio recomendado": "Preço recomendado",
@@ -231,5 +231,16 @@ export const ptBR: Record<string,string> = {
   "Margen: ": "Margem: ",
   " · Precio objetivo: ": " · Preço-alvo: ",
   "Margen ": "Margem ",
-  "Precio meta: ": "Preço-alvo: "
+  "Precio meta: ": "Preço-alvo: ",
+  "ID": "ID",
+  "Origen": "Origem",
+  "Precio actual (COP)": "Preço atual (COP)",
+  "Contribución (COP)": "Contribuição (COP)",
+  "Margen contribución (%)": "Margem de contribuição (%)",
+  "Fecha actualización": "Data da atualização",
+  "Producto ejemplo": "Produto de exemplo",
+  " (copia)": " (cópia)",
+  "manual": "manual",
+  "estimado": "estimado",
+  "confirmado": "confirmado"
 };
