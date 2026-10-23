@@ -1,5 +1,8 @@
 # Precify Colombia 🇨🇴
 
+> **v2.0.1 release candidate (not published):** fixes campaign/ROAS reconciliation, COD stage costs, conditionally truncated PUM presentation, and exact constant-mix break-even. Public v2.0.0 contracts and browser data are preserved. See [financial formulas](docs/FINANCIAL_FORMULAS.md) and [Colombian legal references](docs/COLOMBIA_LEGAL_V2_0_1.md). The current official GitHub release remains v2.0.0.
+
+
 > **Precify Colombia 2.0.0:** merged into `main` and functionally validated by the maintainer (53 automated tests passed). The v2.0.0 GitHub tag/release is published separately. See [status and limitations](docs/V2_STATUS.md).
 
 
