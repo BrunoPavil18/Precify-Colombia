@@ -111,3 +111,26 @@ El usuario solicitó escoger el producto directamente en Metas. Se agregó un se
 10. Probar en móvil: selector, botones y tarjetas deben ajustarse sin solaparse.
 
 **Antes de probar:** actualizar la branch, respaldar datos y repetir `pnpm.cmd typecheck`, `pnpm.cmd test`, `pnpm.cmd build`. Las tres pruebas nuevas escritas aún no están ejecutadas; total de pruebas definidas en el PR: **38**. Ningún GitHub Actions fue iniciado.
+
+## 8. Últimos resultados y pasos seguros de informes/respaldo
+
+**Nueva evidencia de la homologación:** typecheck, **38/38 tests** y build aprobados. Metas muestra valores correctos y mantiene la selección entre productos:
+- Producto ejemplo, fijos 320.000 COP y 10 unidades: contribución 49.000, equilibrio 7, utilidad 170.000 y margen 17,17%.
+- Producto ejemplo (copia), fijos 50.000 COP y 10 unidades: contribución 49.000, equilibrio 2, utilidad 440.000 y margen 44,44%.
+- Confirmado por el usuario que guardar la proyección mantiene inalterados los escenarios y otros importes del producto.
+
+**Informes (sin cambios destructivos):**
+1. Abrir Informes con al menos dos productos guardados. Verificar que las columnas muestran nombre, precio, contribución, margen y sensibilidad. Contribuciones iguales pueden empatar sin un orden relevante.
+2. Exportar CSV en PT. Abrir una copia en editor de texto: debe tener cabeceras portuguesas, nombres de producto conservados y valores canónicos COP (p. ej. `99000.00` y `49000.00`). No inferir cambio de moneda por el separador.
+3. Cambiar a EN, exportar CSV y comprobar cabeceras inglesas, datos numéricos iguales.
+4. Comprobar que el historial muestra las modificaciones guardadas, sin exigir una entrada por cada alteración de rascunho.
+
+**Respaldo / restauración con prioridad de seguridad:**
+1. Ir a Datos y descargar `precify-colombia-backup.json`. Guardar una segunda copia **fuera del navegador**.
+2. Abrir una copia en editor de texto (no modificar original). Verificar metadatos `format=precify-colombia-backup`, `backupVersion=1`, `currency=COP`, `locale=es-CO` y `workspace` con `products`, `scenarios`, `profiles`, `history`. `es-CO` es metadato canónico del formato, no el idioma activo de UI.
+3. Generar `respaldo-invalido.json` con el texto `{"prueba":true}` e intentar Restaurar copia. Debe rechazarse y dejar todos los datos intactos.
+4. Crear un producto temporal de prueba, sin alterar los originales. Intentar restaurar el backup válido y **Cancelar** la confirmación: debe seguir el producto temporal.
+5. Repetir la importación del backup válido y **Confirmar** únicamente después de comprobar que el archivo descargado contiene los productos y escenarios correctos. El producto temporal debe desaparecer; los datos guardados en ese backup deben reaparecer tras F5.
+6. No presionar `Borrar todos los datos` durante esta etapa. Si se prueba en otra fase, hacerlo solo después de verificar la restauración.
+
+**Estado:** Informes/CSV y JSON aún no ejecutados visualmente. No anunciar homologación de restauración sin evidencia.
