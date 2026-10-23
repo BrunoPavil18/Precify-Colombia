@@ -183,6 +183,7 @@ export default function App(){
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  function createScenarios(){
+  if(scenarioId&&hasUnsavedDraft&&!window.confirm("¿Descartar los cambios no guardados antes de crear escenarios?"))return;
   const product=scenarioProduct;
   if(!product){setNotice("Guarda primero un producto para crear escenarios.");return;}
   const existing=workspace.scenarios.filter(s=>s.productId===product.id);
@@ -295,6 +296,14 @@ export default function App(){
           <button className="primary" onClick={saveScenario}>Guardar escenario</button>
           <button className="danger-link" onClick={()=>{if(window.confirm("¿Eliminar este escenario?")&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>Eliminar</button>
          </div></div>
+        <div className="scenario-preview" aria-live="polite">
+         <span className="eyebrow">VISTA PREVIA DE ESTE ESCENARIO · AÚN SIN GUARDAR</span>
+         {result.error?<p role="alert">{result.error}</p>:result.breakdown&&result.suggestion&&<div className="scenario-preview-stats">
+          <div><small>Contribución por venta</small><strong>{fmt(result.breakdown.contribution)}</strong></div>
+          <div><small>Margen de contribución</small><strong>{result.breakdown.marginPercent??"N/D"}%</strong></div>
+          <div><small>Precio recomendado</small><strong>{fmt(result.suggestion.price)}</strong></div>
+         </div>}
+        </div>
         <ProductEditor key={scenarioId+"-"+editorRevision} value={draft} onChange={setDraft} onDirty={markDirty}/>
        </div>:<p className="muted">Selecciona una tarjeta para editarla, guardar y comparar resultados sin cambiar el producto original.</p>}
       </>}
