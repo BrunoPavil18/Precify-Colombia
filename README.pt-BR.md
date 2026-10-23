@@ -5,7 +5,12 @@
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versão 1.0.0 · Gratuito e open source · Apache License 2.0**
+**Versão 2.0.0 · Gratuito e open source · Apache License 2.0**
+
+## Novidades da versão 2.0.0
+
+A v2 mantém as funcionalidades da v1 e adiciona simulações de **risco COD** (pedidos criados, enviados, entregues e pagos), **publicidade/CAC/ROAS**, **preço por unidade de medida** (kg, L, m e unidade), **prévia de preço ao consumidor** (tributos incluídos ou adicionais) e **carteira de produtos** com despesas fixas descontadas uma única vez. As simulações são armazenadas por seção e incluídas no backup JSON v2; arquivos v1 continuam importáveis. Novas métricas distinguem bases de margem e markups; contribuição igual a zero não é classificada como sustentável. A interface ganha percentuais localizados, modais de confirmação próprios, PWA com recursos offline e atualização mediante escolha do usuário. Impostos e taxas permanecem configuráveis e ilustrativos.
+
 
 Aplicação independente de precificação em **pesos colombianos (COP)**, com custos, frete, publicidade, taxas, reservas de pagamento contra entrega (COD), margens, descontos, preço recomendado, metas, ponto de equilíbrio, catálogo, cenários, relatórios e backups. Interface disponível em espanhol colombiano, português brasileiro e inglês.
 
@@ -37,10 +42,11 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
+pnpm verify:core
 pnpm audit --audit-level moderate
 ```
 
-O `lint` atualmente executa `tsc`, não um linter separado. O build de produção é gerado em **`apps/web/dist/`**; publique essa pasta em um host HTTPS para sites estáticos, com MIME e cabeçalhos de segurança apropriados. Não use o servidor `pnpm dev` como hospedagem de produção. Não é necessário backend, login ou serviço pago.
+O comando `pnpm lint` executa um verificador AST independente baseado em TypeScript, além do typecheck; não é ESLint/Biome.
 
 ## Uso e configuração
 
@@ -80,10 +86,16 @@ console.log(resultado.contribution); // "49000.00" com os demais custos de exemp
 console.log(suggestPrice(produto).price);
 ```
 
-Dentro deste monorepo pnpm, use `"@precify-colombia/core": "workspace:*"`. Na versão 1.0.0, **o pacote ainda não foi publicado no npm**, e seu `exports` aponta para fontes `.ts`. Em repositórios externos, incorpore o código-fonte sob Apache 2.0 e configure compilação/bundler; não presuma instalação pública por npm. Para WordPress/PHP nativo, é preciso criar um adaptador JavaScript ou serviço próprio: **não há plugin WordPress ou API HTTP oficial**.
+Dentro deste monorepo pnpm, use `"@precify-colombia/core": "workspace:*"`. Na v2.0.0, o core compila ESM em `packages/core/dist/index.js` e tipos em `dist/index.d.ts`. Execute `pnpm --filter @precify-colombia/core build` e `pnpm verify:core`. **O pacote não está publicado no npm**; a integração externa exige empacotamento/teste local ou incorporação da fonte sob Apache 2.0. Não existe plugin WordPress ou API HTTP oficial.
 
 Para importar dados de loja, converta o modelo da plataforma para o tipo `PriceInput`, valide com `validateInput` e execute `analyze`. Nunca exponha credenciais ao cliente nem altere preços de lojas sem autorização.
 
 Leia [contrato de integração](docs/INTEGRATION_CONTRACT.md), [fórmulas](docs/FINANCIAL_FORMULAS.md), [arquitetura](docs/ARCHITECTURE.md), [segurança](docs/SECURITY_AUDIT.md) e [licença Apache 2.0](LICENSE).
 
 **Limitações:** somente COP; armazenamento local por navegador; sem login, backend, sincronização, integração comercial automática, checkout ou plugin WordPress. Resultados não substituem assessoria contábil/tributária. A licença de código não concede direitos sobre marcas de terceiros.
+
+## Documentación técnica v2 / Technical v2 documentation
+
+- [Integration API v2](docs/INTEGRATION_V2.md)
+- [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
+- [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
