@@ -344,5 +344,6 @@ export const ptBR: Record<string,string> = {
   "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analise COD, publicidade, preço por unidade e rentabilidade de vários produtos.",
   "Confirmar operación": "Confirmar operação",
   "Cancelar": "Cancelar",
-  "Confirmar": "Confirmar"
+  "Confirmar": "Confirmar",
+  "VERSIÓN 2.0.0": "VERSÃO 2.0.0"
 };
