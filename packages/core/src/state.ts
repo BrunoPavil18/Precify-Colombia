@@ -87,12 +87,19 @@ function csvCell(value:string):string {
  const formula=/^[\s\uFEFF]*[=+\-@]/.test(normalized);
  return '"' + (formula?"'":"") + normalized.replace(/"/g,'""') + '"';
 }
-export function exportProductsCsv(data:Workspace):string {
+export type CsvTranslations = {
+ headers?: readonly string[];
+ origin?: Partial<Record<"manual"|"estimado"|"confirmado",string>>;
+};
+export function exportProductsCsv(data:Workspace,translations?:CsvTranslations):string {
  const safe=validateWorkspace(data);
- const rows=[["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"]];
+ const defaultHeaders=["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"];
+ const headers=translations?.headers??defaultHeaders;
+ if(headers.length!==defaultHeaders.length)throw new FinancialInputError("Encabezados CSV inválidos.");
+ const rows=[Array.from(headers)];
  for(const p of safe.products){
   const r=analyze(p.input);
-  rows.push([p.id,p.input.name,p.input.category,p.input.origin,p.input.currentPrice,r.contribution,r.marginPercent??"N/D",p.updatedAt]);
+  rows.push([p.id,p.input.name,p.input.category,translations?.origin?.[p.input.origin]??p.input.origin,p.input.currentPrice,r.contribution,r.marginPercent??"N/D",p.updatedAt]);
  }
  return "\uFEFF"+rows.map(row=>row.map(csvCell).join(",")).join("\r\n");
 }
