@@ -10,8 +10,8 @@ const initialCOD={createdOrders:"100",shippedPercent:"100",deliveredPercentOfShi
 const initialCampaign={impressions:"1000",conversionPercent:"2.00",advertisingSpend:"0",attributedRevenue:"0",refundPercent:"0"};
 type Pane="cod"|"campaign"|"pum"|"consumer"|"portfolio";
 const panes:Pane[]=["cod","campaign","pum","consumer","portfolio"];
-const currencyKeys=new Set(["expectedProfit","profitPerCreatedOrder","profitPerPaidOrder","cac","maxCAC","attributedRevenueAfterRefunds","projectedProfit","pricePerUnit","consumerTotal","netProduct","tax","shipping","otherCharges","totalContribution","monthlyProfit","weightedContribution"]);
-const countKeys=new Set(["createdOrders","shippedOrders","deliveredOrders","paidOrders","failedOrders","conversions","totalUnits","breakEvenUnits"]);
+const currencyKeys=new Set(["expectedProfit","profitPerCreatedOrder","profitPerShippedOrder","profitPerPaidOrder","cac","maxCAC","attributedRevenueAfterRefunds","projectedRevenue","projectedRefunds","attributionDifference","projectedProfit","pricePerUnit","regulatoryTruncatedPrice","consumerTotal","netProduct","tax","shipping","otherCharges","totalContribution","monthlyProfit","weightedContribution"]);
+const countKeys=new Set(["createdOrders","shippedOrders","deliveredOrders","paidOrders","failedOrders","cancelledBeforeShipping","deliveryFailures","deliveredUnpaid","conversions","totalUnits","breakEvenUnits"]);
 function displayAdvancedResult(key:string,value:string|number):string{
  const raw=String(value);
  if(currencyKeys.has(key)){
@@ -23,7 +23,7 @@ function displayAdvancedResult(key:string,value:string|number):string{
  }
  if(countKeys.has(key))return raw;
  if(key==="netMargin")return raw.replace(".",",")+"%";
- if(key==="roas"||key==="breakEvenRoas")return raw.replace(".",",")+"×";
+ if(key==="roas"||key==="projectedRoas"||key==="breakEvenRoas")return raw.replace(".",",")+"×";
  return raw;
 }
 
@@ -111,6 +111,10 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
     {"error" in outcome?<p role="alert">{t(outcome.error??"")}</p>:
     <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>typeof v==="string"||typeof v==="number").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{displayAdvancedResult(key,value as string|number)}</dd></div>)}</dl>}
   </div>
+  {pane==="campaign"&&"data" in outcome&&outcome.data&&"reconciliationNotice" in outcome.data&&
+   <p className="muted" role="note">{t(String(outcome.data.reconciliationNotice))}</p>}
+  {pane==="pum"&&<p className="muted">{t("PUM: cálculo matemático redondeado y presentación truncada a dos decimales; la obligatoriedad depende de la categoría y de la norma SIC aplicable.")}</p>}
+  {pane==="portfolio"&&<p className="muted">{t("Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.")}</p>}
   <div className="advanced-actions"><button className="primary" onClick={snapshot} disabled={!!("error" in outcome)}>{t("Guardar simulación")}</button></div>
   {workspace.advancedSimulations.some(record=>record.kind===pane)&&<section className="advanced-saved"><h3>{t("Simulaciones guardadas")}</h3>
    {workspace.advancedSimulations.filter(row=>row.kind===pane).slice().reverse().map(row=><div key={row.id} className="list-row"><button className="secondary" onClick={()=>load(row)}>{row.label}</button>
