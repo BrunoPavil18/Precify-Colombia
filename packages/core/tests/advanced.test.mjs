@@ -25,7 +25,9 @@ test("COD 100 percent paid and 0 percent paid limits",()=>{
  const a=simulateCOD(values);
  assert.equal(a.paidOrders,"10");assert.equal(a.expectedProfit,"470.00");
  const b=simulateCOD({...values,paidPercentOfDelivered:"0"});
- assert.equal(b.paidOrders,"0");assert.equal(b.expectedProfit,"-30.00");assert.equal(b.profitPerPaidOrder,null);
+ assert.equal(b.paidOrders,"0");// Ten delivered-but-unpaid orders incur COP 2.00 reverse shipping each, plus COP 30.00 advertising.
+ assert.equal(b.deliveredUnpaid,"10");assert.equal(b.deliveryFailures,"0");
+ assert.equal(b.expectedProfit,"-50.00");assert.equal(b.profitPerPaidOrder,null);
 });
 test("PUM scales 500 grams to kilograms",()=>{
  assert.equal(pricePerMeasure("10000.00","500.00","g").pricePerUnit,"20000.00");
