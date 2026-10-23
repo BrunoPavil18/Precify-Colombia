@@ -359,5 +359,6 @@ export const ptBR: Record<string,string> = {
   "Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.": "Ponto de equilíbrio calculado para um mix constante de produtos; as quantidades são estimadas.",
   "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "A receita atribuída não coincide com conversões vezes receita unitária. ROAS atribuído e lucro projetado usam bases diferentes e são apresentados separadamente.",
   "La facturación atribuida coincide con la proyección bruta.": "A receita atribuída coincide com a projeção bruta.",
-  "VERSIÓN 2.0.1": "VERSÃO 2.0.1"
+  "VERSIÓN 2.0.1": "VERSÃO 2.0.1",
+  "Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO": "Precify Colombia 2.0.1 · Projeto independente · Apache-2.0 · COP / es-CO"
 };
