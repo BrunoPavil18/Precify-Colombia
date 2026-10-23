@@ -1,11 +1,11 @@
 # Precify Colombia v2.0.1 — Financial Reliability and Colombian Compliance Clarifications
 
-**Unreleased candidate.** This patch refines the v2.0.0 financial simulation engine, retains COP-only operation and browser-local storage, and does not add accounts, commercial integrations, paid services or remote telemetry.
+**Release v2.0.1.** This patch refines the v2.0.0 financial simulation engine, retains COP-only operation and browser-local storage, and does not add accounts, commercial integrations, paid services or remote telemetry.
 
 ## Fixes
 - **Campaigns / CAC / ROAS:** projected campaign profit now subtracts estimated refunds consistently; displayed attributed ROAS and projected ROAS are separated. When attributed revenue differs from conversions × estimated unit revenue, the simulator shows a reconciliation warning instead of silently mixing bases.
 - **COD:** failed delivery attempts now apply only to shipped-but-undelivered orders, not orders cancelled before shipping. Additional stage counts and per-shipped-order projected profit clarify non-delivery, delivered-unpaid and paid events.
-- **PUM:** preserves rounded mathematical unit pricing for existing API users and adds separate two-decimal truncated presentation for cases where Colombia's SIC rule applies, with an exact integer fraction and explicit conditional applicability.
+- **PUM:** keeps the rounded mathematical result and adds separate, conditionally applicable two-decimal truncated presentation. Users can now select content and comparison units independently (g/kg, ml/L, cm/m), while legacy three-argument API callers retain their previous reference behavior.
 - **Portfolio:** exact weighted constant-mix break-even avoids errors introduced by rounding unit averages prematurely.
 - **Margin targets:** unchanged v1/v2 suggested-price contract; explicit denominator remains contribution / net product sale, not total revenue including freight.
 - **COP and privacy:** BigInt amounts, version 2 JSON backups, v1 import compatibility, and the existing `precify-colombia:workspace:v1` browser storage key remain intact.
@@ -28,7 +28,7 @@ pnpm audit --audit-level moderate
 
 Production output: `apps/web/dist/`. Node.js >=20.19 and pnpm 10.34.7. In Windows PowerShell you may need `pnpm.cmd`.
 
-**Testing status:** tests for regression cases have been committed, but have **not been executed on this 2.0.1 branch in the assistant's environment**. Maintainer acceptance and browser/offline checks are mandatory before release.
+**Validation reported by the maintainer:** 63/63 automated tests passed (42 financial core, 21 web), TypeScript typecheck, AST lint (15 TS sources) and Vite production build passed. Compiled ESM output verification and dependency audit passed earlier on this patch branch before the latest PUM/UI documentation edits. A full browser E2E/accessibility/PWA production audit and a professional legal review were not performed; automated web tests include static source contracts.
 
 **Limitations:** localStorage remains non-transactional during truly simultaneous tab writes; offline install depends on the browser; accounting/tax/legal outcomes remain informative. No npm package, checkout or Vezura integration was introduced.
 
