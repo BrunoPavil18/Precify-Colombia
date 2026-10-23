@@ -47,6 +47,9 @@ export type Breakdown = {
   salePrice: string; collected: string; revenue: string; discount: string;
   variableCost: string; deductions: string; ivaIncluded: string; contribution: string;
   marginPercent: string | null; markupPercent: string | null;
+  marginOnCollectedPercent: string | null; marginOnProductPercent: string | null;
+  commercialMarkupPercent: string | null; contributionMarkupPercent: string | null;
+  viability: "positive" | "zero" | "negative"; canCoverFixedCosts: boolean;
   monthlyNet: string; monthlyNetMargin: string | null; breakEvenUnits: string | null; feasible: boolean;
   assumptions: string[]; warnings: string[];
 };
@@ -83,9 +86,15 @@ export function analyze(input: PriceInput, salePrice = input.currentPrice): Brea
     discount:fromCents(disc), variableCost:fromCents(variableCost),
     deductions:fromCents(deductions), ivaIncluded:fromCents(iva),
     contribution:fromCents(contribution), marginPercent:signedRatio(contribution, netSale),
-    markupPercent: signedRatio(contribution, variableCost),
+    marginOnProductPercent:signedRatio(contribution, netSale),
+    marginOnCollectedPercent:signedRatio(contribution, revenue),
+    markupPercent:signedRatio(contribution, variableCost),
+    contributionMarkupPercent:signedRatio(contribution, variableCost),
+    commercialMarkupPercent:signedRatio(netSale-variableCost, variableCost),
+    viability:contribution>0n?"positive":contribution===0n?"zero":"negative",
+    canCoverFixedCosts:contribution>0n,
     monthlyNet:fromCents(net), monthlyNetMargin:signedRatio(net, revenue * monthlyUnits), breakEvenUnits:breakEven,
-    feasible: contribution >= 0n, assumptions:[
+    feasible: contribution > 0n, assumptions:[
       "Margen de contribución = ingreso cobrado − deducciones − costos variables.",
       "Descuentos sobre el precio del producto; flete cobrado se suma separadamente.",
       "Comisiones y tributo sobre ingresos aplicados al producto tras descuentos.",
@@ -94,7 +103,7 @@ export function analyze(input: PriceInput, salePrice = input.currentPrice): Brea
     ],warnings
   };
 }
-/** Search the minimum pre-discount retail price satisfying contribution/net-sale margin. */
+/** Search the minimum pre-discount retail price satisfying the legacy contribution/net-product-sale margin. The denominator remains unchanged for v1 compatibility. */
 export function suggestPrice(input: PriceInput): { price: string; result: Breakdown; warnings: string[] } {
  const v=validateInput(input);
  const target=percentBps(v.targetMargin);
