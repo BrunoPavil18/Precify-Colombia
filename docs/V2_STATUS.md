@@ -83,3 +83,18 @@ El propietario ejecutó en Windows con pnpm 10.34.7:
 Estas verificaciones sustituyen la anotación anterior de ausencia de ejecución para **typecheck, AST lint, tests y build** en el estado probado. No prueban la seguridad absoluta, ni equivalen a E2E de navegador/PWA o revisión independiente de las hipótesis financieras.
 
 **Quedan pendientes:** homologación visual/funcional de los nuevos simuladores; persistencia de backups v1/v2 reales; cambio de pestañas concurrentes; comportamiento PWA offline/actualizaciones; accesibilidad móvil y teclado; revisión de fórmulas y cumplimiento colombiano; validación de empaquetado del core externo. La PR sigue Draft, sin aprobación de merge ni release.
+
+## Homologación final comunicada por el mantenedor — 23/10/2026
+
+**Resultados locales reales (Windows):**
+- `pnpm.cmd typecheck`: correcto para core y web.
+- `pnpm.cmd lint`: correcto; **15 archivos** examinados por el validador AST y typecheck correcto.
+- `pnpm.cmd test`: **51/51** (34 core + 17 web), 0 fallos.
+- `pnpm.cmd build`: correcto, Vite 8.3.4, 29 módulos; JS 355,33 kB (105,61 kB gzip).
+- `pnpm.cmd audit --audit-level moderate`: **No known vulnerabilities found**.
+
+**Comprobaciones manuales declaradas por el mantenedor:** la restauración de un backup procedente de v1 funcionó; el mantenedor indicó que **todos los puntos del checklist de homologación funcional propuesto** funcionaron, incluyendo persistencia/recuperación, protección de borradores, conflictos entre pestañas, PWA/offline y revisión de experiencia multilingüe/móvil/accesibilidad. Se trata de evidencia declarada por el mantenedor, no de un ensayo E2E automatizado ni una evaluación independiente de accesibilidad.
+
+**Observación de alcance:** no consta ejecución de `pnpm pack` ni consumo desde un proyecto externo; continúa pendiente la revisión especializada de bases fiscales, escenarios financieros extremos y conformidad jurídica. `window.confirm` aún figura en flujos de la UI y la protección multiaba basada en `updatedAt` no es una transacción atómica. Estas limitaciones deben ser aceptadas expresamente o subsanadas antes de merge/release.
+
+La PR #2 sigue Draft. No existe autorización de merge/release y no se solicitó GitHub Actions.
