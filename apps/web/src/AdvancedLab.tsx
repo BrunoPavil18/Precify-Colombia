@@ -80,7 +80,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
    {pane==="pum"&&<>{field("Precio total (COP)",measure.price,v=>setMeasure(a=>({...a,price:v})))}
     {field("Cantidad de contenido",measure.quantity,v=>setMeasure(a=>({...a,quantity:v})))}
     <label className="field"><span>{t("Unidad de medida")}</span><select value={measure.unit} onChange={e=>{setMeasure(a=>({...a,unit:e.target.value as PUMUnit}));onDirty(true);}}>
-    {(["g","kg","ml","l","unit"] as const).map(u=><option key={u} value={u}>{u}</option>)}</select></label></>}
+    {(["g","kg","ml","l","cm","m","unit"] as const).map(u=><option key={u} value={u}>{u}</option>)}</select></label></>}
    {pane==="consumer"&&<>
     {(["productPrice","discount","additionalFees","shippingCharged","taxPercent"] as const).map((key,i)=>field(t(["Precio base (COP)","Descuento (COP)","Cargos adicionales (COP)","Frete (COP)","IVA configurado (%)"][i]!),preview[key],v=>setPreview(a=>({...a,[key]:v}))))}
     <label className="field"><span>{t("Tratamiento tributario ilustrativo")}</span><select value={preview.taxMode} onChange={e=>{setPreview(a=>({...a,taxMode:e.target.value as typeof preview.taxMode}));onDirty(true);}}>
