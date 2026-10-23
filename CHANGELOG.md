@@ -1,20 +1,38 @@
 # Changelog
 
-## [2.0.0] — en desarrollo (PR #2, NO publicada)
+## [2.0.0] — 2026-10-23 (merged into `main`; release/tag published separately)
 
-**Estado:** candidato incompleto, no validado por tests/build ejecutados.
+### Added
+- Advanced COD risk simulator separating created, shipped, delivered, and paid orders with explicit reserves and costs.
+- Campaign simulator: hypothetical conversion, CAC, maximum CAC, ROAS, break-even ROAS, returns and projected contribution.
+- Price per unit of measure (PUM) across mass, volume, length and individual units.
+- Consumer price preview distinguishing tax included, tax added, or no tax, plus shipping, charges and discounts.
+- Multi-product portfolio simulator, weighted contribution and a single shared monthly fixed-cost deduction.
+- Saved advanced simulations grouped by module and version 2 JSON backup export, with v1 import support.
+- PWA manifest, installable icon, offline static-asset caching and consent-driven service worker updates.
+- Compiled ESM `@precify-colombia/core` entry point and TypeScript declarations; `pnpm verify:core` checks built artifacts.
+- A dedicated TypeScript AST source-policy lint step in addition to typechecking.
 
-- Añadidos indicadores explícitos de margen sobre precio neto del producto y sobre ingresos cobrados, markup comercial e indicador separado de markup de contribución.
-- Contribución exactamente cero clasificada como no viable.
-- Core experimental: COD probabilístico, publicidad/CAC/ROAS, PUM, precio público estimado y mezcla de productos.
-- Primera interfaz de simuladores avanzados con diccionarios estáticos ES/PT/EN (no persiste todavía sus borradores).
-- Primer control de revisión de almacenamiento para evitar sobrescrituras silenciosas entre pestañas.
-- Parser de porcentajes localizado y PWA de recursos estáticos experimental.
-- Preparación del core ESM tipado, pendiente de verificación con consumidor real.
-- Investigación jurídica verificable en `docs/COLOMBIA_LEGAL_V2.md`.
+### Improved
+- Explicit contribution margin denominators (net product sale versus total collected revenue) and separate commercial/contribution markup.
+- Zero contribution is no longer presented as financially viable.
+- Localized percentage parsing; COP amounts and ratio units in the advanced interface.
+- Own accessible confirmation dialogs with cancellation and keyboard navigation instead of native browser confirmations.
+- Unsaved-draft navigation safeguards, full-workspace snapshot conflict detection across tabs, responsive navigation and static ES/PT/EN dictionaries.
+- Legal/financial guidance with dated official Colombian references and stated limitations.
 
-**No completado:** persistencia de nuevos simuladores, suite E2E, lint independiente, actualización controlada PWA, auditoría de seguridad actualizada y homologación real. No lanzar v2 hasta finalizar.
+### Validation reported by maintainer
+- 53 automated tests passed: 34 core + 19 web.
+- Typecheck, AST lint (15 source files), production build, and ESM output verification passed.
+- Dependency audit at moderate level reported no known vulnerabilities.
+- 24 manual functional checks reported passed, including backup import from v1.
 
-## [1.0.0] — 2026-10-23 (publicada)
+### Known limits
+- Browser `localStorage` is not an atomic, synchronized multiuser database: simultaneous writes may still race.
+- Static web tests do not replace a comprehensive accessibility audit, professional financial review or external legal/tax advice.
+- PWA availability and iframe storage depend on browser security policies and origin.
+- No npm publication, WordPress plugin, checkout integration, automatic Colombian tax compliance or mandatory cloud services.
 
-Primera release pública: motor COP, productos, escenarios, metas, perfiles, informes, CSV seguro, backup JSON local, ES/PT/EN, documentación abierta Apache-2.0. El mantenedor informó 38 tests locales aprobados y pruebas manuales de preservación y restauración de datos; esta evidencia es histórica y no implica aprobación de v2.
+## [1.0.0] — 2026-10-23
+
+Initial public release: precise COP pricing core, products, independent scenarios, goals, profiles, reports, CSV safeguards, browser-local history, JSON backup and restore, and Spanish/Portuguese/English interface. Apache-2.0.
