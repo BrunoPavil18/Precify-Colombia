@@ -135,3 +135,20 @@ test("CSV translations preserve canonical COP amounts, safety, and backup compat
  const restored=decodeBackup(encodeBackup(workspace));
  assert.equal(restored.products[0].input.currentPrice,"89900.50");
 });
+
+
+test("monthly goals reproduce break-even and remain independent of other product assumptions",()=>{
+ const base={...EMPTY_INPUT,acquisition:"37000.00",currentPrice:"99000.00",
+  monthlyFixed:"490000.00",monthlyUnits:"10",feePercent:"0.00"};
+ const first=analyze(base);
+ assert.equal(first.contribution,"49000.00");
+ assert.equal(first.breakEvenUnits,"10");
+ assert.equal(first.monthlyNet,"0.00");
+ assert.equal(first.monthlyNetMargin,"0.00");
+ const fifteen=analyze({...base,monthlyUnits:"15"});
+ assert.equal(fifteen.breakEvenUnits,"10");
+ assert.equal(fifteen.monthlyNet,"245000.00");
+ assert.equal(fifteen.monthlyNetMargin,"16.50");
+ assert.equal(base.monthlyUnits,"10");
+ assert.equal(base.acquisition,"37000.00");
+});
