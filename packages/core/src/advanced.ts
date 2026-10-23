@@ -78,18 +78,26 @@ export function simulateCampaign(input:CampaignInput){
    estimated:true};
 }
 export type PUMUnit="g"|"kg"|"ml"|"l"|"cm"|"m"|"unit";
-export function pricePerMeasure(price:string,quantity:string,unit:PUMUnit){
+const unitFactor:Record<PUMUnit,bigint>={g:1n,kg:1000n,ml:1n,l:1000n,cm:1n,m:100n,unit:1n};
+const unitFamily:Record<PUMUnit,string>={g:"mass",kg:"mass",ml:"volume",l:"volume",cm:"length",m:"length",unit:"count"};
+/** Price per selected reference unit. Omitting referenceUnit retains the v2.0.0
+ * kilogram/liter/meter default and therefore does not change existing callers.
+ * UI callers must explicitly select the reference to avoid ambiguous displays.
+ */
+export function pricePerMeasure(price:string,quantity:string,unit:PUMUnit,referenceUnit?:PUMUnit){
  const cents=parseDecimal(price),q=parseDecimal(quantity);
  nonzero(q,"Cantidad");
- if(!["g","kg","ml","l","cm","m","unit"].includes(unit))throw new FinancialInputError("Unidad inválida.");
- // quantity carries two decimal digits. Per 1kg for g, per 1L for ml, otherwise per base unit.
- const scale=unit==="g"||unit==="ml"?1000n:unit==="cm"?100n:1n;
- const numerator=cents*100n*scale;
- const amount=roundDiv(numerator,q);
- const truncated=numerator/q;
- return {unit:unit==="g"?"kg":unit==="ml"?"l":unit==="cm"?"m":unit,
+ if(!Object.prototype.hasOwnProperty.call(unitFactor,unit))throw new FinancialInputError("Unidad inválida.");
+ const reference=referenceUnit??(unit==="g"?"kg":unit==="ml"?"l":unit==="cm"?"m":unit);
+ if(!Object.prototype.hasOwnProperty.call(unitFactor,reference))throw new FinancialInputError("Unidad de referencia inválida.");
+ if(unitFamily[unit]!==unitFamily[reference])throw new FinancialInputError("Las unidades de contenido y comparación deben ser compatibles.");
+ // Values carry two decimal places. Ratio is exactly centavos * referenceFactor / inputFactor / quantity.
+ const numerator=cents*100n*unitFactor[reference];
+ const denominator=q*unitFactor[unit];
+ const amount=roundDiv(numerator,denominator),truncated=numerator/denominator;
+ return {unit:reference,sourceUnit:unit,referenceUnit:reference,quantity:fromCents(q),
  pricePerUnit:fromCents(amount),regulatoryTruncatedPrice:fromCents(truncated),
- exactPriceFraction:{numerator:numerator.toString(),denominator:q.toString()},
+ exactPriceFraction:{numerator:numerator.toString(),denominator:denominator.toString()},
  regulatoryPresentationConditional:true,informativeOnly:true};
 }
 export type ConsumerPriceInput={
