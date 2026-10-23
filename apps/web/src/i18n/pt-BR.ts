@@ -360,5 +360,17 @@ export const ptBR: Record<string,string> = {
   "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "A receita atribuída não coincide com conversões vezes receita unitária. ROAS atribuído e lucro projetado usam bases diferentes e são apresentados separadamente.",
   "La facturación atribuida coincide con la proyección bruta.": "A receita atribuída coincide com a projeção bruta.",
   "VERSIÓN 2.0.1": "VERSÃO 2.0.1",
-  "Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO": "Precify Colombia 2.0.1 · Projeto independente · Apache-2.0 · COP / es-CO"
+  "Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO": "Precify Colombia 2.0.1 · Projeto independente · Apache-2.0 · COP / es-CO",
+  "Cantidad de pedidos inválida.": "Quantidade de pedidos inválida.",
+  "Impresiones inválidas.": "Visitas ou impressões inválidas.",
+  "Cantidad": "Quantidade",
+  "Unidad inválida.": "Unidade inválida.",
+  "Cartera inválida.": "Carteira inválida.",
+  "Unidades inválidas.": "Unidades inválidas.",
+  "Cantidad: debe ser positivo.": "Quantidade: deve ser positiva.",
+  "Las tasas y costos son hipótesis ingresadas por el usuario.": "As taxas e os custos são hipóteses informadas pelo usuário.",
+  "No equivale a una tarifa publicada por transportadoras.": "Não corresponde a uma tarifa publicada por transportadoras.",
+  "La adquisición de mercancía no recuperada debe modelarse dentro de la reserva de pérdidas.": "A mercadoria não recuperada deve ser considerada na reserva de perdas.",
+  "revenueMethod": "Metodologia da receita",
+  "reconciliationNotice": "Aviso de conciliação"
 };
