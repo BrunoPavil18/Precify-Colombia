@@ -339,5 +339,7 @@ export const en: Record<string,string> = {
   "Instalar actualización": "Install update",
   "Guarda o descarta tus cambios antes de actualizar la aplicación.": "Save or discard your changes before updating the application.",
   "Hay una actualización disponible. Guarda una copia de seguridad antes de instalarla. ¿Actualizar ahora?": "An update is available. Back up your data before installing it. Update now?",
-  "La actualización no pudo activarse.": "The update could not be activated."
+  "La actualización no pudo activarse.": "The update could not be activated.",
+  "Simula tu negocio con precisión.": "Simulate your business with precision.",
+  "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analyze COD, advertising, unit prices, and profitability across products."
 };
