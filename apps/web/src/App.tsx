@@ -2,7 +2,7 @@ import { AdvancedLab } from "./AdvancedLab";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
  analyze, decodeBackup, defaultScenarios, EMPTY_INPUT, encodeBackup, exportProductsCsv,
- maxDiscountPercent, moneyDisplay, parseCOPInput, parseDecimal, basisAmount, fromCents, suggestPrice, validateInput,
+ maxDiscountPercent, moneyDisplay, parseCOPInput, parseLocalizedPercent, parseDecimal, basisAmount, fromCents, suggestPrice, validateInput,
  validateWorkspace, emptyWorkspace, STORE_KEY,
  type PriceInput, type PriceRounding, type Workspace, type Product, type SavedScenario
 } from "@precify-colombia/core";
@@ -72,9 +72,16 @@ function MoneyField({label,value,help,onCommit,onDirty}:{label:string;value:stri
 }
 function PercentField({label,value,help,onCommit}:{label:string;value:string;help:string;onCommit:(s:string)=>void}){
  const t=useTranslator();
+ const [text,setText]=useState(value);
+ const [previous,setPrevious]=useState(value);
+ const [error,setError]=useState("");
+ if(previous!==value){setPrevious(value);setText(value);setError("");}
  return <label className="field"><span>{t(label)} <span className="unit">%</span></span>
-   <input type="text" inputMode="decimal" value={value} title={t(help)} onChange={e=>onCommit(e.target.value)}/>
-   <small>{t(help)}</small>
+   <input type="text" inputMode="decimal" value={text} title={t(help)} aria-invalid={!!error}
+    onChange={e=>{setText(e.target.value);setError("");}}
+    onBlur={()=>{try{const parsed=parseLocalizedPercent(text);onCommit(parsed);setText(parsed);setError("");}
+     catch(e){setError(e instanceof Error?e.message:String(e));onCommit(text);}}}/>
+   <small>{t(error||help)}</small>
  </label>;
 }
 function Kpi({label,value,detail,attention=false}:{label:string;value:string;detail:string;attention?:boolean}){
