@@ -329,5 +329,10 @@ export const ptBR: Record<string,string> = {
   "Margen sobre ingresos totales": "Margem sobre receitas totais",
   "Contribución / producto neto más frete": "Contribuição / produto líquido mais frete",
   "Markup comercial": "Markup comercial",
-  "(Producto neto - costo variable) / costo variable": "(Produto líquido - custo variável) / custo variável"
+  "(Producto neto - costo variable) / costo variable": "(Produto líquido - custo variável) / custo variável",
+  "Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?": "Há alterações não salvas. Descartá-las para abrir outro produto?",
+  "Hay cambios sin guardar. ¿Descartarlos antes de duplicar?": "Há alterações não salvas. Descartá-las antes de duplicar?",
+  "Hay cambios sin guardar. ¿Aplicar el perfil y descartarlos?": "Há alterações não salvas. Aplicar o perfil e descartá-las?",
+  "Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?": "Há alterações não salvas. Descartá-las para trocar o produto dos cenários?",
+  "Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?": "Há alterações não salvas. Descartá-las para criar um novo produto?"
 };
