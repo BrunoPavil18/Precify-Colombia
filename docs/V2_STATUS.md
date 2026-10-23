@@ -70,3 +70,16 @@ Se algum comando falhar, corrigir na mesma PR antes de homologar. O `lint` atual
 ## Auditoría por hallazgo
 
 Consultar [V2_AUDIT_MATRIX.md](V2_AUDIT_MATRIX.md) para el mapa F-01...F-11 y el estado no homologado por módulo.
+
+## Nueva evidencia local de ejecución — propietario (posterior al commit a9b6ba2)
+
+El propietario ejecutó en Windows con pnpm 10.34.7:
+- `pnpm.cmd typecheck`: **APROBADO**, core y web.
+- `pnpm.cmd lint`: **APROBADO**; el verificador AST independiente examinó **15 archivos TypeScript** y luego se ejecutó typecheck en ambos proyectos.
+- `pnpm.cmd test`: **49/49** (34 core, 15 web), sin fallos ni omisiones.
+- `pnpm.cmd build`: **APROBADO**; Vite **8.3.4**, **29 módulos**, JS **354,49 kB / 105,25 kB gzip**.
+- `pnpm.cmd audit --audit-level moderate`: resultado anterior `No known vulnerabilities found`; **no se repitió dentro del último lote de comandos**.
+
+Estas verificaciones sustituyen la anotación anterior de ausencia de ejecución para **typecheck, AST lint, tests y build** en el estado probado. No prueban la seguridad absoluta, ni equivalen a E2E de navegador/PWA o revisión independiente de las hipótesis financieras.
+
+**Quedan pendientes:** homologación visual/funcional de los nuevos simuladores; persistencia de backups v1/v2 reales; cambio de pestañas concurrentes; comportamiento PWA offline/actualizaciones; accesibilidad móvil y teclado; revisión de fórmulas y cumplimiento colombiano; validación de empaquetado del core externo. La PR sigue Draft, sin aprobación de merge ni release.
