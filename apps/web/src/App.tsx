@@ -4,7 +4,7 @@ import {
  analyze, decodeBackup, defaultScenarios, EMPTY_INPUT, encodeBackup, exportProductsCsv,
  maxDiscountPercent, moneyDisplay, parseCOPInput, parseLocalizedPercent, parseDecimal, basisAmount, fromCents, suggestPrice, validateInput,
  validateWorkspace, emptyWorkspace, STORE_KEY,
- type PriceInput, type PriceRounding, type Workspace, type Product, type SavedScenario
+ type PriceInput, type PriceRounding, type Workspace, type Product, type SavedScenario, type AdvancedSimulationRecord
 } from "@precify-colombia/core";
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
 import { downloadFile, loadWorkspace, persistWorkspace } from "./storage";
@@ -142,6 +142,7 @@ export default function App(){
  const [locale,setLocale]=useState<Locale>(readLocale);
  useEffect(()=>{document.documentElement.lang=locale;document.title="Precify Colombia — "+translate(locale,"Calculadora");},[locale]);
  const [showTips,setShowTips]=useState(true);
+ const [advancedDirty,setAdvancedDirty]=useState(false);
  const uploadRef=useRef<HTMLInputElement>(null);
  const t=(key:string)=>translate(locale,key);
  const fmt=(s:string|null|undefined)=>baseFmt(s,locale);
@@ -202,6 +203,8 @@ export default function App(){
   setNotice("Se descartaron los cambios sin guardar. La versión guardada permanece intacta.");
  }
  function navigate(target:Page){
+  if(target!==page&&page==="avanzado"&&advancedDirty&&!window.confirm(t("Hay simulaciones sin guardar. ¿Salir y descartarlas?")))return;
+  if(target!==page&&page==="avanzado")setAdvancedDirty(false);
   if(target!==page&&page==="escenarios"&&scenarioId){
    if(hasUnsavedDraft&&!window.confirm(t("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?")))return;
    if(savedProduct)setDraft({...savedProduct.input});
@@ -433,7 +436,9 @@ export default function App(){
         </>}
       </aside>
      </div>}
-     {page==="avanzado"&&<AdvancedLab workspace={workspace}/>}
+     {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
+      onSave={(record:AdvancedSimulationRecord)=>{if(commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}))){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}}}
+      onDelete={id=>{if(window.confirm(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t("Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
  origin:{manual:t("Ingreso manual"),estimado:t("Estimación"),confirmado:t("Declarado confirmado")}
@@ -441,8 +446,8 @@ export default function App(){
        {ranked.length===0?<div className="empty-state"><p>{t("Agrega productos para compararlos.")}</p></div>:<div className="table-scroll"><table><caption>{t("Productos ordenados por contribución unitaria")}</caption><thead><tr><th scope="col">{t("Producto")}</th><th scope="col">{t("Precio")}</th><th scope="col">{t("Contribución")}</th><th scope="col">{t("Margen")}</th><th scope="col">{t("Sensibilidad")}</th></tr></thead><tbody>{ranked.map(({p,result:r,error})=><tr key={p.id}><th scope="row">{p.input.name}<small>{t(p.input.origin==="manual"?"Ingreso manual":p.input.origin==="estimado"?"Estimación":"Declarado confirmado")}</small></th><td>{fmt(p.input.currentPrice)}</td><td className={r&&!r.feasible?"red":""}>{r?fmt(r.contribution):t(error??"")}</td><td>{r?r.marginPercent+"%":"N/D"}</td><td>{r?<span className="sensitivity-value">{sensitivity(p.input)} <small>{t("pérdida ante +10% costo de adquisición")}</small><progress max={100} value={Math.max(0,Math.min(100,Number(r.marginPercent??0)))} aria-label={t("Indicador de margen de")+" "+(r.marginPercent??"0")+" "+t("por ciento")}/></span>:"—"}</td></tr>)}</tbody></table></div>}
        <div className="section-head profiles-head"><div><span className="eyebrow">{t("TRAZABILIDAD LOCAL")}</span><h2>{t("Historial de cambios")} ({workspace.history.length})</h2></div></div><div className="stack-list history">{workspace.history.slice().reverse().slice(0,50).map(h=><div className="list-row" key={h.id}><span>{t(h.action)} · {h.snapshot.name}</span><small>{date(h.at)}</small></div>)}{workspace.history.length>50&&<p className="muted">{t("Se muestran los 50 eventos más recientes. El respaldo JSON incluye todo el historial guardado.")}</p>}</div>
      </section>}
-     {page==="datos"&&<div className="two-column"><section className="main-card"><span className="eyebrow">{t("CONTROL DE DATOS")}</span><h2>{t("Tu información, tu control.")}</h2><p>{t("Los cálculos y datos se procesan en tu navegador. Sin cuentas, sin analíticas, sin servidores y sin comunicación obligatoria con servicios externos.")}</p><div className="data-actions"><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-colombia-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Descargar copia de seguridad")}</button><button className="secondary" onClick={()=>uploadRef.current?.click()}>{t("Restaurar copia")}</button><input ref={uploadRef} type="file" accept=".json,application/json" className="sr-only" aria-label={t("Seleccionar respaldo JSON")} onChange={e=>{void importBackup(e.target.files?.[0]);}}/><button className="danger" onClick={reset}>{t("Borrar todos los datos")}</button></div><p className="muted">{t("La restauración valida versión, moneda, tamaño, identificadores y costos; sustituye el conjunto completo solo después de tu confirmación. Conserva copias de seguridad fuera del navegador.")}</p></section><aside className="results-card"><span className="eyebrow">{t("ESTADO DEL ESPACIO")}</span><div className="storage-stat"><strong>{workspace.products.length}</strong><span>{t("Productos locales")}</span></div><div className="storage-stat"><strong>{workspace.scenarios.length}</strong><span>{t("Escenarios")}</span></div><div className="storage-stat"><strong>{workspace.history.length}</strong><span>{t("Eventos históricos")}</span></div><p className="muted">{t("Formato de respaldo: precify-colombia-backup v1 · COP · es-CO · máximo 2 MB.")}</p>{locked&&<button onClick={rawBackup}>{t("Descargar datos locales originales")}</button>}</aside></div>}
-     <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Colombia 1.0.0 · Proyecto independiente · Apache-2.0 · COP / es-CO")}</p></footer>
+     {page==="datos"&&<div className="two-column"><section className="main-card"><span className="eyebrow">{t("CONTROL DE DATOS")}</span><h2>{t("Tu información, tu control.")}</h2><p>{t("Los cálculos y datos se procesan en tu navegador. Sin cuentas, sin analíticas, sin servidores y sin comunicación obligatoria con servicios externos.")}</p><div className="data-actions"><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-colombia-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Descargar copia de seguridad")}</button><button className="secondary" onClick={()=>uploadRef.current?.click()}>{t("Restaurar copia")}</button><input ref={uploadRef} type="file" accept=".json,application/json" className="sr-only" aria-label={t("Seleccionar respaldo JSON")} onChange={e=>{void importBackup(e.target.files?.[0]);}}/><button className="danger" onClick={reset}>{t("Borrar todos los datos")}</button></div><p className="muted">{t("La restauración valida versión, moneda, tamaño, identificadores y costos; sustituye el conjunto completo solo después de tu confirmación. Conserva copias de seguridad fuera del navegador.")}</p></section><aside className="results-card"><span className="eyebrow">{t("ESTADO DEL ESPACIO")}</span><div className="storage-stat"><strong>{workspace.products.length}</strong><span>{t("Productos locales")}</span></div><div className="storage-stat"><strong>{workspace.scenarios.length}</strong><span>{t("Escenarios")}</span></div><div className="storage-stat"><strong>{workspace.history.length}</strong><span>{t("Eventos históricos")}</span></div><p className="muted">{t("Formato de respaldo: precify-colombia-backup v2 · COP · es-CO · máximo 2 MB.")}</p>{locked&&<button onClick={rawBackup}>{t("Descargar datos locales originales")}</button>}</aside></div>}
+     <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Colombia 2.0.0 · Proyecto independiente · Apache-2.0 · COP / es-CO")}</p></footer>
     </main>
    </div>
  </div></LocaleContext.Provider>;
