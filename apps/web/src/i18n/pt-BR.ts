@@ -325,5 +325,9 @@ export const ptBR: Record<string,string> = {
   "monthlyProfit": "Lucro mensal",
   "breakEvenUnits": "Unidades de equilíbrio",
   "weightedContribution": "Contribuição média ponderada",
-  "netMargin": "Margem líquida"
+  "netMargin": "Margem líquida",
+  "Margen sobre ingresos totales": "Margem sobre receitas totais",
+  "Contribución / producto neto más frete": "Contribuição / produto líquido mais frete",
+  "Markup comercial": "Markup comercial",
+  "(Producto neto - costo variable) / costo variable": "(Produto líquido - custo variável) / custo variável"
 };
