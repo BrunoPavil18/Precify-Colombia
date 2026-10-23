@@ -211,3 +211,13 @@ tbody th small{display:block;color:#8b9e96;margin-top:5px}
  .advanced-tabs button{white-space:nowrap}
  .sidebar nav{scrollbar-width:thin}
 }
+
+/* Compact mobile navigation: no horizontal scrollbar, keyboard focus remains visible. */
+@media(max-width:720px){
+ .sidebar nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow-x:visible;gap:5px;padding-bottom:0}
+ .nav-link{min-width:0;width:100%;overflow-wrap:anywhere}
+}
+@media(max-width:420px){
+ .sidebar nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .nav-link{font-size:11px}
+}
