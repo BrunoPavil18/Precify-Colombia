@@ -1,6 +1,6 @@
 # Matriz de auditoría v1 → trabajo en v2
 
-**Fecha de evaluación:** 23/10/2026. **Branch:** `feat/precify-colombia-v2`. **Estado:** PR #2 en borrador; no validada con builds, tests ni auditoría de seguridad ejecutados.
+**Fecha de evaluación inicial:** 23/10/2026. **Estado actual:** PR #2 merged into `main`, maintainer validation reported 53 tests and 24 manual checks. **The table preserves the original audit snapshot**; follow [V2_STATUS.md](V2_STATUS.md) and [CHANGELOG](../CHANGELOG.md) for the completed implementation and limitations.
 
 | ID | Hallazgo de auditoría | Código existente en v2 | Estado de aceptación |
 |---|---|---|---|
