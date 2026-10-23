@@ -4,7 +4,7 @@ import {
  parseCOPInput, parseDecimal, percentBps, roundPrice, moneyDisplay,
  FinancialInputError, fromCents, EMPTY_INPUT, analyze, suggestPrice,
  maxDiscountPercent, emptyWorkspace, validateWorkspace, encodeBackup,
- decodeBackup, exportProductsCsv
+ decodeBackup, exportProductsCsv, defaultScenarios, compareScenarios
 } from "../dist/index.js";
 
 test("COP 89.900 is 89900 and comma decimal",()=>{
@@ -89,3 +89,32 @@ test("max-price and ratio limits",()=>{
  assert.throws(()=>suggestPrice({...EMPTY_INPUT,acquisition:"999999999999.99",targetMargin:"99.99",feePercent:"1"}),FinancialInputError);
 });
 test("signed bigint formatter",()=>assert.equal(fromCents(-101n),"-1.01"));
+
+test("optimistic, expected and conservative are independent from the product",()=>{
+ const original={...EMPTY_INPUT,acquisition:"37000.00",currentPrice:"99000.00",feePercent:"0.00"};
+ const scenarios=defaultScenarios(original);
+ scenarios[0].values.acquisition="35000.00";
+ scenarios[2].values.acquisition="40000.00";
+ assert.equal(original.acquisition,"37000.00");
+ assert.equal(scenarios[1].values.acquisition,"37000.00");
+ assert.deepEqual(scenarios.map(s=>analyze(s.values).contribution),
+  ["51000.00","49000.00","46000.00"]);
+ const compared=compareScenarios(scenarios);
+ assert.equal(compared.length,3);
+ assert.ok(BigInt(parseDecimal(compared[0].result.contribution))>BigInt(parseDecimal(compared[2].result.contribution)));
+});
+
+test("persisted scenarios survive backup and do not change original product",()=>{
+ const now=new Date().toISOString();
+ const workspace=emptyWorkspace();
+ const baseline={...EMPTY_INPUT,acquisition:"37000.00",currentPrice:"99000.00",feePercent:"0.00"};
+ workspace.products.push({id:"original",createdAt:now,updatedAt:now,input:baseline});
+ workspace.scenarios=defaultScenarios(baseline).map((s,i)=>({
+  id:"s"+i,productId:"original",title:s.name,note:s.note,values:s.values
+ }));
+ workspace.scenarios[2].values.acquisition="40000.00";
+ const restored=decodeBackup(encodeBackup(workspace));
+ assert.equal(restored.products[0].input.acquisition,"37000.00");
+ assert.equal(restored.scenarios[2].values.acquisition,"40000.00");
+ assert.equal(restored.scenarios[0].productId,"original");
+});
