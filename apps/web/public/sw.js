@@ -1,5 +1,5 @@
 /* Asset-only offline cache. Local product/backup data are never fetched or cached. */
-const VERSION="precify-colombia-v2-assets-1";
+const VERSION="precify-colombia-v2-assets-2";
 self.addEventListener("install",event=>{
  event.waitUntil((async()=>{
   const cache=await caches.open(VERSION);
