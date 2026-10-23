@@ -372,5 +372,12 @@ export const ptBR: Record<string,string> = {
   "No equivale a una tarifa publicada por transportadoras.": "Não corresponde a uma tarifa publicada por transportadoras.",
   "La adquisición de mercancía no recuperada debe modelarse dentro de la reserva de pérdidas.": "A mercadoria não recuperada deve ser considerada na reserva de perdas.",
   "revenueMethod": "Metodologia da receita",
-  "reconciliationNotice": "Aviso de conciliação"
+  "reconciliationNotice": "Aviso de conciliação",
+  "Unidad de comparación del PUM": "Unidade de comparação do PUM",
+  "La unidad de contenido es distinta de la unidad de comparación: selecciona si deseas precio por g o kg, ml o l, cm o m. Compara productos similares usando la misma unidad. La aplicación de la norma SIC es contextual.": "A unidade do conteúdo é diferente da unidade de comparação: escolha preço por g ou kg, ml ou L, cm ou m. Compare produtos semelhantes usando a mesma unidade. A regra SIC depende do contexto.",
+  "Unidad de referencia inválida.": "Unidade de referência inválida.",
+  "Las unidades de contenido y comparación deben ser compatibles.": "As unidades de conteúdo e comparação devem ser compatíveis.",
+  "sourceUnit": "Unidade do conteúdo",
+  "referenceUnit": "Unidade de comparação",
+  "quantity": "Quantidade informada"
 };
