@@ -185,3 +185,11 @@ tbody th small{display:block;color:#8b9e96;margin-top:5px}
 .scenario-preview-stats small{color:#648677}
 .scenario-preview-stats strong{font-size:clamp(16px,2vw,24px);color:#165f4c;overflow-wrap:anywhere}
 @media(max-width:540px){.scenario-preview-stats{grid-template-columns:1fr}.scenario-preview-stats>div{border-right:0;border-bottom:1px solid #d9eae1;padding-bottom:8px}}
+
+/* Goals: an explicit saved-product source and non-destructive monthly draft. */
+.goal-product-selector{display:flex;flex-direction:column;gap:9px;max-width:540px;margin:20px 0 10px;font-size:12px;color:#33534d;font-weight:750}
+.goal-product-selector select{height:45px;padding:0 14px;border:1px solid #bcd8cc;background:#fbfefd;color:#1c4c3e;border-radius:9px;width:100%;font-weight:650}
+.goal-product-selector select:focus-visible{outline:3px solid #17ad96;outline-offset:2px}
+.goal-help{font-size:12px;line-height:1.65;margin:7px 0 18px}
+.goals-actions{margin:16px 0 8px;justify-content:flex-start}
+@media(max-width:420px){.goal-product-selector{max-width:100%}.goals-actions{align-items:stretch}.goals-actions button{flex:1}}
