@@ -1,5 +1,8 @@
 # Precify Colombia 🇨🇴
 
+> **v2.0.0 development branch:** this branch contains advanced simulators and fixes that are not yet validated. The latest public stable release remains **v1.0.0**. Do not release v2 before compilation, real tests and maintainer approval. See the [implementation status](docs/V2_STATUS.md).
+
+
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
 **Version 1.0.0 · Free and open source · Apache License 2.0**
