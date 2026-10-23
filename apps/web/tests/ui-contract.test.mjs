@@ -44,3 +44,10 @@ test("Goals discards unsaved simulations and saves only monthly product fields",
  assert.ok(!app.slice(app.indexOf('function saveGoalChanges(){'),app.indexOf('function restoreSavedDraft(){')).includes('scenarios:w.scenarios'),
   "saving a goal must never edit scenarios");
 });
+
+test("advanced saved simulations are scoped to the active section",()=>{
+ const lab=readFileSync(new URL("../src/AdvancedLab.tsx",import.meta.url),"utf8");
+ assert.ok(lab.includes('workspace.advancedSimulations.some(record=>record.kind===pane)'));
+ assert.ok(lab.includes('workspace.advancedSimulations.filter(row=>row.kind===pane).slice().reverse().map(row=>'));
+ assert.ok(lab.includes('onDelete(row.id)'));
+});
