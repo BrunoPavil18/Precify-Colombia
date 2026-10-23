@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EMPTY_INPUT, analyze, simulateCOD, simulateCampaign, pricePerMeasure,
- consumerPricePreview, simulatePortfolio, parseLocalizedPercent } from "../dist/index.js";
+ consumerPricePreview, simulatePortfolio, parseLocalizedPercent, emptyWorkspace, encodeBackup, decodeBackup } from "../dist/index.js";
 
 const base={...EMPTY_INPUT,acquisition:"50.00",packaging:"0",shippingCost:"0",fixedFee:"0",advertising:"0",currentPrice:"100.00",monthlyFixed:"0",monthlyUnits:"10"};
 test("margin denominator includes separately charged shipping and retains legacy",()=>{
@@ -55,4 +55,24 @@ test("localized percentage accepts explicit comma or dot, never grouping or scie
  assert.equal(parseLocalizedPercent("19.50"),"19.50");
  for(const bad of ["1.000,00","1e2","19,500","-1","101","19.5.0"])
   assert.throws(()=>parseLocalizedPercent(bad));
+});
+
+test("v2 simulation backup roundtrip and legacy v1 import",()=>{
+ const w=emptyWorkspace();
+ w.advancedSimulations.push({id:"adv1",kind:"pum",productId:null,at:new Date().toISOString(),
+ label:"Test PUM",inputs:{price:"10000.00",quantity:"500.00",unit:"g"}});
+ const parsed=JSON.parse(encodeBackup(w));
+ assert.equal(parsed.backupVersion,2);
+ const restored=decodeBackup(JSON.stringify(parsed));
+ assert.equal(restored.advancedSimulations.length,1);
+ assert.equal(restored.advancedSimulations[0].inputs.quantity,"500.00");
+ parsed.backupVersion=1;
+ delete parsed.workspace.advancedSimulations;
+ assert.equal(decodeBackup(JSON.stringify(parsed)).advancedSimulations.length,0);
+});
+test("invalid advanced snapshot rejects restore",()=>{
+ const w=emptyWorkspace();
+ w.advancedSimulations.push({id:"x",kind:"cod",productId:null,at:new Date().toISOString(),
+ label:"Bad",inputs:{unexpectedCode:"evil"}});
+ assert.throws(()=>encodeBackup(w));
 });
