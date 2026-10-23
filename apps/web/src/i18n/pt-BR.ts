@@ -341,5 +341,8 @@ export const ptBR: Record<string,string> = {
   "Hay una actualización disponible. Guarda una copia de seguridad antes de instalarla. ¿Actualizar ahora?": "Há uma atualização disponível. Faça um backup antes de instalá-la. Atualizar agora?",
   "La actualización no pudo activarse.": "Não foi possível ativar a atualização.",
   "Simula tu negocio con precisión.": "Simule seu negócio com precisão.",
-  "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analise COD, publicidade, preço por unidade e rentabilidade de vários produtos."
+  "Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.": "Analise COD, publicidade, preço por unidade e rentabilidade de vários produtos.",
+  "Confirmar operación": "Confirmar operação",
+  "Cancelar": "Cancelar",
+  "Confirmar": "Confirmar"
 };
