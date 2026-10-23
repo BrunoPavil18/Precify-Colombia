@@ -360,5 +360,17 @@ export const en: Record<string,string> = {
   "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "Entered attributed revenue does not equal conversions times unit revenue. Attributed ROAS and projected profit use separate bases.",
   "La facturación atribuida coincide con la proyección bruta.": "Attributed revenue matches the gross projection.",
   "VERSIÓN 2.0.1": "VERSION 2.0.1",
-  "Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO": "Precify Colombia 2.0.1 · Independent project · Apache-2.0 · COP / es-CO"
+  "Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO": "Precify Colombia 2.0.1 · Independent project · Apache-2.0 · COP / es-CO",
+  "Cantidad de pedidos inválida.": "Invalid order count.",
+  "Impresiones inválidas.": "Invalid visits or impressions.",
+  "Cantidad": "Quantity",
+  "Unidad inválida.": "Invalid unit.",
+  "Cartera inválida.": "Invalid portfolio.",
+  "Unidades inválidas.": "Invalid units.",
+  "Cantidad: debe ser positivo.": "Quantity must be positive.",
+  "Las tasas y costos son hipótesis ingresadas por el usuario.": "Rates and costs are user-entered assumptions.",
+  "No equivale a una tarifa publicada por transportadoras.": "This is not a published carrier rate.",
+  "La adquisición de mercancía no recuperada debe modelarse dentro de la reserva de pérdidas.": "Unrecovered merchandise must be accounted for in the loss reserve.",
+  "revenueMethod": "Revenue methodology",
+  "reconciliationNotice": "Reconciliation notice"
 };
