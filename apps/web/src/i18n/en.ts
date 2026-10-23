@@ -358,5 +358,6 @@ export const en: Record<string,string> = {
   "PUM: cálculo matemático redondeado y presentación truncada a dos decimales; la obligatoriedad depende de la categoría y de la norma SIC aplicable.": "PUM: mathematically rounded value and separately truncated two-decimal presentation; the legal requirement depends on category and applicable SIC rule.",
   "Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.": "Break-even assumes a constant product mix; quantities are estimated.",
   "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "Entered attributed revenue does not equal conversions times unit revenue. Attributed ROAS and projected profit use separate bases.",
-  "La facturación atribuida coincide con la proyección bruta.": "Attributed revenue matches the gross projection."
+  "La facturación atribuida coincide con la proyección bruta.": "Attributed revenue matches the gross projection.",
+  "VERSIÓN 2.0.1": "VERSION 2.0.1"
 };
