@@ -10,6 +10,23 @@ const initialCOD={createdOrders:"100",shippedPercent:"100",deliveredPercentOfShi
 const initialCampaign={impressions:"1000",conversionPercent:"2.00",advertisingSpend:"0",attributedRevenue:"0",refundPercent:"0"};
 type Pane="cod"|"campaign"|"pum"|"consumer"|"portfolio";
 const panes:Pane[]=["cod","campaign","pum","consumer","portfolio"];
+const currencyKeys=new Set(["expectedProfit","profitPerCreatedOrder","profitPerPaidOrder","cac","maxCAC","attributedRevenueAfterRefunds","projectedProfit","pricePerUnit","consumerTotal","netProduct","tax","shipping","otherCharges","totalContribution","monthlyProfit","weightedContribution"]);
+const countKeys=new Set(["createdOrders","shippedOrders","deliveredOrders","paidOrders","failedOrders","conversions","totalUnits","breakEvenUnits"]);
+function displayAdvancedResult(key:string,value:string|number):string{
+ const raw=String(value);
+ if(currencyKeys.has(key)){
+  if(!/^-?\d+(?:\.\d{1,2})?$/.test(raw))return raw;
+  const negative=raw.startsWith("-");
+  const [whole,fraction=""]=raw.replace("-","").split(".");
+  const grouped=whole!.replace(/\B(?=(\d{3})+(?!\d))/g,".");
+  return (negative?"−":"")+"COP "+grouped+(fraction&&!/^0+$/.test(fraction)?","+fraction.padEnd(2,"0"):"");
+ }
+ if(countKeys.has(key))return raw;
+ if(key==="netMargin")return raw.replace(".",",")+"%";
+ if(key==="roas"||key==="breakEvenRoas")return raw.replace(".",",")+"×";
+ return raw;
+}
+
 export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
  workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>boolean;
  onDelete:(id:string)=>void;onDirty:(dirty:boolean)=>void
@@ -92,7 +109,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   <div className="advanced-results" aria-live="polite">
     <h3>{t("Resultados orientativos")}</h3>
     {"error" in outcome?<p role="alert">{t(outcome.error??"")}</p>:
-    <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>typeof v==="string"||typeof v==="number").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{String(value)}</dd></div>)}</dl>}
+    <dl>{Object.entries(outcome.data??{}).filter(([k,v])=>typeof v==="string"||typeof v==="number").map(([key,value])=><div key={key}><dt>{t(key)}</dt><dd>{displayAdvancedResult(key,value as string|number)}</dd></div>)}</dl>}
   </div>
   <div className="advanced-actions"><button className="primary" onClick={snapshot} disabled={!!("error" in outcome)}>{t("Guardar simulación")}</button></div>
   {workspace.advancedSimulations.some(record=>record.kind===pane)&&<section className="advanced-saved"><h3>{t("Simulaciones guardadas")}</h3>
