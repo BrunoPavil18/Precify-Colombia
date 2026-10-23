@@ -358,5 +358,6 @@ export const ptBR: Record<string,string> = {
   "PUM: cálculo matemático redondeado y presentación truncada a dos decimales; la obligatoriedad depende de la categoría y de la norma SIC aplicable.": "PUM: cálculo matemático arredondado e apresentação truncada em duas casas; a obrigatoriedade depende da categoria e da regra SIC aplicável.",
   "Punto de equilibrio calculado para una mezcla constante de productos; las cantidades son estimadas.": "Ponto de equilíbrio calculado para um mix constante de produtos; as quantidades são estimadas.",
   "La facturación atribuida informada no coincide con conversiones por ingreso unitario. ROAS atribuido y utilidad proyectada usan bases distintas y se presentan separadamente.": "A receita atribuída não coincide com conversões vezes receita unitária. ROAS atribuído e lucro projetado usam bases diferentes e são apresentados separadamente.",
-  "La facturación atribuida coincide con la proyección bruta.": "A receita atribuída coincide com a projeção bruta."
+  "La facturación atribuida coincide con la proyección bruta.": "A receita atribuída coincide com a projeção bruta.",
+  "VERSIÓN 2.0.1": "VERSÃO 2.0.1"
 };
