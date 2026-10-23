@@ -108,7 +108,7 @@ function ProductEditor({value,onChange,onDirty}:{value:PriceInput;onChange:(next
     <label className="field"><span>{t("Unidades vendidas por mes")}</span><input type="text" inputMode="numeric" value={value.monthlyUnits} onChange={e=>set("monthlyUnits",e.target.value)}/><small>{t("Volumen hipotético para la proyección.")}</small></label>
    </div>
   </section>
- </div></LocaleContext.Provider>;
+ </div>;
 }
 export default function App(){
  const initialized=useMemo(loadWorkspace,[]);
@@ -266,7 +266,7 @@ export default function App(){
    <div className="content-column">
     <header className="topbar"><div className="breadcrumb">PRECIFY / <strong>{t(titleOf(page)).toUpperCase()}</strong></div><div className="topbar-right"><span className="currency-pill">COP <span aria-hidden="true">▾</span></span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> LOCAL</span></div></header>
     <main id="main-content">
-     <div className="page-heading"><div><div className="eyebrow">HERRAMIENTA FINANCIERA GRATUITA <span className="green-line"></span> VERSIÓN 1.0.0</div><h1>{t(page==="calculadora"?"Precios que tienen sentido.":page==="productos"?"Tus productos. Tus números.":page==="escenarios"?"Prepárate para cada escenario.":page==="metas"?"Del objetivo al resultado.":page==="informes"?"Decisiones respaldadas por datos.":"Tus datos te pertenecen.")}</h1><p>{t(page==="calculadora"?"Calcula el precio correcto, protege tu margen y toma mejores decisiones para tu negocio.":page==="productos"?"Tu catálogo se guarda exclusivamente en este dispositivo.":page==="escenarios"?"Simula resultados antes de cambiar el precio de un producto.":page==="metas"?"Estima cuánto necesitas vender para cubrir gastos fijos.":page==="informes"?"Compara contribuciones reales y lleva tus reportes contigo.":"Sin cuentas, sin seguimiento y sin enviar tus cifras a ningún servidor.")}</p></div><div className="heading-symbol" aria-hidden="true">✳</div></div>
+     <div className="page-heading"><div><div className="eyebrow">{t("HERRAMIENTA FINANCIERA GRATUITA")} <span className="green-line"></span> {t("VERSIÓN 1.0.0")}</div><h1>{t(page==="calculadora"?"Precios que tienen sentido.":page==="productos"?"Tus productos. Tus números.":page==="escenarios"?"Prepárate para cada escenario.":page==="metas"?"Del objetivo al resultado.":page==="informes"?"Decisiones respaldadas por datos.":"Tus datos te pertenecen.")}</h1><p>{t(page==="calculadora"?"Calcula el precio correcto, protege tu margen y toma mejores decisiones para tu negocio.":page==="productos"?"Tu catálogo se guarda exclusivamente en este dispositivo.":page==="escenarios"?"Simula resultados antes de cambiar el precio de un producto.":page==="metas"?"Estima cuánto necesitas vender para cubrir gastos fijos.":page==="informes"?"Compara contribuciones reales y lleva tus reportes contigo.":"Sin cuentas, sin seguimiento y sin enviar tus cifras a ningún servidor.")}</p></div><div className="heading-symbol" aria-hidden="true">✳</div></div>
      {notice&&<div role="status" aria-live="polite" className={"notice"+(locked?" notice-danger":"")}><span>{t(notice)}</span><button aria-label={t("Cerrar aviso")} onClick={()=>setNotice("")}>×</button></div>}
      {locked&&<div className="critical"><strong>{t("Protección de datos activa")}</strong><p>{t("La información local existente está dañada o inaccesible. Se bloquea el guardado para no sobrescribirla silenciosamente.")}</p><button onClick={rawBackup}>{t("Descargar datos originales sin validar")}</button> <button className="ghost" onClick={()=>setPage("datos")}>{t("Opciones de recuperación")}</button></div>}
      {page==="calculadora"&&<>
@@ -324,5 +324,5 @@ export default function App(){
      <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Colombia 1.0.0 · Proyecto independiente · Apache-2.0 · COP / es-CO")}</p></footer>
     </main>
    </div>
- </div>;
+ </div></LocaleContext.Provider>;
 }
