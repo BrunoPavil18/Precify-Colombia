@@ -1,5 +1,8 @@
 # Precify Colombia 🇨🇴
 
+> **Candidata v2.0.1 (aún no publicada):** correcciones de confiabilidad para campañas/ROAS, incidencias COD, PUM truncado cuando corresponda y equilibrio de mix. Se preservan los datos y contratos públicos de v2.0.0; ver [formulas](docs/FINANCIAL_FORMULAS.md) y [guía legal](docs/COLOMBIA_LEGAL_V2_0_1.md). La v2.0.0 sigue como release oficial hasta la publicación autorizada.
+
+
 > **Precify Colombia 2.0.0:** versión integrada en `main` y homologada funcionalmente por el mantenedor (53 pruebas automatizadas aprobadas). La publicación de la etiqueta/release v2.0.0 se realiza por separado. Consulte [alcance y límites](docs/V2_STATUS.md).
 
 
