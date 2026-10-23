@@ -160,3 +160,20 @@ tbody th small{display:block;color:#8b9e96;margin-top:5px}
 @media(max-width:720px){.app-shell{display:block}.sidebar{position:static;width:100%;min-width:0;height:auto;padding:16px}.brand{margin-bottom:15px}.nav-caption,.sidebar-bottom{display:none}.sidebar nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:3px}.nav-link{min-width:108px;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:5px;padding:8px 5px}.nav-link small{display:none}.nav-icon{background:none}.topbar{height:58px;padding:0 16px}.breadcrumb{font-size:9px}.topbar-right{gap:8px}.local-chip{display:none}main{padding:25px 15px}.heading-symbol{display:none}.page-heading{margin-bottom:24px}.page-heading p{font-size:13px}.action-strip,.section-head{align-items:flex-start;flex-direction:column}.action-strip .actions{width:100%}.form-section,.main-card,.results-card{padding:19px}.form-grid,.scenario-grid,.kpi-grid{grid-template-columns:1fr 1fr}.scenario-grid{grid-template-columns:1fr}.footer{display:block}}
 @media(max-width:420px){.form-grid,.kpi-grid{grid-template-columns:1fr}.topbar-right .language-select{display:none}.suggested strong{font-size:34px}.actions{width:100%}.actions button{flex:1}.page-heading h1{font-size:29px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Scenarios: clear source selection and independently editable hypotheses. */
+.scenario-intro{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px 20px;border-radius:12px;background:#edf8f3;border:1px solid #d7e9dd;margin-bottom:22px;color:#3b6857}
+.scenario-intro p{font-size:12px;line-height:1.65;margin:0}
+.scenario-intro strong{color:#135d48}
+.scenario-selector{display:flex;flex-direction:column;gap:9px;max-width:540px;margin-bottom:26px;font-size:12px;color:#33534d;font-weight:750}
+.scenario-selector select{height:45px;padding:0 14px;border:1px solid #bcd8cc;background:#fbfefd;color:#1c4c3e;border-radius:9px;width:100%;font-weight:650}
+.scenario-empty{padding:28px 24px;text-align:center;border:1px dashed #b4d4c4;border-radius:12px;background:#fbfdfc;color:#2d6452}
+.scenario-empty p{font-size:12px;margin:9px 0 0;color:#759387;line-height:1.6}
+.scenario-grid{margin-bottom:26px}
+.scenario-tile:focus-visible{outline:3px solid #17ad96;outline-offset:2px}
+.scenario-tile small{line-height:1.45}
+.scenario-edit{border-top:1px solid #e4ede7;padding-top:24px}
+.scenario-edit .section-head{align-items:flex-start}
+.scenario-edit .section-head h3{margin:8px 0}
+.scenario-edit .actions{justify-content:flex-end}
+@media(max-width:720px){.scenario-intro{grid-template-columns:1fr}.scenario-edit .actions{justify-content:flex-start}}
