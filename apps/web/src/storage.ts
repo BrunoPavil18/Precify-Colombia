@@ -11,13 +11,13 @@ export function loadWorkspace():ReadResult {
  }
 }
 /** Optimistic revision guard: refuse stale writes from another browser tab. */
-export function persistWorkspace(state:Workspace,expectedUpdatedAt?:string):void {
- if(expectedUpdatedAt!==undefined){
+export function persistWorkspace(state:Workspace,expected?:Workspace):void {
+ if(expected!==undefined){
   const raw=localStorage.getItem(STORE_KEY);
   if(raw===null)throw new Error("Conflicto entre pestañas: los datos cambiaron o fueron borrados. Actualiza y exporta una copia antes de continuar.");
   if(new TextEncoder().encode(raw).length>MAX_BACKUP_BYTES)throw new Error("Conflicto entre pestañas: almacenamiento inesperado.");
   const current=validateWorkspace(JSON.parse(raw));
-  if(current.updatedAt!==expectedUpdatedAt)
+  if(JSON.stringify(current)!==JSON.stringify(validateWorkspace(expected)))
    throw new Error("Conflicto entre pestañas: cambios externos detectados. No se sobrescribieron datos.");
  }
 
