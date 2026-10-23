@@ -142,14 +142,14 @@ export default function App(){
  }
  function navigate(target:Page){
   if(target!==page&&page==="escenarios"&&scenarioId){
-   if(hasUnsavedDraft&&!window.confirm("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?"))return;
+   if(hasUnsavedDraft&&!window.confirm(t("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?")))return;
    if(savedProduct)setDraft({...savedProduct.input});
    setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
   }
   setPage(target);
  }
  function switchScenarioProduct(id:string){
-  if(scenarioId&&hasUnsavedDraft&&!window.confirm("Hay cambios sin guardar en este escenario. ¿Descartarlos?"))return;
+  if(scenarioId&&hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar en este escenario. ¿Descartarlos?")))return;
   setScenarioProductId(id);setScenarioId(null);setDirtyMoney(new Set());setEditorRevision(n=>n+1);
   const selected=workspace.products.find(p=>p.id===id);
   if(selected){setActiveId(selected.id);setDraft({...selected.input});}
@@ -159,7 +159,7 @@ export default function App(){
   try{
    const next=validateWorkspace({...change(workspace),updatedAt:new Date().toISOString()});
    persistWorkspace(next);setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
-  }catch(e){setNotice("No se pudieron guardar los cambios: "+String(e instanceof Error?e.message:e));return false;}
+  }catch(e){setNotice("No se pudieron guardar los cambios: "+(e instanceof Error?e.message:String(e)));return false;}
  }
  const result=useMemo(()=>{
   try{
@@ -185,12 +185,12 @@ export default function App(){
  function openProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
  function duplicateProduct(p:Product){setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  function deleteProduct(p:Product){
-  if(!window.confirm("¿Eliminar «"+p.input.name+"» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos."))return;
+  if(!window.confirm(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos.")))return;
   const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id)}));
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  function createScenarios(){
-  if(scenarioId&&hasUnsavedDraft&&!window.confirm("¿Descartar los cambios no guardados antes de crear escenarios?"))return;
+  if(scenarioId&&hasUnsavedDraft&&!window.confirm(t("¿Descartar los cambios no guardados antes de crear escenarios?")))return;
   const product=scenarioProduct;
   if(!product){setNotice("Guarda primero un producto para crear escenarios.");return;}
   const existing=workspace.scenarios.filter(s=>s.productId===product.id);
@@ -212,7 +212,7 @@ export default function App(){
   if(commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
  }
  function openScenario(s:SavedScenario){
-  if(scenarioId!==s.id&&scenarioId&&hasUnsavedDraft&&!window.confirm("Hay cambios sin guardar. ¿Descartarlos y abrir otro escenario?"))return;
+  if(scenarioId!==s.id&&scenarioId&&hasUnsavedDraft&&!window.confirm(t("Hay cambios sin guardar. ¿Descartarlos y abrir otro escenario?")))return;
   setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setScenarioProductId(s.productId);
   setDraft({...s.values});setEditorRevision(n=>n+1);setPage("escenarios");
  }
@@ -230,14 +230,14 @@ export default function App(){
   if(file.size>2_000_000){setNotice("Archivo supera 2 MB. No se modificaron datos.");return;}
   try{
    const valid=decodeBackup(await file.text());
-   if(!window.confirm("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales."))return;
+   if(!window.confirm(t("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales.")))return;
    persistWorkspace(valid);setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
    setNotice("Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.");setPage("productos");
   }catch(e){setNotice("Respaldo rechazado, sin modificaciones: "+String(e instanceof Error?e.message:e));}
   finally{if(uploadRef.current)uploadRef.current.value="";}
  }
  function reset(){
-  if(!window.confirm("¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes."))return;
+  if(!window.confirm(t("¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes.")))return;
   try{localStorage.removeItem(STORE_KEY);setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
   catch(e){setNotice("No se pudieron borrar los datos: "+String(e));}
  }
@@ -299,9 +299,9 @@ export default function App(){
         <div className="section-head"><div><span className="eyebrow">{t("EDICIÓN INDEPENDIENTE")}</span><h3>{t(selectedScenario.title)} · {scenarioProduct.input.name}</h3><p className="muted">{t("Los cambios solo afectan a este escenario cuando presionas Guardar escenario.")}</p></div>
          <div className="actions">
           <button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>
-          <button className="secondary" onClick={()=>{if(hasUnsavedDraft&&!window.confirm("¿Descartar los cambios no guardados antes de duplicar?"))return;commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
+          <button className="secondary" onClick={()=>{if(hasUnsavedDraft&&!window.confirm(t("¿Descartar los cambios no guardados antes de duplicar?")))return;commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
           <button className="primary" onClick={saveScenario}>{t("Guardar escenario")}</button>
-          <button className="danger-link" onClick={()=>{if(window.confirm("¿Eliminar este escenario?")&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
+          <button className="danger-link" onClick={()=>{if(window.confirm(t("¿Eliminar este escenario?"))&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
          </div></div>
         <div className="scenario-preview" aria-live="polite">
          <span className="eyebrow">{t("VISTA PREVIA DE ESTE ESCENARIO · AÚN SIN GUARDAR")}</span>
