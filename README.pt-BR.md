@@ -1,10 +1,10 @@
 # Precify Colombia
 
-Projeto open source Apache-2.0 e independente, com motor monetário em centavos BigInt e interface inicial em espanhol colombiano. Inclui precificação, cadastro local de produtos, perfis, cenários, descontos, campanhas, IVA parametrizável, frete, COD estimativo, metas, exportação CSV/JSON e backup versionado.
+Projeto open source Apache-2.0 e independente, com motor monetário em centavos BigInt e interface estática completa em espanhol colombiano, português brasileiro e inglês (menu ES/PT/EN). Inclui precificação, cadastro local de produtos, perfis, cenários, descontos, campanhas, IVA parametrizável, frete, COD estimativo, metas, exportação CSV/JSON e backup versionado.
 
-**Status:** candidato 1.0.0; não homologado. Necessário gerar pnpm-lock.yaml e validar instalação, compilação, testes, auditoria de pacotes e fluxo no navegador.
+**Status:** candidato 1.0.0; não homologado. Lockfile já foi gerado e versionado na branch. A compilação, testes e auditoria das novas traduções ainda dependem da execução local; fluxo completo no navegador segue em homologação.
 
-Requisitos: Node >=20.11 e pnpm 10.34.7.
+Requisitos: Node >=20.19 e pnpm 10.34.7.
 
 ~~~sh
 corepack enable
