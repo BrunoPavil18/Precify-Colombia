@@ -325,5 +325,9 @@ export const en: Record<string,string> = {
   "monthlyProfit": "Monthly profit",
   "breakEvenUnits": "Break-even units",
   "weightedContribution": "Weighted average contribution",
-  "netMargin": "Net margin"
+  "netMargin": "Net margin",
+  "Margen sobre ingresos totales": "Margin on total collected revenue",
+  "Contribución / producto neto más frete": "Contribution / net product sales plus shipping",
+  "Markup comercial": "Commercial markup",
+  "(Producto neto - costo variable) / costo variable": "(Net product sales - variable costs) / variable costs"
 };
