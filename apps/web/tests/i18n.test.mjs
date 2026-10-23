@@ -74,3 +74,11 @@ test("destructive dialogs are localized and static dictionaries need no network"
   for(const forbidden of ["fetch(","eval(","dangerouslySetInnerHTML","XMLHttpRequest"])
    assert.ok(!text.includes(forbidden),forbidden);
 });
+
+test("translated blank products do not appear modified until a real user edit",()=>{
+ assert.ok(app.includes('savedProduct?.input??{...EMPTY_INPUT,name:t("Producto ejemplo")}'),
+  "default comparison should use the localized placeholder product name");
+ assert.ok(app.includes('const hasUnsavedDraft=dirtyMoney.size>0||JSON.stringify(draft)!==JSON.stringify(persistedDraft)'));
+ assert.ok(app.includes('if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))'));
+ assert.ok(app.includes("setDraft(d=>({...d,name:translate(lang,\"Producto ejemplo\")}))"));
+});
