@@ -131,3 +131,11 @@ No user account, paid service, Meta credentials, Supabase deployment or Vezura c
 - The PR description records completed modules and remaining real database/Meta/browser verification. It may be converted to ready only after unresolved acceptance conditions are addressed; no merge/release without the owner's explicit approval.
 - The GitHub temporary validation workflows were removed; the last source-affecting commit was validated successfully by Actions #41309016163, with later commits limited to documentation/CI cleanup.
 - No immediate action is required from the owner for repository work; provisioning a dedicated Supabase test project and a real Meta developer app will require an explicit setup decision before those external flows can be authenticated.
+
+### Supabase 2026 key compatibility — final repository check
+
+Official Supabase docs now prefer publishable (`sb_publishable_...`) and server-secret (`sb_secret_...`) keys while supporting legacy anon/service_role keys during migration. The Precify backend now accepts `SUPABASE_PUBLISHABLE_KEY` + `SUPABASE_SECRET_KEY` with fallback to `SUPABASE_ANON_KEY` + `SUPABASE_SERVICE_KEY`. The existing web `VITE_SUPABASE_ANON_KEY` parameter can contain a publishable key; **no secret is shipped to the frontend**. Updated the server env example, integration guide and API key scope regression test.
+
+**Final owner-authorized validation:** [GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309523249) — **SUCCESS**: frozen lockfile install, typecheck, AST lint, 61 core + 22 web + 7 service + 1 SDK = **91/91**, service syntax, Vite production build, ESM package check and no known moderate-or-higher vulnerabilities. Temporary workflow and signal removed immediately after success; no ongoing Actions automation configured.
+
+**Release boundary unchanged:** optional connected services need a test PostgreSQL/Supabase project, approved Meta app credentials and real browser/webhook acceptance; source/SQL contract tests do not prove database transactions or OAuth. The consolidated [draft PR #4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4) stays open for continued final verification. No `main` merge or v2.1.0 release.
