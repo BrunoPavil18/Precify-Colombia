@@ -84,13 +84,13 @@ export function ConnectedLab(){
   try{
    const value=await request<Dash>(access,"/v1/orgs/"+org+"/dashboard");
    setDashboard(value);setOffline(false);
-   if(cacheConsent)try{localStorage.setItem(summaryKey(access.user.id,org),JSON.stringify(value));}catch{}
+   if(cacheConsent&&consentOrg===org)try{localStorage.setItem(summaryKey(access.user.id,org),JSON.stringify(value));}catch{}
   }catch(e){
    let raw:string|null=null;try{raw=localStorage.getItem(summaryKey(access.user.id,org));}catch{/* Browser storage denied */}
    if(raw){try{setDashboard(JSON.parse(raw) as Dash);setOffline(true);}catch{setDashboard(null);}}
    else{setDashboard(null);setNotice(String(e));setOffline(true);}
   }
- },[cacheConsent]);
+ },[cacheConsent,consentOrg]);
  const loadOrgs=useCallback(async(access:Session)=>{
   try{const list=await request<Org[]>(access,"/v1/orgs");setOrgs(list);
    const id=list.find(v=>v.id===selected)?.id??list[0]?.id??"";
