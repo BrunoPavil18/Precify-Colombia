@@ -36,8 +36,9 @@ begin
   n:=public.precify_import_campaign_batch(b,'[{"id":"cb","source":"csv","currency":"USD"}]'::jsonb);
   insert into public.precify_oauth_states(nonce_hash,org_id,user_id,expires_at)
   values(nonce,a,user_a,now()+interval '5 minutes');
-  if (select count(*) from public.precify_consume_oauth_state(nonce))<>1 or
-     (select count(*) from public.precify_consume_oauth_state(nonce))<>0 then
+  if (select count(*) from public.precify_consume_oauth_state(nonce))<>1 then
+    raise exception 'OAuth nonce first consumption failed';end if;
+  if (select count(*) from public.precify_consume_oauth_state(nonce))<>0 then
     raise exception 'OAuth nonce reused';end if;
   perform public.precify_erase_operational_data(a);
   if exists(select 1 from public.precify_order_events where org_id=a)
@@ -55,15 +56,15 @@ rollback;
 begin;
 set local role service_role;
 do $service_role_smoke$
-declare org_id uuid; imported integer;
+declare v_org uuid; imported integer;
 begin
- org_id:=public.precify_create_org('SMOKE service role',gen_random_uuid());
- imported:=public.precify_import_order_batch(org_id,'[{"id":"one","orderId":"qa"}]'::jsonb);
+ v_org:=public.precify_create_org('SMOKE service role',gen_random_uuid());
+ imported:=public.precify_import_order_batch(v_org,'[{"id":"one","orderId":"qa"}]'::jsonb);
  if imported<>1 then raise exception 'Service role order insert failed';end if;
- imported:=public.precify_import_campaign_batch(org_id,'[{"id":"first","source":"csv","currency":"COP"}]'::jsonb);
+ imported:=public.precify_import_campaign_batch(v_org,'[{"id":"first","source":"csv","currency":"COP"}]'::jsonb);
  if imported<>1 then raise exception 'Service role campaign insert failed';end if;
- perform public.precify_erase_operational_data(org_id);
- if exists(select 1 from public.precify_order_events where org_id=org_id) then
+ perform public.precify_erase_operational_data(v_org);
+ if exists(select 1 from public.precify_order_events where org_id=v_org) then
   raise exception 'Service role erase failed';end if;
 end $service_role_smoke$;
 rollback;
