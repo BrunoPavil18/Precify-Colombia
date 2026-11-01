@@ -25,7 +25,7 @@ const inputFields=["grossRevenue","productCost","shippingCost","reverseShippingC
 const defaultCPA:CPASensitivityInput={currency:"COP",createdOrders:"100",shippedPercent:"100",
  deliveredPercentOfShipped:"70",paidPercentOfDelivered:"90",contributionPerPaid:"50000.00",
  failedDeliveryCost:"10000.00",reverseShippingPerUnpaid:"5000.00",
- advertisementPerCreated:"0",otherFixedCosts:"0"};
+ otherFixedCosts:"0"};
 function mergeRows<T extends {id:string}>(current:T[],incoming:T[]):T[]{
  const ids=new Map(current.map(x=>[x.id,x]));
  for(const x of incoming){
