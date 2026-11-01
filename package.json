@@ -1,6 +1,6 @@
 {
   "name": "precify-colombia",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "private": true,
   "packageManager": "pnpm@10.34.7",
   "engines": {
@@ -13,6 +13,9 @@
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "verify": "node scripts/verify-local.mjs",
-    "verify:core": "pnpm --filter @precify-colombia/core build && node scripts/verify-core-package.mjs"
+    "verify:core": "pnpm --filter @precify-colombia/core build && node scripts/verify-core-package.mjs",
+    "start:connected-api": "pnpm --filter @precify-colombia/core build && node apps/service/server.mjs",
+    "test:connected-api": "node --test apps/service/tests/*.test.mjs",
+    "check:connected-api": "node --check apps/service/server.mjs && node --check apps/service/security.mjs"
   }
 }
