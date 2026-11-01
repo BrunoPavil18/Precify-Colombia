@@ -38,7 +38,7 @@ function readOperations():{value:LocalOperations;error:string|null;raw:string|nu
   if(raw.length>2000000)throw new Error("El almacenamiento operacional supera el límite.");
   const value=validateLocalOps(JSON.parse(raw));
   return {value,error:null,raw};
- }catch(e){return {value:empty(),raw:localStorage.getItem(KEY),error:e instanceof Error?e.message:String(e)};}
+ }catch(e){let raw:string|null=null;try{raw=localStorage.getItem(KEY);}catch{/* Storage may itself be unavailable */}return {value:empty(),raw,error:e instanceof Error?e.message:String(e)};}
 }
 const requiredFields=["id","orderId","status","occurredAt"] as const;
 const inputFields=["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount","campaignId","currency"] as const;
@@ -57,7 +57,7 @@ function mergeRows<T extends {id:string}>(current:T[],incoming:T[]):T[]{
 }
 function exportText(content:string,filename:string,type:string){
  const url=URL.createObjectURL(new Blob([content],{type}));
- const a=document.createElement("a");a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+ const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 export function OperationsLab({products}:{products:Product[]}){
  const t=useTranslator();
