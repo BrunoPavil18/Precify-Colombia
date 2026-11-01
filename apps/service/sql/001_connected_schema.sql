@@ -133,3 +133,57 @@ begin
 end $$;
 revoke all on function public.precify_import_order_batch(uuid,jsonb) from public,anon,authenticated;
 grant execute on function public.precify_import_order_batch(uuid,jsonb) to service_role;
+
+-- All mutations below run as one PostgreSQL transaction per RPC call.
+-- The org-scoped advisory lock is shared with precify_import_order_batch,
+-- preventing an in-flight COD import from racing against erasure.
+-- The service verifies owner permissions before invoking this restricted RPC.
+create or replace function public.precify_erase_operational_data(p_org uuid)
+returns void language plpgsql security invoker as $$
+begin
+ perform pg_advisory_xact_lock(hashtextextended(p_org::text, 2100));
+ delete from public.precify_order_events where org_id=p_org;
+ delete from public.precify_campaigns where org_id=p_org;
+ delete from public.precify_prices where org_id=p_org;
+ delete from public.precify_meta_accounts where org_id=p_org;
+ delete from public.precify_meta_connections where org_id=p_org;
+ delete from public.precify_oauth_states where org_id=p_org;
+ delete from public.precify_webhooks where org_id=p_org;
+ delete from public.precify_api_keys where org_id=p_org;
+ -- Keep organization/memberships and a minimal audit trail of deletion.
+ insert into public.precify_audit(org_id,actor,action,details)
+ values(p_org,'system','data.erase','{"scope":"connected-operational-data"}'::jsonb);
+end $$;
+revoke all on function public.precify_erase_operational_data(uuid) from public,anon,authenticated;
+grant execute on function public.precify_erase_operational_data(uuid) to service_role;
+
+-- Durable campaign imports share the erasure/import transaction lock.
+-- Updated insights may replace existing observations, but a reused ID must
+-- not silently switch its source or operating currency.
+create or replace function public.precify_import_campaign_batch(p_org uuid,p_campaigns jsonb)
+returns integer language plpgsql security invoker as $$
+declare v_campaign jsonb;v_id text;v_previous jsonb;v_count integer:=0;
+begin
+ if jsonb_typeof(p_campaigns)<>'array' or jsonb_array_length(p_campaigns)>10000
+ then raise exception 'Invalid campaign batch'; end if;
+ perform pg_advisory_xact_lock(hashtextextended(p_org::text, 2100));
+ for v_campaign in select value from jsonb_array_elements(p_campaigns) loop
+  v_id:=v_campaign->>'id';
+  if v_id is null or length(v_id) not between 1 and 128 then
+   raise exception 'Invalid campaign identity';end if;
+  select payload into v_previous from public.precify_campaigns
+   where org_id=p_org and id=v_id for update;
+  if found and (v_previous->>'source' is distinct from v_campaign->>'source' or
+                v_previous->>'currency' is distinct from v_campaign->>'currency') then
+   raise exception 'Campaign source/currency conflict';
+  end if;
+  insert into public.precify_campaigns(org_id,id,payload,updated_at)
+   values(p_org,v_id,v_campaign,now())
+   on conflict (org_id,id) do update
+    set payload=excluded.payload,updated_at=excluded.updated_at;
+  v_count:=v_count+1;
+ end loop;
+ return v_count;
+end $$;
+revoke all on function public.precify_import_campaign_batch(uuid,jsonb) from public,anon,authenticated;
+grant execute on function public.precify_import_campaign_batch(uuid,jsonb) to service_role;
