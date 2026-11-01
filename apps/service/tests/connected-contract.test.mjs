@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 
 const service=readFileSync(new URL("../server.mjs",import.meta.url),"utf8");
 const schema=readFileSync(new URL("../sql/001_connected_schema.sql",import.meta.url),"utf8");
-const ui=readFileSync(new URL("../../../web/src/ConnectedLab.tsx",import.meta.url),"utf8");
+const ui=readFileSync(new URL("../../web/src/ConnectedLab.tsx",import.meta.url),"utf8");
 
 test("operational erasure is one scoped SQL transaction rather than partial sequential HTTP deletes",()=>{
  const sql=schema.slice(schema.indexOf("create or replace function public.precify_erase_operational_data"));
