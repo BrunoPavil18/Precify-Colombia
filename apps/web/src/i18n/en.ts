@@ -556,5 +556,8 @@ export const en: Record<string,string> = {
   "Género": "Gender",
   "Impresiones": "Impressions",
   "Clics": "Clicks",
-  "Gasto": "Spend"
+  "Gasto": "Spend",
+  "VERSIÓN 2.1.0 EN DESARROLLO": "VERSION 2.1.0 IN DEVELOPMENT",
+  "Precify Colombia 2.1.0 · En desarrollo · Apache-2.0": "Precify Colombia 2.1.0 · In development · Apache-2.0",
+  "Cuenta conectada opcional": "Optional connected account"
 };
