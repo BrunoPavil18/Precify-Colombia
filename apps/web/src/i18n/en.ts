@@ -540,5 +540,11 @@ export const en: Record<string,string> = {
   "Margen sobre venta neta (%)": "Net product sale margin (%)",
   "Margen sobre cobro total (%)": "Total collected margin (%)",
   "Unidades para equilibrio": "Break-even units",
-  "El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.": "Suggested price uses net product sale as denominator. Taxes are configurable deductions, not tax advice."
+  "El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.": "Suggested price uses net product sale as denominator. Taxes are configurable deductions, not tax advice.",
+  "Evolución de pagos registrados por día": "Recorded payments by day",
+  "Todavía no hay eventos de pago.": "No payment events yet.",
+  "Pagos registrados por día": "Payments recorded by day",
+  "Métricas atribuidas de campañas": "Attributed campaign metrics",
+  "Todavía no hay métricas publicitarias importadas.": "No imported ad metrics yet.",
+  "Campaña": "Campaign"
 };
