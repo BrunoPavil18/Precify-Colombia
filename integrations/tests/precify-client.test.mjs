@@ -9,6 +9,6 @@ test("server integration preserves organization scope and never changes URL host
  assert.deepEqual(await client.sendOrderEvents(org,[{id:"e"}]),{imported:1});
  assert.equal(called.url,"https://api.example.test/v1/orgs/"+org+"/orders/import");
  assert.equal(called.options.headers.Authorization,"ApiKey "+key);
- assert.throws(()=>client.dashboard("../other"));
+ await assert.rejects(client.dashboard("../other"));
  assert.throws(()=>new PrecifyConnectedClient({baseURL:"http://public.example",apiKey:key}));
 });
