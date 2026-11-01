@@ -1,4 +1,4 @@
-import {globalPrice,type GlobalPriceInput} from "@precify-colombia/core";
+import {globalPrice,nonNegativeMinorAmount,type GlobalPriceInput} from "@precify-colombia/core";
 
 export const GLOBAL_PRODUCTS_KEY="precify-colombia:global-pricing:v1";
 export type GlobalPriceHistory={salePrice:string;currency:string;at:string};
@@ -25,8 +25,7 @@ function validateCatalog(value:unknown):GlobalSavedCatalog {
     if(typeof historic.at!=="string"||!Number.isFinite(Date.parse(historic.at))||
        typeof historic.currency!=="string"||typeof historic.salePrice!=="string")
      throw new Error("Invalid price history entry");
-    const historical={...record.input,currency:historic.currency,salePrice:historic.salePrice};
-    globalPrice(historical);
+    nonNegativeMinorAmount(historic.salePrice,historic.currency);
    }
   }
  }
