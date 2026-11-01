@@ -546,5 +546,15 @@ export const en: Record<string,string> = {
   "Pagos registrados por día": "Payments recorded by day",
   "Métricas atribuidas de campañas": "Attributed campaign metrics",
   "Todavía no hay métricas publicitarias importadas.": "No imported ad metrics yet.",
-  "Campaña": "Campaign"
+  "Campaña": "Campaign",
+  "Nivel del informe": "Report level",
+  "Conjunto de anuncios": "Ad set",
+  "Anuncio": "Ad",
+  "Consultar datos agregados de edad y género": "View aggregated age/gender breakdown",
+  "Datos demográficos agregados actualizados.": "Aggregate demographic data refreshed.",
+  "Edad": "Age",
+  "Género": "Gender",
+  "Impresiones": "Impressions",
+  "Clics": "Clicks",
+  "Gasto": "Spend"
 };
