@@ -89,7 +89,7 @@ test("all 2.1.0 connected, embedded, FX and COD t-literals have ES/PT/EN coverag
  let total=0;
  for(const path of paths){
   const text=read("../src/"+path);
-  const keys=[...text.matchAll(/\\bt\\("([^"]+)"\\)/g)].map(x=>x[1]);
+  const keys=[...text.matchAll(/\bt\("([^"]+)"\)/g)].map(x=>x[1]);
   total+=keys.length;
   for(const key of keys){
    assert.ok(Object.hasOwn(pt,key),"pt-BR missing ("+path+"): "+key);
