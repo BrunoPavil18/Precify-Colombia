@@ -93,3 +93,13 @@ begin
 end $$;
 revoke all on function public.precify_create_org(text,uuid) from public,anon,authenticated;
 grant execute on function public.precify_create_org(text,uuid) to service_role;
+
+-- Atomically claim one OAuth state exactly once (prevents callback replay races).
+create or replace function public.precify_consume_oauth_state(p_nonce_hash text)
+returns table(org_id uuid,user_id uuid) language sql security invoker as $$
+ delete from public.precify_oauth_states
+ where nonce_hash=p_nonce_hash and expires_at>now()
+ returning precify_oauth_states.org_id,precify_oauth_states.user_id;
+$$;
+revoke all on function public.precify_consume_oauth_state(text) from public,anon,authenticated;
+grant execute on function public.precify_consume_oauth_state(text) to service_role;
