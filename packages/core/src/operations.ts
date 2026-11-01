@@ -3,7 +3,8 @@
  * Observed order events and ad-platform attributed data are never silently
  * presented as an identical cohort. All amounts are canonical decimal strings.
  */
-import {FinancialInputError,parseDecimal,fromCents,roundDiv,ceilDiv} from "./money.js";
+import {FinancialInputError,fromCents,roundDiv} from "./money.js";
+import {minorAmount,fromMinor} from "./fx.js";
 
 export type CODStatus="created"|"cancelled"|"shipped"|"delivery_failed"|"delivered"|"paid"|"returned"|"refunded";
 export type OrderEvent={
@@ -37,8 +38,8 @@ export function validateOrderEvent(value:OrderEvent):OrderEvent {
  if(value.campaignId!==null)safeId(value.campaignId,"Campaña");
  if(typeof value.currency!=="string"||!/^[A-Z]{3}$/.test(value.currency))throw new FinancialInputError("Moneda inválida.");
  for(const field of ["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount"] as const)
-  parseDecimal(value[field],field);
- if(parseDecimal(value.refundAmount)>parseDecimal(value.grossRevenue))
+  minorAmount(value[field],value.currency);
+ if(minorAmount(value.refundAmount,value.currency)>minorAmount(value.grossRevenue,value.currency))
   throw new FinancialInputError("Reembolso mayor que el importe de la venta.");
  return value;
 }
@@ -46,7 +47,7 @@ export function validateAdCampaign(value:AdCampaign):AdCampaign {
  safeId(value.id,"Campaña");safeId(value.source,"Origen");
  if(typeof value.currency!=="string"||!/^[A-Z]{3}$/.test(value.currency))
   throw new FinancialInputError("Moneda inválida.");
- for(const field of ["spend","attributedRevenue"] as const)parseDecimal(value[field],field);
+ for(const field of ["spend","attributedRevenue"] as const)minorAmount(value[field],value.currency);
  for(const field of ["impressions","clicks","attributedConversions"] as const)
   if(!countPattern.test(value[field]))throw new FinancialInputError("Contador de publicidad inválido.");
  dateString(value.observedFrom);dateString(value.observedTo);
@@ -99,22 +100,23 @@ export function computeCODFunnel(events:OrderEvent[]):{
   if(wasPaid)paid++;if(item.status==="delivery_failed")deliveryFailed++;
   if(wasReturned)returned++;if(wasRefunded)refunded++;
   if(item.campaignId===null)unattributedOrders++;
-  const sale=wasPaid?parseDecimal(item.grossRevenue):0n;
-  const returnedValue=wasRefunded?parseDecimal(item.refundAmount||item.grossRevenue):0n;
+  const money=(amount:string)=>minorAmount(amount,item.currency);
+  const sale=wasPaid?money(item.grossRevenue):0n;
+  const returnedValue=wasRefunded?money(item.refundAmount):0n;
   // Each cost happens once per order, not once per status event.
-  const costs=parseDecimal(item.advertisingCost)+parseDecimal(item.otherCost)
-   +(wasShipped?parseDecimal(item.shippingCost):0n)
-   +(wasReturned?parseDecimal(item.reverseShippingCost):0n)
-   +(wasPaid||wasReturned?parseDecimal(item.productCost):0n);
+  const costs=money(item.advertisingCost)+money(item.otherCost)
+   +(wasShipped?money(item.shippingCost):0n)
+   +(wasReturned?money(item.reverseShippingCost):0n)
+   +(wasPaid||wasReturned?money(item.productCost):0n);
   grossCollected+=sale;refunds+=returnedValue;incurredCosts+=costs;
   snapshots.push({orderId:id,status:item.status,campaignId:item.campaignId,currency:item.currency,source:item.source,
    occurredAt:item.occurredAt,totalEvents:group.length,hasShipped:wasShipped,hasDelivered:wasDelivered,
    hasPaid:wasPaid,hasReturned:wasReturned,hasRefunded:wasRefunded});
  }
  return {currency,orders:groups.size,created,cancelled,shipped,delivered,paid,deliveryFailed,returned,refunded,
-  grossCollected:fromCents(grossCollected),refunds:fromCents(refunds),
-  netCollected:fromCents(grossCollected-refunds),incurredCosts:fromCents(incurredCosts),
-  projectedNet:fromCents(grossCollected-refunds-incurredCosts),unattributedOrders,snapshots};
+  grossCollected:fromMinor(grossCollected,currency??"COP"),refunds:fromMinor(refunds,currency??"COP"),
+  netCollected:fromMinor(grossCollected-refunds,currency??"COP"),incurredCosts:fromMinor(incurredCosts,currency??"COP"),
+  projectedNet:fromMinor(grossCollected-refunds-incurredCosts,currency??"COP"),unattributedOrders,snapshots};
 }
 export function reconcileCampaigns(events:OrderEvent[],campaigns:AdCampaign[]){
  const funnel=computeCODFunnel(events);
@@ -127,42 +129,43 @@ export function reconcileCampaigns(events:OrderEvent[],campaigns:AdCampaign[]){
    throw new FinancialInputError("Monedas del anuncio y pedidos incompatibles; convierte cada resultado con una tasa fechada.");
   const matchingOrders=normalizeEvents(events);
   const revenue=matching.reduce((sum,s)=>{const g=matchingOrders.get(s.orderId)!;const row=latest(g);
-   return sum+(s.hasPaid?parseDecimal(row.grossRevenue)-(s.hasRefunded?parseDecimal(row.refundAmount):0n):0n);
+   return sum+(s.hasPaid?minorAmount(row.grossRevenue,c.currency)-(s.hasRefunded?minorAmount(row.refundAmount,c.currency):0n):0n);
   },0n);
-  const spent=parseDecimal(c.spend);
+  const spent=minorAmount(c.spend,c.currency);
   return {campaignId:c.id,currency:c.currency,
    attributedConversions:c.attributedConversions,attributedRevenue:c.attributedRevenue,
    matchedOrders:matching.length,paidOrders:matching.filter(x=>x.hasPaid).length,
-   observedNetRevenue:fromCents(revenue),observedAdvertisingSpend:c.spend,
+   observedNetRevenue:fromMinor(revenue,c.currency),observedAdvertisingSpend:c.spend,
    roasOnObservedOrders:spent>0n?fromCents(roundDiv(revenue*100n,spent)):null,
    evidence:matching.length?"matched-explicit-campaign-id":"not-linked",
-   discrepancy:fromCents(parseDecimal(c.attributedRevenue)-revenue),
+   discrepancy:fromMinor(minorAmount(c.attributedRevenue,c.currency)-revenue,c.currency),
    warning:"La atribución de anuncios no equivale a pagos confirmados y no debe sustituir registros operativos."};
  });
 }
 export type CPASensitivityInput={
- createdOrders:string; shippedPercent:string; deliveredPercentOfShipped:string;paidPercentOfDelivered:string;
+ currency?:string;createdOrders:string; shippedPercent:string; deliveredPercentOfShipped:string;paidPercentOfDelivered:string;
  contributionPerPaid:string; failedDeliveryCost:string; reverseShippingPerUnpaid:string;
  advertisementPerCreated:string; otherFixedCosts:string;
 };
 export function simulateCPASensitivity(input:CPASensitivityInput, deliveryRates:string[], cpaValues:string[]){
  if(!countPattern.test(input.createdOrders))throw new FinancialInputError("Pedidos creados inválidos.");
- const count=BigInt(input.createdOrders);
+ const count=BigInt(input.createdOrders),currency=input.currency??"COP";
+ const money=(value:string)=>minorAmount(value,currency);
  const percent=(v:string)=>{const match=/^(0|[1-9]\d{0,2})(?:\.\d{1,2})?$/.test(v);if(!match)throw new FinancialInputError("Porcentaje inválido.");const b=BigInt(v.replace(".","").padEnd(v.includes(".")?v.split(".")[0]!.length+2:v.length+2,"0"));if(b>10000n)throw new FinancialInputError("Porcentaje fuera de rango.");return b;};
  const shipped=roundDiv(count*percent(input.shippedPercent),10000n);
  const paidRate=percent(input.paidPercentOfDelivered);
- const fixed=parseDecimal(input.otherFixedCosts);
- const contribution=parseDecimal(input.contributionPerPaid);
- const failedCost=parseDecimal(input.failedDeliveryCost),reverse=parseDecimal(input.reverseShippingPerUnpaid);
+ const fixed=money(input.otherFixedCosts);
+ const contribution=money(input.contributionPerPaid);
+ const failedCost=money(input.failedDeliveryCost),reverse=money(input.reverseShippingPerUnpaid);
  if(deliveryRates.length>20||cpaValues.length>20)throw new FinancialInputError("Matriz demasiado grande.");
  return deliveryRates.map(deliveryPercent=>{
   const delivered=roundDiv(shipped*percent(deliveryPercent),10000n);
   const paid=roundDiv(delivered*paidRate,10000n),failed=shipped-delivered,unpaid=delivered-paid;
   return {deliveryPercent,shippedOrders:shipped.toString(),deliveredOrders:delivered.toString(),paidOrders:paid.toString(),
    results:cpaValues.map(cpa=>{
-    const cp=parseDecimal(cpa);
+    const cp=money(cpa);
     const result=paid*contribution-count*cp-failed*failedCost-unpaid*reverse-fixed;
-    return {cpa,profit:fromCents(result),feasible:result>=0n};
+    return {cpa,profit:fromMinor(result,currency),currency,feasible:result>=0n};
    })};
  });
 }
