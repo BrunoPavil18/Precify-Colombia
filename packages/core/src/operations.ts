@@ -40,7 +40,7 @@ export function validateOrderEvent(value:OrderEvent):OrderEvent {
  if(typeof value.currency!=="string"||!/^[A-Z]{3}$/.test(value.currency))throw new FinancialInputError("Moneda inválida.");
  for(const field of ["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount"] as const)
   nonNegativeMinorAmount(value[field],value.currency);
- if(nonNegativeMinorAmount(value.refundAmount,value.currency)>nonNegativeMinorAmount(value.grossRevenue,value.currency))
+ if(nonNegativeMinorAmount(value.grossRevenue,value.currency)>0n && nonNegativeMinorAmount(value.refundAmount,value.currency)>nonNegativeMinorAmount(value.grossRevenue,value.currency))
   throw new FinancialInputError("Reembolso mayor que el importe de la venta.");
  return value;
 }
@@ -73,11 +73,16 @@ export type OrderSnapshot={orderId:string;status:CODStatus;campaignId:string|nul
 };
 function normalizeEvents(input:OrderEvent[]):Map<string,OrderEvent[]> {
  if(!Array.isArray(input)||input.length>100000)throw new FinancialInputError("Cantidad de eventos excesiva.");
- const ids=new Set<string>(),groups=new Map<string,OrderEvent[]>();
+ const ids=new Map<string,OrderEvent>(),groups=new Map<string,OrderEvent[]>();
  for(const event of input){
   validateOrderEvent(event);
-  if(ids.has(event.id))continue; // idempotent replay
-  ids.add(event.id);
+  const prior=ids.get(event.id);
+  if(prior){
+   const fingerprint=(v:OrderEvent)=>JSON.stringify(Object.keys(v).sort().map(k=>[k,v[k as keyof OrderEvent]]));
+   if(fingerprint(prior)!==fingerprint(event))throw new FinancialInputError("ID de evento duplicado con contenido distinto.");
+   continue;
+  }
+  ids.set(event.id,event);
   const group=groups.get(event.orderId)??[];
   group.push(event);groups.set(event.orderId,group);
  }
@@ -89,6 +94,24 @@ function normalizeEvents(input:OrderEvent[]):Map<string,OrderEvent[]> {
  return groups;
 }
 function latest(group:OrderEvent[]):OrderEvent{return group[group.length-1]!;}
+const moneyFields=["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount"] as const;
+/**
+ * Payment/refund status events often omit original amounts. A later nonzero
+ * observation replaces a previous amount; omitted zero does not erase it.
+ * To correct a nonzero amount to zero, require an explicit order correction.
+ * Never sum repeated full-order snapshots across workflow stages.
+ */
+function orderSnapshot(group:OrderEvent[]):OrderEvent {
+ const item={...latest(group)};
+ for(const key of moneyFields){
+  const known=[...group].reverse().find(x=>nonNegativeMinorAmount(x[key],x.currency)>0n);
+  if(known)item[key]=known[key];
+ }
+ item.campaignId=[...group].reverse().find(x=>x.campaignId!==null)?.campaignId??null;
+ if(nonNegativeMinorAmount(item.refundAmount,item.currency)>nonNegativeMinorAmount(item.grossRevenue,item.currency))
+  throw new FinancialInputError("Reembolso acumulado superior a la venta del pedido.");
+ return item;
+}
 function observed(group:OrderEvent[],status:CODStatus):boolean{return group.some(v=>v.status===status);}
 export function computeCODFunnel(events:OrderEvent[]):{
  currency:string|null; orders:number;created:number;cancelled:number;shipped:number;
@@ -100,10 +123,10 @@ export function computeCODFunnel(events:OrderEvent[]):{
  let currency:string|null=null,created=0,cancelled=0,shipped=0,delivered=0,paid=0,deliveryFailed=0,returned=0,refunded=0;
  let grossCollected=0n,refunds=0n,incurredCosts=0n,unattributedOrders=0;
  for(const [id,group]of groups){
-  const item=latest(group),wasShipped=observed(group,"shipped")||observed(group,"delivered")||observed(group,"paid")||observed(group,"delivery_failed")||observed(group,"returned")||observed(group,"refunded");
+  const item=orderSnapshot(group),wasShipped=observed(group,"shipped")||observed(group,"delivered")||observed(group,"paid")||observed(group,"delivery_failed")||observed(group,"returned")||observed(group,"refunded");
   const wasDelivered=observed(group,"delivered")||observed(group,"paid")||observed(group,"returned")||observed(group,"refunded");
   const wasPaid=observed(group,"paid")||observed(group,"refunded");
-  const wasReturned=observed(group,"returned")||observed(group,"refunded");
+  const wasReturned=observed(group,"returned");
   const wasRefunded=observed(group,"refunded");
   if(currency!==null&&currency!==item.currency)throw new FinancialInputError("No mezcles diferentes monedas en un resultado COD sin conversión verificable.");
   currency=item.currency;
@@ -140,7 +163,7 @@ export function reconcileCampaigns(events:OrderEvent[],campaigns:AdCampaign[]){
   if(matching.some(o=>o.currency!==c.currency))
    throw new FinancialInputError("Monedas del anuncio y pedidos incompatibles; convierte cada resultado con una tasa fechada.");
   const matchingOrders=normalizeEvents(events);
-  const revenue=matching.reduce((sum,s)=>{const g=matchingOrders.get(s.orderId)!;const row=latest(g);
+  const revenue=matching.reduce((sum,s)=>{const g=matchingOrders.get(s.orderId)!;const row=orderSnapshot(g);
    return sum+(s.hasPaid?minorAmount(row.grossRevenue,c.currency)-(s.hasRefunded?minorAmount(row.refundAmount,c.currency):0n):0n);
   },0n);
   const spent=minorAmount(c.spend,c.currency);
