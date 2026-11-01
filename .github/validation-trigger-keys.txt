@@ -1,0 +1,1 @@
+One-shot owner-authorized CI signal for Supabase 2026 key alias changes (2026-11-01).
