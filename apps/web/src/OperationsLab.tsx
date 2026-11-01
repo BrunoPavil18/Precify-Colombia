@@ -59,14 +59,15 @@ function exportText(content:string,filename:string,type:string){
  const url=URL.createObjectURL(new Blob([content],{type}));
  const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
-export function OperationsLab({products}:{products:Product[]}){
+type OpsTab="unified"|"dashboard"|"import"|"matrix"|"prices";
+export function OperationsLab({products,initialTab="unified"}:{products:Product[];initialTab?:OpsTab}){
  const t=useTranslator();
  const initial=useMemo(readOperations,[]);
  const [data,setData]=useState(initial.value);
  const baseline=useRef(initial.raw);
  const [locked,setLocked]=useState(!!initial.error);
  const [notice,setNotice]=useState(initial.error??"");
- const [tab,setTab]=useState<"unified"|"dashboard"|"import"|"matrix"|"prices">("unified");
+ const [tab,setTab]=useState<OpsTab>(initialTab);
  const [csv,setCSV]=useState(""),[headers,setHeaders]=useState<string[]>([]);
  const [mapping,setMapping]=useState<OrderCSVMapping>({});
  const [importMode,setImportMode]=useState<"orders"|"campaigns">("orders");
