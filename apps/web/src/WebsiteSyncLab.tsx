@@ -176,7 +176,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     <button className="danger" onClick={()=>{void remove(site);}}>{t.remove}</button>
    </div>
    <p role="status">{statusesText(site)}
-    {statuses[site.id]?.lastError?" · "+statuses[site.id].lastError:""}</p>
+    {statuses[site.id]?.lastError?" · "+(statuses[site.id]?.lastError??""):""}</p>
    <small>{t.last}: {stats[site.id]?.at?new Date(stats[site.id]?.at??0).toLocaleString(locale):t.never}
     {" · "}{t.rows}: {stats[site.id]?.count??0}
     {" · "}{t.imported}: {statuses[site.id]?.pulled??0}</small>
