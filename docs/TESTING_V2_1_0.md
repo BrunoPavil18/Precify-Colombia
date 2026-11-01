@@ -87,3 +87,9 @@ Four preceding Actions attempts failed and were repaired. All checks above are b
 [GitHub Actions #41309016163](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163) passed: frozen install, TypeScript, AST lint, **61 core + 22 web + 6 service + 1 integration SDK = 90/90 tests**, API syntax, Vite production build, ESM packaging, and dependency audit reporting no known vulnerabilities at the moderate threshold. An initial run [#41308887058](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41308887058) identified two regressions, fixed before the successful run.
 
 These new service tests verify source/SQL **contracts**, not PostgreSQL transaction execution. The temporary Actions workflow and its trigger have been removed. A test database is still needed to confirm atomic erasure and concurrent imports across organizations; real Meta Ads, webhook reception and browser PWA/iframe acceptance remain unexecuted.
+
+## Final additional CI evidence — 2026-11-01
+
+[GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309523249) completed **successfully** with **91/91 tests** (61 core, 22 web, 7 service static/security tests, 1 server integration SDK), frozen install, typecheck, AST lint, Node service syntax, production build, ESM package verification and dependency audit with no known moderate-or-higher vulnerabilities. It includes the test for separation of Supabase publishable/secret keys and backward-compatible environment-variable aliases.
+
+The 2026 Supabase key transition is documented but no real Supabase gateway handshake, service-role RLS isolation, SQL execution, Meta OAuth, signed live webhook, browser PWA/iframe E2E or external security review has been performed. The temporary workflow was removed. Automated success should not be described as end-to-end connected-service homologation.
