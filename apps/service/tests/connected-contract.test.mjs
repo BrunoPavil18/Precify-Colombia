@@ -39,3 +39,11 @@ test("connected browser caches only the consented organization and avoids duplic
  assert.match(ui,/const current=await ensureFreshSession\(session\)/);
  assert.doesNotMatch(ui,/await renewSession\(session\)/);
 });
+
+test("public and privileged Supabase API keys remain separate with modern and legacy aliases",()=>{
+ assert.match(service,/const publicKey=env\.SUPABASE_PUBLISHABLE_KEY\|\|env\.SUPABASE_ANON_KEY/);
+ assert.match(service,/const adminKey=env\.SUPABASE_SECRET_KEY\|\|env\.SUPABASE_SERVICE_KEY/);
+ assert.match(service,/const serviceHeaders=\{apikey:adminKey,\.\.\.bearer\(adminKey\)\}/);
+ assert.match(service,/headers:\{apikey:publicKey,\.\.\.bearer\(token\)\}/);
+ assert.doesNotMatch(service,/apikey:publicKey,\.\.\.bearer\(publicKey\)/);
+});
