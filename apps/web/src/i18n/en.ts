@@ -1,4 +1,4 @@
-/** Static localized strings. */
+/* Canonical static localized dictionary */
 export const en: Record<string,string> = {
   "Calculadora": "Calculator",
   "Precio recomendado": "Recommended price",
@@ -732,5 +732,15 @@ export const en: Record<string,string> = {
   "Limpiar búsqueda": "Clear search",
   "Abrir menú": "Open menu",
   "Cerrar menú": "Close menu",
-  "LOCAL": "LOCAL"
+  "LOCAL": "LOCAL",
+  "Actividad operacional importada": "Imported operational activity",
+  "DATOS IMPORTADOS, NO VERIFICADOS POR PRECIFY": "IMPORTED DATA, NOT VERIFIED BY PRECIFY",
+  "Operaciones y anuncios": "Operations and ads",
+  "Abrir panel COD": "Open COD dashboard",
+  "Hay datos operativos inválidos. Revisa el módulo de importaciones sin sobrescribir la copia original.": "Some operational data is invalid. Review imports without overwriting the original copy.",
+  "Pedidos importados": "Imported orders",
+  "Pagos registrados": "Recorded payments",
+  "Devoluciones registradas": "Recorded returns",
+  "Campañas importadas": "Imported campaigns",
+  "Métricas declaradas por la fuente": "Metrics reported by the source"
 };

@@ -327,3 +327,12 @@ main>.main-card,main>.two-column,main>.advanced-results{animation:pc-reveal .25s
  .sidebar,.nav-link,.overview-action,.product-card,main>.main-card,main>.two-column,main>.advanced-results,.overview-page,.confirmation-dialog{
   animation-duration:.01ms;transition-duration:.01ms;transform:none}
 }
+
+/* Import-only operational dashboard: explicit provenance, one currency per card. */
+.overview-observed-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+.overview-observed{display:grid;gap:7px;border:1px solid #365141;background:#22352a;border-radius:11px;padding:16px}
+.overview-observed span{font-size:12px;color:#b7d5c1}
+.overview-observed strong{font-size:25px;color:var(--pc-text);line-height:1.1}
+.overview-observed small{font-size:11px;color:var(--pc-muted)}
+.overview-imported .section-head{align-items:center}
+@media(max-width:720px){.overview-imported .section-head{align-items:flex-start}}

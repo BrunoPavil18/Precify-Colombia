@@ -1,4 +1,4 @@
-/** Static localized strings. */
+/* Canonical static localized dictionary */
 export const ptBR: Record<string,string> = {
   "Calculadora": "Calculadora",
   "Precio recomendado": "Preço recomendado",
@@ -732,5 +732,15 @@ export const ptBR: Record<string,string> = {
   "Limpiar búsqueda": "Limpar busca",
   "Abrir menú": "Abrir menu",
   "Cerrar menú": "Fechar menu",
-  "LOCAL": "LOCAL"
+  "LOCAL": "LOCAL",
+  "Actividad operacional importada": "Atividade operacional importada",
+  "DATOS IMPORTADOS, NO VERIFICADOS POR PRECIFY": "DADOS IMPORTADOS, NÃO VERIFICADOS PELO PRECIFY",
+  "Operaciones y anuncios": "Operações e anúncios",
+  "Abrir panel COD": "Abrir painel COD",
+  "Hay datos operativos inválidos. Revisa el módulo de importaciones sin sobrescribir la copia original.": "Há dados operacionais inválidos. Revise o módulo de importações sem sobrescrever a cópia original.",
+  "Pedidos importados": "Pedidos importados",
+  "Pagos registrados": "Pagamentos registrados",
+  "Devoluciones registradas": "Devoluções registradas",
+  "Campañas importadas": "Campanhas importadas",
+  "Métricas declaradas por la fuente": "Métricas declaradas pela fonte"
 };
