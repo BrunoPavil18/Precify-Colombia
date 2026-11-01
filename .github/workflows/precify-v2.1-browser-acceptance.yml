@@ -1,0 +1,26 @@
+name: Precify 2.1 one-shot browser acceptance
+on:
+  push:
+    branches:
+      - feat/precify-colombia-v2.1.0
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:2.1.0
+      - name: Compile browser cache module
+        run: pnpm --dir apps/web exec tsc src/website-sync-db.ts --target ES2022 --module ES2022 --lib DOM,ES2022 --skipLibCheck --outDir ../../.browser-sync-output
+      - name: Browser IndexedDB smoke
+        run: node scripts/browser-sync-smoke.mjs .browser-sync-output/website-sync-db.js
