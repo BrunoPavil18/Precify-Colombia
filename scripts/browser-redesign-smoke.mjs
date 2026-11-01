@@ -65,10 +65,20 @@ try{
  await shot("overview-desktop.png");
  for(const [label,title] of [
   ["Calculadora","Calculadora de precios"],["Productos","Catálogo de productos"],
+  ["Escenarios","Escenarios de rentabilidad"],["Metas","Metas y punto de equilibrio"],
+  ["Precio por unidad","Precio por unidad"],["Precio al consumidor","Precio al consumidor"],
+  ["Cartera multiproducto","Cartera multiproducto"],
   ["Riesgo COD","Simulación de riesgo COD"],["Marketing y CAC","Marketing y CAC"],
   ["Matriz CPA","Matriz de sensibilidad CPA"],["Precios internacionales","Precificación internacional"],
-  ["Conexiones","Fuentes y conexiones"],["Panel COD","Panel de operaciones COD"]
- ])await nav(label,title);
+  ["Precificación COD","Precificación COD integrada"],["Importar CSV","Importación de datos"],
+  ["Conexiones","Fuentes y conexiones"],["Panel COD","Panel de operaciones COD"],
+  ["Informes","Informes y comparaciones"],["Competidores","Referencias de competidores"],
+  ["Divisas","Divisas y cambio"],["Datos y copias","Datos, privacidad y copias"]
+ ]){
+  await nav(label,title);
+  if(["Calculadora","Riesgo COD","Marketing y CAC","Panel COD","Informes","Datos y copias"].includes(label))
+   await shot("desktop-"+label.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".png");
+ }
  const home=await evaluate('(()=>{const item=[...document.querySelectorAll(".nav-link")].find(x=>x.textContent.includes("Visión general"));if(!item)return false;item.click();return true})()');
  if(!home)throw Error("Dashboard entry missing");
  await until(()=>evaluate('!!document.querySelector(".overview-page")'));
@@ -85,7 +95,7 @@ try{
  if(await evaluate('document.querySelector(".sidebar").classList.contains("mobile-open")'))throw Error("Mobile sidebar did not close after navigation");
  await shot("calculator-mobile.png");
  if(errors.length)throw Error("Unhandled React/JS errors: "+JSON.stringify(errors.slice(0,4)));
- console.log("PASS: Jet Black, normal animation, 8 routed tools, real mobile drawer, no JS exceptions");
+ console.log("PASS: Jet Black, normal animation, 19 routed tools, real mobile drawer, no JS exceptions");
 }finally{
  try{ws?.close();}catch{}
  try{child?.kill("SIGKILL");}catch{}
