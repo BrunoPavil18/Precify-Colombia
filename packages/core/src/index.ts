@@ -3,3 +3,4 @@ export * from "./pricing.js";
 export * from "./scenarios.js";
 export * from "./state.js";
 export * from "./advanced.js";
+export * from "./fx.js";
