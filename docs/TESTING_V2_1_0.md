@@ -68,10 +68,16 @@ The top-level `test` now covers core, web, backend security and the server-side 
 ## Acceptance record
 | Area | Evidence | State |
 |---|---|---|
-| Core unit and regression | `pnpm.cmd test` | Not executed |
-| TypeScript & lint | `pnpm.cmd typecheck`, `pnpm.cmd lint` | Not executed |
-| Production build / package | `pnpm.cmd build`, `pnpm.cmd verify:core` | Not executed |
-| Service syntax/security SDK | `pnpm.cmd check:connected-api`, service tests | Not executed |
+| Core unit and regression | GitHub Actions #41303902552 | PASS: 61 core tests |
+| TypeScript & lint | GitHub Actions #41303902552 | PASS |
+| Production build / package | GitHub Actions #41303902552 | PASS |
+| Service syntax/security SDK | GitHub Actions #41303902552 | PASS: syntax + 2 security + 1 SDK test |
 | Browser accessibility/PWA | Offline/production browser walkthrough | Not executed |
 | PostgreSQL/Meta | Isolated credentials and external service checks | Not configured |
 | Legal/professional review | External scope-specific review | Not performed |
+
+## Recorded GitHub Actions validation — 2026-11-01
+
+The owner authorized a temporary, feature-branch-specific GitHub Actions gate. [Run #41303902552](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303902552) **passed**, including `pnpm install --frozen-lockfile --ignore-scripts`, `pnpm typecheck`, `pnpm lint` (existing AST lint implementation, not ESLint), `pnpm test` (61 core + 22 web + 2 service security + 1 server-side SDK = 86 total), `pnpm check:connected-api`, `pnpm build`, `pnpm verify:core` and `pnpm audit --audit-level moderate` with no known vulnerabilities reported.
+
+Four preceding Actions attempts failed and were repaired. All checks above are backed by the GitHub job logs, not assertions inferred from source. Automated success does **not** cover real browser E2E, offline/PWA upgrades, production hosting, real Meta consent/permission verification, Supabase tenant/isolation E2E, operational financial reconciliation against live merchant datasets or penetration testing. These remain blocking for production-connected launch. No release or merge is authorized by CI success alone.
