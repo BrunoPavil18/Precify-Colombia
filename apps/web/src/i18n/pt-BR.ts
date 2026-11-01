@@ -743,5 +743,8 @@ export const ptBR: Record<string,string> = {
   "Devoluciones registradas": "Devoluções registradas",
   "Campañas importadas": "Campanhas importadas",
   "Métricas declaradas por la fuente": "Métricas declaradas pela fonte",
-  "Los cálculos y datos locales se procesan en este navegador. No necesitas crear una cuenta. Las conexiones a servicios externos son opcionales y requieren tu autorización.": "Os cálculos e os dados locais são processados neste navegador. Não é necessário criar uma conta. As conexões com serviços externos são opcionais e exigem sua autorização."
+  "Los cálculos y datos locales se procesan en este navegador. No necesitas crear una cuenta. Las conexiones a servicios externos son opcionales y requieren tu autorización.": "Os cálculos e os dados locais são processados neste navegador. Não é necessário criar uma conta. As conexões com serviços externos são opcionais e exigem sua autorização.",
+  "Ranking por margen": "Ranking por margem",
+  "Mayor contribución": "Maior contribuição",
+  "Mayor margen": "Maior margem"
 };
