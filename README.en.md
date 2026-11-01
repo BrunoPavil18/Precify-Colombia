@@ -4,7 +4,11 @@
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Version 2.0.1 · Free and open source · Apache License 2.0**
+**Version 2.1.0 in development (UNRELEASED) · Latest stable version: 2.0.1 · Apache License 2.0**
+
+## Version 2.1.0 development — not production-certified
+
+This feature branch adds native ISO-currency pricing, dated daily FX references with offline caches, an independent international catalog, a COD funnel, CPA matrix, CSV imports, dashboards and an optional REST service with organizations, roles, signed webhooks and Facebook Ads. A stateless iframe calculator (`?embed=1`) can be embedded in Vezura or another website **without modifying Vezura's repository**. Connected capabilities require PostgreSQL/Supabase, Meta credentials and external integration testing; they are NOT production-ready. [Progress checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integration guide](docs/CONNECTED_API_V2_1_0.md).
 
 ## Version 2.0.1 update
 
