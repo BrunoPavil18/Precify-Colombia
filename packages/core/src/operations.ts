@@ -39,8 +39,8 @@ export function validateOrderEvent(value:OrderEvent):OrderEvent {
  if(value.campaignId!==null)safeId(value.campaignId,"Campaña");
  if(typeof value.currency!=="string"||!/^[A-Z]{3}$/.test(value.currency))throw new FinancialInputError("Moneda inválida.");
  for(const field of ["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount"] as const)
-  minorAmount(value[field],value.currency);
- if(minorAmount(value.refundAmount,value.currency)>minorAmount(value.grossRevenue,value.currency))
+  nonNegativeMinorAmount(value[field],value.currency);
+ if(nonNegativeMinorAmount(value.refundAmount,value.currency)>nonNegativeMinorAmount(value.grossRevenue,value.currency))
   throw new FinancialInputError("Reembolso mayor que el importe de la venta.");
  return value;
 }
@@ -48,7 +48,7 @@ export function validateAdCampaign(value:AdCampaign):AdCampaign {
  safeId(value.id,"Campaña");safeId(value.source,"Origen");
  if(typeof value.currency!=="string"||!/^[A-Z]{3}$/.test(value.currency))
   throw new FinancialInputError("Moneda inválida.");
- for(const field of ["spend","attributedRevenue"] as const)minorAmount(value[field],value.currency);
+ for(const field of ["spend","attributedRevenue"] as const)nonNegativeMinorAmount(value[field],value.currency);
  for(const field of ["impressions","clicks","attributedConversions"] as const)
   if(!countPattern.test(value[field]))throw new FinancialInputError("Contador de publicidad inválido.");
  dateString(value.observedFrom);dateString(value.observedTo);
@@ -162,7 +162,7 @@ export type CPASensitivityInput={
 export function simulateCPASensitivity(input:CPASensitivityInput, deliveryRates:string[], cpaValues:string[]){
  if(!countPattern.test(input.createdOrders))throw new FinancialInputError("Pedidos creados inválidos.");
  const count=BigInt(input.createdOrders),currency=input.currency??"COP";
- const money=(value:string)=>minorAmount(value,currency);
+ const money=(value:string)=>nonNegativeMinorAmount(value,currency);
  const percent=(v:string)=>{const match=/^(0|[1-9]\d{0,2})(?:\.\d{1,2})?$/.test(v);if(!match)throw new FinancialInputError("Porcentaje inválido.");const b=BigInt(v.replace(".","").padEnd(v.includes(".")?v.split(".")[0]!.length+2:v.length+2,"0"));if(b>10000n)throw new FinancialInputError("Porcentaje fuera de rango.");return b;};
  const shipped=roundDiv(count*percent(input.shippedPercent),10000n);
  const paidRate=percent(input.paidPercentOfDelivered);
