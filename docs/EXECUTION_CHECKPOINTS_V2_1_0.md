@@ -125,3 +125,9 @@ No user account, paid service, Meta credentials, Supabase deployment or Vezura c
 - Removed temporary workflow and signal after validation. Neither `main` nor Vezura was changed. No automatic Actions configured.
 
 **Remaining external acceptance:** run the schema and real tenant-boundary/transaction tests in a dedicated Supabase/PostgreSQL test project; connect a real, approved Meta Ads application to verify OAuth and campaign insights; do browser-level iframe/offline/PWA tests. Do not call the connected service fully homologated without these. A production-connected launch will require deployment accounts, application registration, redirect URLs and secure credentials, but **no such user action is required to finish the current repository-only work**.
+
+### Single consolidated PR — draft for external acceptance
+- Opened **[PR #4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4)** from `feat/precify-colombia-v2.1.0` to `main` as **DRAFT** after successful automated contract checks. This is the only v2.1.0 PR; not a merged or released version.
+- The PR description records completed modules and remaining real database/Meta/browser verification. It may be converted to ready only after unresolved acceptance conditions are addressed; no merge/release without the owner's explicit approval.
+- The GitHub temporary validation workflows were removed; the last source-affecting commit was validated successfully by Actions #41309016163, with later commits limited to documentation/CI cleanup.
+- No immediate action is required from the owner for repository work; provisioning a dedicated Supabase test project and a real Meta developer app will require an explicit setup decision before those external flows can be authenticated.
