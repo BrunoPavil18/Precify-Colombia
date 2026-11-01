@@ -116,6 +116,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       running.current.delete(site.id);
       if(stopped)return;
       await loadSnapshot(scope,site.id);
+      return result;
      };
      controllers.current.set(site.id,{run});
      handler=()=>{void run();};
