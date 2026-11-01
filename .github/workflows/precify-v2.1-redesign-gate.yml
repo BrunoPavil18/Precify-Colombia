@@ -22,3 +22,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify:2.1.0
+      - name: Real Chromium production UI acceptance
+        run: node scripts/browser-redesign-smoke.mjs
+      - name: Preserve screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: precify-dark-ui
+          path: artifacts/redesign/*.png
+          if-no-files-found: ignore
+          retention-days: 7
