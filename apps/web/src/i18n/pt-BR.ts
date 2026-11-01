@@ -546,5 +546,15 @@ export const ptBR: Record<string,string> = {
   "Pagos registrados por día": "Pagamentos registrados por dia",
   "Métricas atribuidas de campañas": "Métricas atribuídas das campanhas",
   "Todavía no hay métricas publicitarias importadas.": "Ainda não há métricas de anúncios importadas.",
-  "Campaña": "Campanha"
+  "Campaña": "Campanha",
+  "Nivel del informe": "Nível do relatório",
+  "Conjunto de anuncios": "Conjunto de anúncios",
+  "Anuncio": "Anúncio",
+  "Consultar datos agregados de edad y género": "Consultar dados agregados de idade e gênero",
+  "Datos demográficos agregados actualizados.": "Dados demográficos agregados atualizados.",
+  "Edad": "Idade",
+  "Género": "Gênero",
+  "Impresiones": "Impressões",
+  "Clics": "Cliques",
+  "Gasto": "Gasto"
 };
