@@ -17,6 +17,7 @@ export type AdCampaign={
  id:string;source:string;currency:string;spend:string;impressions:string;
  clicks:string;attributedConversions:string;attributedRevenue:string;
  observedFrom:string;observedTo:string;
+ level?:"campaign"|"adset"|"ad";parentCampaignId?:string;name?:string;
 };
 const statuses:CODStatus[]=["created","cancelled","shipped","delivery_failed","delivered","paid","returned","refunded"];
 const idPattern=/^[a-zA-Z0-9_.:-]{1,128}$/;
@@ -54,6 +55,17 @@ export function validateAdCampaign(value:AdCampaign):AdCampaign {
  if(Date.parse(value.observedFrom)>Date.parse(value.observedTo))
   throw new FinancialInputError("Rango de fechas inválido.");
  return value;
+}
+export function advertisingIndicators(campaign:AdCampaign){
+ const c=validateAdCampaign(campaign),spend=minorAmount(c.spend,c.currency);
+ const imp=BigInt(c.impressions),clicks=BigInt(c.clicks);
+ const attributed=minorAmount(c.attributedRevenue,c.currency);
+ return {id:c.id,currency:c.currency,impressions:c.impressions,clicks:c.clicks,
+  ctrPercent:imp===0n?null:fromCents(roundDiv(clicks*10000n,imp)),
+  cpc:clicks===0n?null:fromMinor(roundDiv(spend,clicks),c.currency),
+  cpm:imp===0n?null:fromMinor(roundDiv(spend*1000n,imp),c.currency),
+  attributedRoas:spend===0n?null:fromCents(roundDiv(attributed*100n,spend)),
+  evidence:"attributed-platform-metrics" as const};
 }
 export type OrderSnapshot={orderId:string;status:CODStatus;campaignId:string|null;currency:string;
  source:string;occurredAt:string;totalEvents:number;
