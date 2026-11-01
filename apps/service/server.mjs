@@ -69,7 +69,7 @@ async function sb(method,table,query={},body,prefer){
  const text=await response.text();return text?JSON.parse(text):null;
 }
 async function rpc(name,body){
- if(!["precify_create_org","precify_consume_oauth_state","precify_import_order_batch"].includes(name))fail(500,"Unknown RPC");
+ if(!["precify_create_org","precify_consume_oauth_state","precify_import_order_batch","precify_import_campaign_batch","precify_erase_operational_data"].includes(name))fail(500,"Unknown RPC");
  const url=new URL("/rest/v1/rpc/"+name,dbUrl);
  const response=await fetch(url,{method:"POST",headers:{...serviceHeaders,"content-type":"application/json"},body:JSON.stringify(body)});
  if(!response.ok)fail(502,"Organization creation failed");
@@ -160,10 +160,17 @@ async function importOrders(org,auth,rows){
 async function importCampaigns(org,auth,rows){
  if(!Array.isArray(rows)||rows.length>10000)fail(400,"Invalid campaign batch");
  const unique=new Map();
- for(const c of rows){validateAdCampaign(c);unique.set(c.id,c);}
- if(unique.size)await insert("precify_campaigns",[...unique.values()].map(c=>({org_id:org,id:c.id,payload:c,updated_at:new Date().toISOString()})),{upsert:"merge",conflict:"org_id,id"});
- await audit(org,auth,"campaigns.import",{count:unique.size});
- return {imported:unique.size};
+ for(const c of rows){
+  validateAdCampaign(c);
+  const old=unique.get(c.id);
+  if(old&&canonicalJSON(old)!==canonicalJSON(c))fail(409,"Conflicting duplicate campaign ID");
+  unique.set(c.id,c);
+ }
+ // PostgreSQL handles the entire batch under the same org-scoped advisory lock
+ // as COD events and destructive erasure; errors roll the whole batch back.
+ const count=await rpc("precify_import_campaign_batch",{p_org:org,p_campaigns:[...unique.values()]});
+ await audit(org,auth,"campaigns.import",{count});
+ return {imported:count};
 }
 async function exportOrg(org){
  const [events,campaigns,prices,audits]=await Promise.all([
@@ -472,9 +479,8 @@ async function handler(req,res){
   }
   if(path==="data"&&req.method==="DELETE"){
    await authorize(auth,org,"owner");
-   for(const table of ["precify_order_events","precify_campaigns","precify_prices","precify_meta_accounts","precify_meta_connections","precify_webhooks","precify_api_keys"])
-    await remove(table,{org_id:"eq."+org});
-   await audit(org,auth,"data.erase",{scope:"connected-operational-data"});
+   // Single database transaction: failure cannot leave just some tables erased.
+   await rpc("precify_erase_operational_data",{p_org:org});
    return respond(res,200,{deleted:true});
   }
   fail(404,"Not found");
