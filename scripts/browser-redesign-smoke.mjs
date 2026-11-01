@@ -79,6 +79,16 @@ try{
   if(["Calculadora","Riesgo COD","Marketing y CAC","Panel COD","Informes","Datos y copias"].includes(label))
    await shot("desktop-"+label.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".png");
  }
+ // End-to-end local workflow: save the default editable example and verify dashboard persistence.
+ await nav("Calculadora","Calculadora de precios");
+ const didSave=await evaluate('(()=>{const button=[...document.querySelectorAll(".action-strip button")].find(el=>el.textContent.includes("Guardar producto"));if(!button)return false;button.click();return true})()');
+ if(!didSave)throw Error("Save product action was not found");
+ await until(()=>evaluate('document.querySelectorAll(".product-card").length===1'));
+ await send("Page.reload",{ignoreCache:true});
+ await until(()=>evaluate('!!document.querySelector(".overview-page")'));
+ const savedCount=await evaluate('document.querySelector(".overview-stat strong")?.textContent.trim()');
+ if(savedCount!=="1")throw Error("Saved product was not preserved after browser reload");
+ await shot("overview-with-product.png");
  const home=await evaluate('(()=>{const item=[...document.querySelectorAll(".nav-link")].find(x=>x.textContent.includes("Visión general"));if(!item)return false;item.click();return true})()');
  if(!home)throw Error("Dashboard entry missing");
  await until(()=>evaluate('!!document.querySelector(".overview-page")'));
