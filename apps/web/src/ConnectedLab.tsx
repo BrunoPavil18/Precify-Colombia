@@ -226,7 +226,7 @@ export function ConnectedLab(){
     <button className="secondary" disabled={busy} onClick={()=>{void createOrg();}}>{t("Crear organización")}</button>
    </div>
    {selected&&<>
-    <label className="field"><input type="checkbox" checked={cacheConsent} onChange={e=>setCacheConsent(e.target.checked)}/> {t("Guardar un resumen financiero offline solo en este navegador")}</label>
+    <label className="field"><input type="checkbox" checked={cacheConsent} onChange={e=>{const consent=e.target.checked;setCacheConsent(consent);if(!consent&&session&&selected){try{localStorage.removeItem(summaryKey(session.user.id,selected));}catch{}}}}/> {t("Guardar un resumen financiero offline solo en este navegador")}</label>
     <div className="advanced-results">
      <h3>{offline?t("Último informe guardado — no actualizado"):t("Informe conectado")}</h3>
      {!dashboard?<p>{t("No hay un informe conectado disponible.")}</p>:
