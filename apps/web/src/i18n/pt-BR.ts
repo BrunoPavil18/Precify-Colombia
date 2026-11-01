@@ -556,5 +556,8 @@ export const ptBR: Record<string,string> = {
   "Género": "Gênero",
   "Impresiones": "Impressões",
   "Clics": "Cliques",
-  "Gasto": "Gasto"
+  "Gasto": "Gasto",
+  "VERSIÓN 2.1.0 EN DESARROLLO": "VERSÃO 2.1.0 EM DESENVOLVIMENTO",
+  "Precify Colombia 2.1.0 · En desarrollo · Apache-2.0": "Precify Colombia 2.1.0 · Em desenvolvimento · Apache-2.0",
+  "Cuenta conectada opcional": "Conta conectada opcional"
 };
