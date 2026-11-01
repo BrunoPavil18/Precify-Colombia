@@ -595,5 +595,7 @@ export const en: Record<string,string> = {
   "Historial de precios inválido.": "Invalid price history.",
   "IDs duplicados en respaldo.": "Duplicate IDs in backup.",
   "Respaldo validado. Confirma la sustitución antes de continuar.": "Backup validated. Confirm replacement before proceeding.",
-  "Respaldo operacional restaurado.": "Operations backup restored."
+  "Respaldo operacional restaurado.": "Operations backup restored.",
+  "Calculadora integrable. Sin cuenta ni transferencia de datos a la tienda o al servidor.": "Embeddable calculator without an account or transferring data to the store or server.",
+  "Valores estimados. No son asesoría fiscal ni precios garantizados.": "Estimated values, not tax advice or guaranteed prices."
 };
