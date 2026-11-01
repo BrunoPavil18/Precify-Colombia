@@ -108,3 +108,20 @@ The total five run durations recorded by GitHub are 23s, 24s, 30s, 37s and 44s (
 
 ### Final CI cleanup confirmation — 2026-11-01
 The temporary `.github/workflows/validate-v2.1.0-once.yml` and `.github/validation-trigger-2.1.0.txt` were both removed from the feature branch after GitHub Actions success #41303902552. GitHub shows five completed validation runs, with no further run on the cleanup commits. No ongoing automatic push/PR workflow was retained; the `main` baseline remains unchanged. The source code validated by CI differs from the final feature-branch HEAD only by documentation/CI-file cleanup. Not yet production-homologated due to external integration and browser acceptance gaps.
+
+### Connected-mode consistency pass — 2026-11-01, after owner asked to proceed
+
+No user account, paid service, Meta credentials, Supabase deployment or Vezura changes required for this pass.
+
+- Fixed operational-data deletion: now calls `precify_erase_operational_data` (one PostgreSQL transaction), instead of deleting eight groups sequentially and risking partial erasure. Preserves organization, members and a minimal audit record.
+- Fixed campaign batch imports: `precify_import_campaign_batch` uses the same tenant-specific transaction/advisory-lock convention as order events and deletions. Conflicting same-ID campaigns from different sources/currencies are rejected; current same-source observations can still be updated.
+- Corrected PostgREST RPC handling of empty/204 responses; empty `void` RPC result is no longer parsed as JSON.
+- Web connected mode uses one token-refresh path, obtains explicit report-cache consent for each organization, and clears the previous report when switching organizations.
+- Added four source/SQL contract regression tests in `apps/service/tests/connected-contract.test.mjs`; **these assert API and SQL contracts, not actual PostgreSQL transaction execution**.
+
+**Owner-authorized CI evidence:**
+- [#41308887058](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41308887058): failed because of a duplicate `body` variable in the server's RPC response parser and a cache-consent guard not applied; both corrected.
+- [#41309016163](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163): **SUCCESS** with frozen install, typecheck, AST lint, 61 core + 22 web + 6 service + 1 SDK tests = **90/90**, service syntax check, production build, ESM verification and no known moderate-or-higher dependency vulnerabilities.
+- Removed temporary workflow and signal after validation. Neither `main` nor Vezura was changed. No automatic Actions configured.
+
+**Remaining external acceptance:** run the schema and real tenant-boundary/transaction tests in a dedicated Supabase/PostgreSQL test project; connect a real, approved Meta Ads application to verify OAuth and campaign insights; do browser-level iframe/offline/PWA tests. Do not call the connected service fully homologated without these. A production-connected launch will require deployment accounts, application registration, redirect URLs and secure credentials, but **no such user action is required to finish the current repository-only work**.
