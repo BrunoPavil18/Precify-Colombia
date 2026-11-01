@@ -601,5 +601,18 @@ export const en: Record<string,string> = {
   "La eliminación anterior conserva tu organización y sus miembros. Para eliminar también cuenta de organización, equipos, llaves y conexiones, escribe el ID de la organización.": "The deletion above preserves the organization and its members. To delete the organization, teams, keys and connections, enter the organization ID.",
   "Confirma el ID completo de la organización": "Confirm the full organization ID",
   "Eliminar toda la organización permanentemente": "Permanently delete the entire organization",
-  "Organización y datos conectados eliminados permanentemente.": "Organization and connected data permanently deleted."
+  "Organización y datos conectados eliminados permanentemente.": "Organization and connected data permanently deleted.",
+  "Catálogo internacional guardado en este navegador.": "International catalog saved in this browser.",
+  "Nombre del precio guardado": "Saved price name",
+  "Abrir precio guardado": "Open saved price",
+  "Nueva simulación internacional": "New international simulation",
+  "Guardar precio internacional": "Save international price",
+  "Descargar respaldo internacional": "Download international backup",
+  "Eliminar precio guardado": "Delete saved price",
+  "Se eliminará este precio guardado del catálogo internacional, no tus productos COP.": "This saved price will be deleted from the international catalog, not your COP products.",
+  "Restaurar respaldo de precios internacionales (JSON)": "Restore international pricing backup (JSON)",
+  "La restauración sustituirá el catálogo internacional, sin modificar los productos COP originales.": "Restoration replaces the international catalog without changing original COP products.",
+  "Respaldo validado; confirma si quieres sustituir el catálogo internacional.": "Backup validated; confirm if you want to replace the international catalog.",
+  "Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.": "Another browser tab changed your currency catalog. Export data and reload.",
+  "Introduce un nombre para guardar el precio.": "Enter a name to save this price."
 };
