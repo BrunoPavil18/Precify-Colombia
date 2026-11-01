@@ -27,14 +27,14 @@ function displayAdvancedResult(key:string,value:string|number):string{
  return raw;
 }
 
-export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod"}:{
- initialPane?:Pane;
+export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod",initialProductId=""}:{
+ initialPane?:Pane;initialProductId?:string;
  workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>boolean;
  onDelete:(id:string)=>void;onDirty:(dirty:boolean)=>void
 }){
  const t=useTranslator();
  const [pane,setPane]=useState<Pane>(initialPane);
- const [selected,setSelected]=useState("");
+ const [selected,setSelected]=useState(initialProductId);
  const [cod,setCOD]=useState(initialCOD);
  const [campaign,setCampaign]=useState(initialCampaign);
  const [measure,setMeasure]=useState({price:"10000.00",quantity:"500.00",unit:"g" as PUMUnit,referenceUnit:"g" as PUMUnit});
