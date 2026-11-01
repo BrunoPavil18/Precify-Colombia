@@ -61,7 +61,7 @@ async function sb(method,table,query={},body,prefer){
  if(!supportedTables.has(table))fail(500,"Invalid database table");
  const url=new URL("/rest/v1/"+table,dbUrl);
  for(const [name,value] of Object.entries(query))url.searchParams.set(name,String(value));
- const response=await fetch(url,{method,headers:{...serviceHeaders,"content-type":"application/json",...(prefer?Prefer:undefined)},body:body===undefined?undefined:JSON.stringify(body)});
+ const response=await fetch(url,{method,headers:{...serviceHeaders,"content-type":"application/json",...(prefer?{Prefer:prefer}:{})},body:body===undefined?undefined:JSON.stringify(body)});
  // Replaced below: Prefer header is set explicitly so write semantics are visible.
  if(!response.ok)fail(response.status>=400&&response.status<500?400:502,"Database operation failed: "+response.status);
  if(response.status===204)return null;
