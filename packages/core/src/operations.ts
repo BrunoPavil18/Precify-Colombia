@@ -4,7 +4,7 @@
  * presented as an identical cohort. All amounts are canonical decimal strings.
  */
 import {FinancialInputError,fromCents,roundDiv} from "./money.js";
-import {minorAmount,fromMinor} from "./fx.js";
+import {minorAmount,nonNegativeMinorAmount,fromMinor} from "./fx.js";
 
 export type CODStatus="created"|"cancelled"|"shipped"|"delivery_failed"|"delivered"|"paid"|"returned"|"refunded";
 export type OrderEvent={
