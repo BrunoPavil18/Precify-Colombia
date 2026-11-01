@@ -10,6 +10,12 @@
 
 This feature branch adds native ISO-currency pricing, dated daily FX references with offline caches, an independent international catalog, a COD funnel, CPA matrix, CSV imports, dashboards and an optional REST service with organizations, roles, signed webhooks and Facebook Ads. A stateless iframe calculator (`?embed=1`) can be embedded in Vezura or another website **without modifying Vezura's repository**. Connected capabilities require PostgreSQL/Supabase, Meta credentials and external integration testing; they are NOT production-ready. [Progress checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integration guide](docs/CONNECTED_API_V2_1_0.md).
 
+## Store-owned, local-first sync (2.1.0 candidate)
+
+The new **Connections → Connect your own stores** panel reads updates from independently hosted stores that implement the Precify v1 change-feed protocol, without requiring a central Precify server. A store preserves its own order and campaign history while the computer is switched off. Precify pulls changes after account authentication, every minute by default (30 seconds / 5 minutes / manual only), and on **Sync now**. Consented site-specific records are cached in IndexedDB for offline COD reports, segregated by store and tenant.
+
+**Important:** each store must first implement the authenticated endpoints; no Vezura or Hostinger integration has been deployed by this branch. The current client is an installable web PWA, not a native Windows background service, and session-only read tokens must be provided again after restart. [Protocol and server adapter](docs/SITE_OWNED_SYNC_V2_1_0.md).
+
 ## Version 2.0.1 update
 
 Version 2.0.1 stabilizes attributed versus projected campaign ROAS, stage-specific COD costs, PUM with **explicit content and comparison units** (g/kg, ml/L, cm/m), exact portfolio break-even and ES/PT/EN translations. Version 1/2 backups and previous API contracts remain compatible; legacy three-argument PUM calls retain their historical reference units. See the [integration guide](docs/INTEGRATION_V2.md), [Colombian legal scope](docs/COLOMBIA_LEGAL_V2_0_1.md), and [2.0.1 release notes](docs/RELEASE_NOTES_2.0.1.md).

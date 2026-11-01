@@ -166,3 +166,10 @@ Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flo
 - **Sem deploy, sem merge, sem release e sem alterações no repositório Vezura.** O Supabase existente permanece dedicado às funções conectadas opcionais e não é requisito desta sincronização.
 
 **Condição de release:** aceite real com site de teste implementando os endpoints, token read-only (ou OAuth revisado), HTTPS/CORS, persistência outbox enquanto PC fechado, retomada pelo último cursor, casos de duplicação e concorrência entre abas, remoção de consentimento, operação offline e métricas de campanhas; revisão de privacidade/retenção.
+
+
+### CI handoff and owner-authorized Actions — 2026-11-01
+
+- Consolidated candidate verification completed on GitHub Actions: [run 41314800134](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41314800134) for commit `6fa07229a9d16ad99cb03713faa6a061a4a31b13`: 106/106 tests (61 core, 22 web, 7 service, 16 integration), TS typecheck, AST lint, connected service syntax, Vite production build, ESM package check.
+- Temporary branch Actions workflow is removed after successful owner-authorized validation to avoid unnecessary ongoing CI consumption. Keep the evidence links. Later documentation-only changes do not alter tested application/runtime code.
+- Never describe this as browser/merchant production acceptance: real IndexedDB browser integration, Windows/PWA restart behavior, merchant-owned outbox implementation, HTTPS store auth, mobile behavior and Meta/provider credentials still require external validation.

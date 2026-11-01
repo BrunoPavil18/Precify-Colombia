@@ -10,6 +10,12 @@
 
 Esta branch experimental añade precios nativos en monedas ISO, cotizaciones orientativas diarias con cache offline, catálogo internacional independiente, panel COD y CPA, importación de pedidos/anuncios CSV, dashboard y una API REST conectada opcional con organizaciones, roles, webhooks firmados y Facebook Ads. También permite integrar una calculadora sin cuentas mediante `?embed=1`, por ejemplo en Vezura, **sin modificar el repositorio de Vezura**. Las funciones conectadas requieren servidor PostgreSQL/Supabase, credenciales Meta y validación externa; aún NO se consideran listas para producción. [Checkpoints de ejecución](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Guía de integración](docs/CONNECTED_API_V2_1_0.md).
 
+## Sincronización local-first con tiendas independientes (candidata 2.1.0)
+
+El nuevo panel **Conexiones → Sincronización con tiendas propias** consume cambios de tiendas que implementen el protocolo Precify v1, sin requerir un servidor central de Precify. Cada tienda conserva sus pedidos y campañas, incluso mientras el ordenador está apagado. Precify descarga únicamente los cambios pendientes al autenticar la cuenta, cada minuto por defecto (30 segundos / 5 minutos / sólo manual) y con **Sincronizar ahora**. El historial se guarda localmente en IndexedDB, separado por tienda/usuario y sólo con consentimiento. Los informes COD se pueden consultar sin conexión.
+
+**Importante:** aún se requiere implementar los endpoints autenticados del protocolo en cada tienda; la integración Vezura/Hostinger no ha sido implementada ni desplegada. La versión actual es una PWA instalable en el navegador, no un servicio nativo Windows. El token temporal de lectura no se conserva al reiniciar. [Contrato y adaptador de servidor](docs/SITE_OWNED_SYNC_V2_1_0.md).
+
 ## Actualización 2.0.1
 
 La v2.0.1 estabiliza campañas (ROAS atribuido y proyectado separados), costos COD por etapa, PUM con **unidad de contenido y unidad de comparación seleccionables** (g/kg, ml/L, cm/m), equilibrio exacto de cartera y traducciones ES/PT/EN. Los backups v1/v2 y la API histórica permanecen compatibles; el cálculo PUM con tres parámetros mantiene su referencia anterior para consumidores existentes. Consulte la [integración](docs/INTEGRATION_V2.md), la [guía legal](docs/COLOMBIA_LEGAL_V2_0_1.md) y las [notas 2.0.1](docs/RELEASE_NOTES_2.0.1.md).
