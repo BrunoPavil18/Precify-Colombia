@@ -14,6 +14,7 @@ function openSyncDB():Promise<IDBDatabase>{
   req.onsuccess=()=>resolve(req.result);
  });
 }
+const stableJSON=(value:unknown):string=>JSON.stringify(value,(_key,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 export type SyncChange={kind:"order"|"campaign";id:string;operation:"upsert"|"delete";value?:Record<string,unknown>};
 export async function readSiteCheckpoint(scope:string):Promise<{cursor:string|null;at:number;count:number}|null>{
  const db=await openSyncDB();
@@ -35,7 +36,17 @@ export async function applySitePage(scope:string,changes:SyncChange[],cursor:str
   for(const item of changes){
    const key=scope+":"+item.kind+":"+item.id;
    if(item.operation==="delete")rows.delete(key);
-   else rows.put({key,scope,kind:item.kind,id:item.id,value:item.value});
+   else{
+    if(item.kind==="order"){
+     const existing=rows.get(key);
+     existing.onsuccess=()=>{
+      if(existing.result&&stableJSON(existing.result.value)!==stableJSON(item.value)){
+       try{tx.abort();}catch{/* Transaction already finished */ }
+      }
+     };
+    }
+    rows.put({key,scope,kind:item.kind,id:item.id,value:item.value});
+   }
   }
   tx.objectStore("checkpoints").put({scope,cursor,at:Date.now()});
   tx.oncomplete=()=>resolve();

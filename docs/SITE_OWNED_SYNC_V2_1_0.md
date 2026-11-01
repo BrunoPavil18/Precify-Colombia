@@ -8,7 +8,7 @@ A merchant's own website is the **source of truth**. It stores orders/campaigns 
 * GET `/precify/v1/changes?limit=100&cursor=<opaque>`, same auth; returns:
 ```json
 {
-  "changes":[{"kind":"order","id":"order-event-1","operation":"upsert","value":{"id":"order-event-1","orderId":"123","source":"store"}}],
+  "changes":[{"kind":"order","id":"order-event-1","operation":"upsert","value":{"id":"order-event-1","orderId":"123","source":"store","occurredAt":"2026-11-01T12:00:00Z","status":"created","campaignId":null,"currency":"COP","grossRevenue":"99000","productCost":"40000","shippingCost":"0","reverseShippingCost":"0","advertisingCost":"0","otherCost":"0","refundAmount":"0"}}],
   "nextCursor":"opaque-next-cursor",
   "hasMore":false
 }
@@ -69,3 +69,9 @@ The placeholders `verifyStoreViewerToken` and `storeDatabase.readFinancialChange
 ### Validated local reports
 
 Store upserts must contain complete Precify `OrderEvent` or `AdCampaign` values as defined in `packages/core/src/operations.ts`. Reject unknown fields/statuses or malformed amounts at the connector. The Precify client validates payloads before atomically persisting cursor+changes. Per-site and per-currency COD summaries show paid orders and projected operating net result, without mixing currencies or silently copying records into the separate manual workspace.
+
+### Consistency safeguards
+
+- A previously synchronized order event ID is immutable: redelivery with the same payload is idempotent; a conflicting payload aborts its IndexedDB transaction without advancing its cursor. Corrections use a new event ID; campaign measurements may update by ID.
+- "Manual only" never triggers an automatic startup, interval, online or visibility pull. Manual refresh can be attempted even when the browser's online indicator is inaccurate.
+- Cached data is isolated by connector ID and verified tenant subject. Switching subjects hides the previous summary from the UI, without merging accounts.

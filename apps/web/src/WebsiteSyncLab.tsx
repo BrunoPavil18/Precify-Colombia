@@ -90,6 +90,8 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      const subject=await connector.identify();
      if(stopped)return;
      if(site.subject!==subject){
+      setStats(previous=>{const next={...previous};delete next[site.id];return next;});
+      setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
       setSites(previous=>{const next=previous.map(s=>s.id===site.id?{...s,subject}:s);persistSites(next);return next;});
      }
      const scope=site.id+":"+subject;
@@ -117,11 +119,11 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       await loadSnapshot(scope,site.id);
      };
      handler=()=>{void run();};
-     if(navigator.onLine)void run();
+     if(site.interval>0&&navigator.onLine)void run();
      const interval=site.interval>0?window.setInterval(()=>{if(navigator.onLine&&!document.hidden)void run();},site.interval):undefined;
-     window.addEventListener("online",handler);
-     const visibility=()=>{if(!document.hidden)handler();};
-     document.addEventListener("visibilitychange",visibility);
+     if(site.interval>0)window.addEventListener("online",handler);
+     const visibility=()=>{if(site.interval>0&&!document.hidden)handler();};
+     if(site.interval>0)document.addEventListener("visibilitychange",visibility);
      tasks.push(()=>{if(interval!==undefined)window.clearInterval(interval);
       window.removeEventListener("online",handler);document.removeEventListener("visibilitychange",visibility);});
     }catch(e){if(!stopped)setStatuses(previous=>({...previous,[site.id]:{
@@ -186,7 +188,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     else void revoke(site);
    }}/> {t.consent}</label>
    <div className="advanced-actions">
-    <button className="secondary" disabled={!site.enabled||!tokens[site.id]||!navigator.onLine||statuses[site.id]?.phase==="syncing"}
+    <button className="secondary" disabled={!site.enabled||!tokens[site.id]||statuses[site.id]?.phase==="syncing"}
      onClick={()=>{const controller=controllers.current.get(site.id);
       if(!controller){setNotice(t.pending);return;}
       void controller.run(true).then(async()=>{if(site.subject)await loadSnapshot(site.id+":"+site.subject,site.id);}).catch(e=>setNotice(String(e)));
