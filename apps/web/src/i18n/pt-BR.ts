@@ -601,5 +601,18 @@ export const ptBR: Record<string,string> = {
   "La eliminación anterior conserva tu organización y sus miembros. Para eliminar también cuenta de organización, equipos, llaves y conexiones, escribe el ID de la organización.": "A exclusão anterior preserva a organização e seus membros. Para excluir também organização, equipes, chaves e conexões, digite o ID da organização.",
   "Confirma el ID completo de la organización": "Confirme o ID completo da organização",
   "Eliminar toda la organización permanentemente": "Excluir toda a organização permanentemente",
-  "Organización y datos conectados eliminados permanentemente.": "Organização e dados conectados excluídos permanentemente."
+  "Organización y datos conectados eliminados permanentemente.": "Organização e dados conectados excluídos permanentemente.",
+  "Catálogo internacional guardado en este navegador.": "Catálogo internacional salvo neste navegador.",
+  "Nombre del precio guardado": "Nome do preço salvo",
+  "Abrir precio guardado": "Abrir preço salvo",
+  "Nueva simulación internacional": "Nova simulação internacional",
+  "Guardar precio internacional": "Salvar preço internacional",
+  "Descargar respaldo internacional": "Baixar backup internacional",
+  "Eliminar precio guardado": "Excluir preço salvo",
+  "Se eliminará este precio guardado del catálogo internacional, no tus productos COP.": "O preço salvo será excluído do catálogo internacional, não dos produtos COP.",
+  "Restaurar respaldo de precios internacionales (JSON)": "Restaurar backup de preços internacionais (JSON)",
+  "La restauración sustituirá el catálogo internacional, sin modificar los productos COP originales.": "A restauração substituirá o catálogo internacional sem alterar os produtos COP originais.",
+  "Respaldo validado; confirma si quieres sustituir el catálogo internacional.": "Backup validado; confirme se deseja substituir o catálogo internacional.",
+  "Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.": "Outra aba alterou o catálogo de moedas. Exporte os dados e atualize a página.",
+  "Introduce un nombre para guardar el precio.": "Informe um nome para salvar o preço."
 };
