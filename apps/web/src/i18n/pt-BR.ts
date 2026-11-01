@@ -523,5 +523,22 @@ export const ptBR: Record<string,string> = {
   "Informes publicitarios importados": "Relatórios de anúncios importados",
   "Resultado parcial: existen páginas adicionales.": "Resultado parcial: há outras páginas.",
   "La clave se muestra una sola vez. No la incluyas en el frontend.": "A chave aparece apenas uma vez. Não a inclua no frontend.",
-  "Datos conectados eliminados; el área local no fue modificada.": "Dados conectados excluídos; os dados locais não foram alterados."
+  "Datos conectados eliminados; el área local no fue modificada.": "Dados conectados excluídos; os dados locais não foram alterados.",
+  "PRECIFICACIÓN MULTIMONEDA": "PRECIFICAÇÃO MULTIMOEDA",
+  "Calcula márgenes directamente en la moneda elegida": "Calcule margens diretamente na moeda escolhida",
+  "Este cálculo utiliza valores nativos en una sola moneda, no una tasa de cambio implícita. No mezcla importes de diferentes monedas ni calcula tributos oficiales automáticamente.": "Este cálculo usa valores na mesma moeda, sem conversão implícita. Não mistura moedas nem calcula impostos oficiais automaticamente.",
+  "Moneda de cálculo": "Moeda do cálculo",
+  "Precio de venta": "Preço de venda",
+  "Descuento porcentual (%)": "Desconto percentual (%)",
+  "Comisión porcentual (%)": "Comissão percentual (%)",
+  "Deducción tributaria estimada (%)": "Dedução tributária estimada (%)",
+  "Margen objetivo sobre venta neta (%)": "Margem-alvo sobre a venda líquida (%)",
+  "Unidades mensuales": "Unidades mensais",
+  "Resultados de precio internacional": "Resultados da precificação internacional",
+  "Contribución unitaria": "Contribuição unitária",
+  "Beneficio mensual estimado": "Lucro mensal estimado",
+  "Margen sobre venta neta (%)": "Margem sobre venda líquida (%)",
+  "Margen sobre cobro total (%)": "Margem sobre recebimento total (%)",
+  "Unidades para equilibrio": "Unidades para equilíbrio",
+  "El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.": "O preço sugerido usa a venda líquida do produto como denominador. Impostos são deduções configuráveis, não consultoria tributária."
 };
