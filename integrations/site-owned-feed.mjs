@@ -4,6 +4,8 @@
  */
 import {validateChangePage} from "./site-owned-sync.mjs";
 const SUBJECT=/^[a-zA-Z0-9._:-]{1,160}$/;
+/** A merchant outbox should signal expired cursors explicitly, never skip history. */
+export class SiteCursorExpired extends Error {constructor(){super("Store cursor expired");this.name="SiteCursorExpired";}}
 function json(status,data,origin=null){
  const headers={"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","vary":"Origin"};
  if(origin)headers["access-control-allow-origin"]=origin;
@@ -51,6 +53,7 @@ export function createSiteFeedHandler({authorize,readChanges,allowedOrigins=[]})
    if(page.changes.length>limit)return json(502,{error:"Store returned oversized page"},cors);
    if(cursor!==null&&page.nextCursor===null)return json(502,{error:"Store cursor regression"},cors);
    return json(200,page,cors);
-  }catch(_error){return json(502,{error:"Store sync provider unavailable or invalid"},cors);}
+  }catch(error){if(error instanceof SiteCursorExpired)return json(410,{error:"Cursor expired; explicit full resynchronization required"},cors);
+   return json(502,{error:"Store sync provider unavailable or invalid"},cors);}
  };
 }

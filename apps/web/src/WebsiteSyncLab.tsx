@@ -98,19 +98,18 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      const controller=createSyncController({
       connector,scope,
       store:{read:async key=>await readSiteCheckpoint(key),
-       apply:async(key,changes,cursor)=>{
+       apply:async(key,changes,cursor,expectedCursor)=>{
         if(stopped||!loadSites().some(x=>x.id===site.id&&x.enabled))throw Error("Sync disabled");
         for(const change of changes)if(change.operation==="upsert"){
          if(change.kind==="order")validateOrderEvent(change.value as OrderEvent);
          else validateAdCampaign(change.value as AdCampaign);
         }
-        await applySitePage(key,changes,cursor);
+        await applySitePage(key,changes,cursor,expectedCursor);
        }},
       onState:state=>{if(!stopped)setStatuses(previous=>({...previous,[site.id]:state}));}
      });
-     controllers.current.set(site.id,controller);
      const run=async(manual=false)=>{
-      if(stopped||!navigator.onLine)return;
+      if(stopped||(!manual&&!navigator.onLine))return controller.getState();
       const result=controller.run(manual);
       running.current.set(site.id,result);
       await result;
@@ -118,6 +117,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       if(stopped)return;
       await loadSnapshot(scope,site.id);
      };
+     controllers.current.set(site.id,{run});
      handler=()=>{void run();};
      if(site.interval>0&&navigator.onLine)void run();
      const interval=site.interval>0?window.setInterval(()=>{if(navigator.onLine&&!document.hidden)void run();},site.interval):undefined;
@@ -191,7 +191,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     <button className="secondary" disabled={!site.enabled||!tokens[site.id]||statuses[site.id]?.phase==="syncing"}
      onClick={()=>{const controller=controllers.current.get(site.id);
       if(!controller){setNotice(t.pending);return;}
-      void controller.run(true).then(async()=>{if(site.subject)await loadSnapshot(site.id+":"+site.subject,site.id);}).catch(e=>setNotice(String(e)));
+      void controller.run(true).catch(e=>setNotice(String(e)));
      }}>{t.manual}</button>
     <button className="danger" onClick={()=>{void remove(site);}}>{t.remove}</button>
    </div>

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createSiteFeedHandler} from "../site-owned-feed.mjs";
+import {createSiteFeedHandler,SiteCursorExpired} from "../site-owned-feed.mjs";
 const token="read-only-12345",origin="https://precify.example";
 const changes={changes:[{id:"event-1",kind:"order",operation:"delete"}],nextCursor:"c2",hasMore:false};
 function backend({authorize=async(t)=>t===token?{subject:"shop-A"}:null,readChanges=async()=>changes}={}){
@@ -42,4 +42,11 @@ test("invalid feed and missing route fail closed",async()=>{
  assert.equal((await h(req("/precify/v1/changes","GET",{authorization:"Bearer "+token}))).status,502);
  assert.equal((await h(req("/precify/v1/admin","GET",{authorization:"Bearer "+token}))).status,404);
  assert.equal((await h(req("/precify/v1/identity","POST",{authorization:"Bearer "+token}))).status,405);
+});
+
+test("expired merchant cursor is 410 and never treated as a successful empty page",async()=>{
+ const h=backend({readChanges:async()=>{throw new SiteCursorExpired();}});
+ const result=await h(req("/precify/v1/changes?cursor=too-old","GET",{authorization:"Bearer "+token}));
+ assert.equal(result.status,410);
+ assert.match((await result.json()).error,/resynchronization/);
 });

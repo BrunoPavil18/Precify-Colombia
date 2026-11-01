@@ -107,3 +107,14 @@ test("malformed IDs and cursor rewinds never mutate the checkpoint",async()=>{
  assert.equal((await controller.run()).phase,"error");
  assert.equal(store.peek("s").cursor,"stable");
 });
+
+test("controller forwards expected cursor for transactional cross-tab conflict checks",async()=>{
+ const expected=[];let page=0;
+ const store={read:async()=>({cursor:"old"}),apply:async(_scope,_changes,next,prior)=>expected.push([prior,next])};
+ const connector={pull:async()=>++page===1?
+  {changes:[delta("a")],hasMore:true,nextCursor:"mid"}:
+  {changes:[delta("b")],hasMore:false,nextCursor:"new"}};
+ const sync=createSyncController({connector,store,scope:"store-A"});
+ assert.equal((await sync.run()).phase,"ready");
+ assert.deepEqual(expected,[["old","mid"],["mid","new"]]);
+});

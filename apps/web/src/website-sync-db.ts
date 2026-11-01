@@ -28,11 +28,18 @@ export async function readSiteCheckpoint(scope:string):Promise<{cursor:string|nu
   tx.onabort=()=>reject(tx.error??new Error("Database read aborted"));
  });}finally{db.close();}
 }
-export async function applySitePage(scope:string,changes:SyncChange[],cursor:string|null):Promise<void>{
+export async function applySitePage(scope:string,changes:SyncChange[],cursor:string|null,expectedCursor?:string|null):Promise<void>{
  const db=await openSyncDB();
  try{await new Promise<void>((resolve,reject)=>{
   const tx=db.transaction(["checkpoints","rows"],"readwrite");
   const rows=tx.objectStore("rows");
+  if(expectedCursor!==undefined){
+   const checkpoint=tx.objectStore("checkpoints").get(scope);
+   checkpoint.onsuccess=()=>{
+    const current=(checkpoint.result as {cursor:string|null}|undefined)?.cursor??null;
+    if(current!==expectedCursor)tx.abort();
+   };
+  }
   for(const item of changes){
    const key=scope+":"+item.kind+":"+item.id;
    if(item.operation==="delete")rows.delete(key);

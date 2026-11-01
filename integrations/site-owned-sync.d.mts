@@ -12,6 +12,6 @@ export function createSiteConnector(options:{
 export interface SyncStatus {phase:"idle"|"syncing"|"ready"|"error";lastSuccess:number|null;lastError:string|null;pulled:number;}
 export function createSyncController(options:{
  connector:{pull:(cursor:string|null,limit?:number)=>Promise<SitePage>};
- store:{read:(scope:string)=>Promise<{cursor:string|null}|null>;apply:(scope:string,changes:SiteChange[],cursor:string|null)=>Promise<void>};
+ store:{read:(scope:string)=>Promise<{cursor:string|null}|null>;apply:(scope:string,changes:SiteChange[],cursor:string|null,expectedCursor:string|null)=>Promise<void>};
  scope:string;onState?:(state:SyncStatus)=>void;clock?:()=>number;pageLimit?:number;maxPages?:number;
 }):{run:(manual?:boolean)=>Promise<SyncStatus>;getState:()=>SyncStatus};

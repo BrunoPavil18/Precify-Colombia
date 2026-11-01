@@ -88,7 +88,7 @@ export function createSyncController({connector,store,scope,onState=()=>{},clock
      if(page.hasMore&&page.nextCursor===cursor)throw new Error("Site change-feed cursor did not advance");
      if(cursor!==null&&page.nextCursor===null)throw new Error("Site change-feed cursor was reset");
      // Validation and durability occur before moving to the next cursor.
-     await store.apply(scope,page.changes,page.nextCursor);
+     await store.apply(scope,page.changes,page.nextCursor,cursor);
      pulled+=page.changes.length;
      cursor=page.nextCursor;
      if(!page.hasMore) {
