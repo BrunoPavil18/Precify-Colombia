@@ -44,7 +44,7 @@ function loadSites():Site[]{
 }
 function persistSites(sites:Site[]){localStorage.setItem(SETTINGS,JSON.stringify(sites));}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
-export function WebsiteSyncLab(){
+export function WebsiteSyncLab({visible}:{visible:boolean}){
  const locale=useContext(LocaleContext) as Locale;
  const t=strings[locale];
  const [sites,setSites]=useState<Site[]>(loadSites),[tokens,setTokens]=useState<Record<string,string>>({});
@@ -92,8 +92,8 @@ export function WebsiteSyncLab(){
       const result=controller.run(manual);
       running.current.set(site.id,result);
       await result;
-      if(stopped)return;
       running.current.delete(site.id);
+      if(stopped)return;
       const checkpoint=await readSiteCheckpoint(scope);
       if(checkpoint)setStats(previous=>({...previous,[site.id]:{at:checkpoint.at,count:checkpoint.count}}));
      };
@@ -144,7 +144,7 @@ export function WebsiteSyncLab(){
   const value=statuses[site.id];
   return value?.phase==="syncing"?t.running:value?.phase==="error"?t.error:value?.phase==="ready"?t.ready:t.pending;
  };
- return <section className="advanced-results website-sync-lab">
+ return <section className="advanced-results website-sync-lab" style={{display:visible?undefined:"none"}}>
   <h3>{t.title}</h3><p className="muted">{t.description}</p>
   <div className="advanced-grid">
    <label className="field"><span>{t.name}</span><input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label>
@@ -166,8 +166,13 @@ export function WebsiteSyncLab(){
    }}/> {t.consent}</label>
    <div className="advanced-actions">
     <button className="secondary" disabled={!site.enabled||!tokens[site.id]||!navigator.onLine||statuses[site.id]?.phase==="syncing"}
-     onClick={()=>{const controller=controllers.current.get(site.id);if(controller)void controller.run(true);
-      else setNotice(t.pending);}}>{t.manual}</button>
+     onClick={()=>{const controller=controllers.current.get(site.id);
+      if(!controller){setNotice(t.pending);return;}
+      void controller.run(true).then(async()=>{if(site.subject){
+       const checkpoint=await readSiteCheckpoint(site.id+":"+site.subject);
+       if(checkpoint)setStats(previous=>({...previous,[site.id]:{at:checkpoint.at,count:checkpoint.count}}));
+      }}).catch(e=>setNotice(String(e)));
+     }}>{t.manual}</button>
     <button className="danger" onClick={()=>{void remove(site);}}>{t.remove}</button>
    </div>
    <p role="status">{statusesText(site)}

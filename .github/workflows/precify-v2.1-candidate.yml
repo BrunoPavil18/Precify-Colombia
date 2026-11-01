@@ -1,0 +1,26 @@
+name: Precify 2.1 candidate CI
+on:
+  push:
+    branches: ['feat/precify-colombia-v2.1.0']
+  pull_request:
+    branches: ['main']
+permissions:
+  contents: read
+concurrency:
+  group: precify-v2-1-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:2.1.0

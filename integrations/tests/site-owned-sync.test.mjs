@@ -30,7 +30,8 @@ test("site identity and opaque cursor, no credentials in URL",async()=>{
  const connector=createSiteConnector(cfg);
  assert.equal(await connector.identify(),"tenant-1");
  assert.equal((await connector.pull("last/one",100)).nextCursor,"c:1");
- assert.match(urls[1][0],/cursor=last%2Fone/);
+ assert.match(urls[1][0],/\/precify\/v1\/changes\?limit=100&cursor=last%2Fone/);
+ assert.match(urls[0][0],/\/precify\/v1\/identity$/);
  assert.ok(!urls[1][0].includes("read-only-token"));
  assert.equal(urls[1][1].headers.Authorization,"Bearer read-only-token");
  assert.equal(urls[1][1].credentials,"omit");
@@ -96,4 +97,13 @@ test("cursor loop is an error, not infinite polling",async()=>{
  const sync=createSyncController({connector:{pull:async()=>({changes:[delta("a")],nextCursor:"same",hasMore:true})},store,scope:"x"});
  assert.equal((await sync.run()).phase,"error");
  assert.equal(store.peek("x").cursor,"same");
+});
+
+test("malformed IDs and cursor rewinds never mutate the checkpoint",async()=>{
+ assert.throws(()=>validateChangePage({changes:[{kind:"order",operation:"delete"}],hasMore:false,nextCursor:"x"}),/change/);
+ const store=memory();
+ await store.apply("s",[], "stable");
+ const controller=createSyncController({connector:{pull:async()=>({changes:[delta("x")],nextCursor:null,hasMore:false})},store,scope:"s"});
+ assert.equal((await controller.run()).phase,"error");
+ assert.equal(store.peek("s").cursor,"stable");
 });

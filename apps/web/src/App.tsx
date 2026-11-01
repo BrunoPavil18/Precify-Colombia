@@ -1,4 +1,5 @@
 import { ConnectedLab } from "./ConnectedLab";
+import { WebsiteSyncLab } from "./WebsiteSyncLab";
 import { OperationsLab } from "./OperationsLab";
 import { CurrencyLab } from "./CurrencyLab";
 import { AdvancedLab } from "./AdvancedLab";
@@ -501,6 +502,7 @@ export default function App(){
      {page==="cambio"&&<CurrencyLab/>}
      {page==="operaciones"&&<OperationsLab products={workspace.products}/>}
      {page==="conectado"&&<ConnectedLab/>}
+     <WebsiteSyncLab visible={page==="conectado"} />
      {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
       onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
       onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}

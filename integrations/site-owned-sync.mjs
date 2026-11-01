@@ -10,7 +10,7 @@ export function validateChangePage(value) {
     !(value.nextCursor===null||typeof value.nextCursor==="string"&&value.nextCursor.length<=2048))
   throw new Error("Invalid site change-feed page");
  for(const change of value.changes) {
-  if(!change||!ID.test(change.id)||!["order","campaign"].includes(change.kind)||
+  if(!change||typeof change.id!=="string"||!ID.test(change.id)||!["order","campaign"].includes(change.kind)||
      !["upsert","delete"].includes(change.operation))throw new Error("Invalid site change");
   if(change.operation==="upsert" && (!change.value||typeof change.value!=="object"||Array.isArray(change.value)))
    throw new Error("Invalid site change payload");
@@ -34,7 +34,9 @@ export function createSiteConnector({id,baseURL,getToken,fetchImpl=fetch}) {
   const token=await getToken();
   if(typeof token!=="string"||!token.trim())throw new Error("Site sign-in required");
   const u=new URL(origin.href);
-  u.pathname=(origin.pathname||"")+"/precify/v1/"+path;
+  const [route,queryString]=path.split("?");
+  u.pathname=origin.pathname.replace(/\/+$/,"")+"/precify/v1/"+route;
+  u.search=queryString?"?"+queryString:"";
   const response=await fetchImpl(u.toString(),{
    method:"GET",cache:"no-store",redirect:"error",credentials:"omit",
    headers:{Authorization:"Bearer "+token,Accept:"application/json"}
@@ -50,7 +52,7 @@ export function createSiteConnector({id,baseURL,getToken,fetchImpl=fetch}) {
   id,
   async identify(){
    const result=await call("identity");
-   if(!result||!ID.test(result.subject))throw new Error("Invalid site identity");
+   if(!result||typeof result.subject!=="string"||!ID.test(result.subject))throw new Error("Invalid site identity");
    return result.subject;
   },
   async pull(cursor,limit=100){
@@ -84,6 +86,7 @@ export function createSyncController({connector,store,scope,onState=()=>{},clock
     for(let i=0;i<maxPages;i++){
      const page=validateChangePage(await connector.pull(cursor,pageLimit));
      if(page.hasMore&&page.nextCursor===cursor)throw new Error("Site change-feed cursor did not advance");
+     if(cursor!==null&&page.nextCursor===null)throw new Error("Site change-feed cursor was reset");
      // Validation and durability occur before moving to the next cursor.
      await store.apply(scope,page.changes,page.nextCursor);
      pulled+=page.changes.length;

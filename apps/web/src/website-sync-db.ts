@@ -21,11 +21,8 @@ export async function readSiteCheckpoint(scope:string):Promise<{cursor:string|nu
   const tx=db.transaction(["checkpoints","rows"],"readonly");
   const cp=tx.objectStore("checkpoints").get(scope);
   const count=tx.objectStore("rows").index("byScope").count(scope);
-  let snapshot:null|{cursor:string|null;at:number;count:number}=null;
-  cp.onsuccess=()=>{const value=cp.result as {cursor:string|null;at:number}|undefined;
-   if(value)snapshot={cursor:value.cursor,at:value.at,count:0};};
-  count.onsuccess=()=>{if(snapshot)snapshot.count=count.result;};
-  tx.oncomplete=()=>resolve(snapshot);
+  tx.oncomplete=()=>{const value=cp.result as {cursor:string|null;at:number}|undefined;
+   resolve(value?{cursor:value.cursor,at:value.at,count:count.result}:null);};
   tx.onerror=()=>reject(tx.error??new Error("Database read failed"));
   tx.onabort=()=>reject(tx.error??new Error("Database read aborted"));
  });}finally{db.close();}
