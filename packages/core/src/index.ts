@@ -6,3 +6,4 @@ export * from "./advanced.js";
 export * from "./fx.js";
 export * from "./operations.js";
 export * from "./operational-csv.js";
+export * from "./global-pricing.js";
