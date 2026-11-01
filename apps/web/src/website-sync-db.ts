@@ -67,7 +67,8 @@ export async function purgeSiteCache(sourceId:string):Promise<void>{
   const tx=db.transaction(["checkpoints","rows"],"readwrite");
   const checkpoints=tx.objectStore("checkpoints");
   const rows=tx.objectStore("rows");
-  const cp=checkpoints.openKeyCursor();
+  // A value cursor permits delete(); a key-only cursor cannot safely delete.
+  const cp=checkpoints.openCursor();
   cp.onsuccess=()=>{const cursor=cp.result;if(cursor){if(String(cursor.key).startsWith(sourceId+":"))cursor.delete();cursor.continue();}};
   const row=rows.index("byScope").openCursor();
   row.onsuccess=()=>{const cursor=row.result;if(cursor){if(String(cursor.value.scope).startsWith(sourceId+":"))cursor.delete();cursor.continue();}};
