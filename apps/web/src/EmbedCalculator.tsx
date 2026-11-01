@@ -1,6 +1,6 @@
 import {useMemo,useState} from "react";
 import {currencyCatalog,globalPrice,globalSuggestedPrice,type GlobalPriceInput} from "@precify-colombia/core";
-import {LocaleContext,readLocale,translate,type Locale} from "./i18n";
+import {LocaleContext,translate,type Locale} from "./i18n";
 
 /** No account, storage, cookies or network calls; suitable for a third-party iframe.
  * All fields are user-entered and processed in this document only.
@@ -22,7 +22,10 @@ const fields=[
  ["targetMargin","Margen objetivo sobre venta neta (%)"]
 ] as const;
 export default function EmbedCalculator(){
- const [locale,setLocale]=useState<Locale>(()=>readLocale());
+ const [locale,setLocale]=useState<Locale>(()=>{
+  const value=new URLSearchParams(window.location.search).get("lang");
+  return value==="pt-BR"||value==="en"||value==="es-CO"?value:"es-CO";
+ });
  const [data,setData]=useState<GlobalPriceInput>(empty);
  const t=(text:string)=>translate(locale,text);
  const analysis=useMemo(()=>{
