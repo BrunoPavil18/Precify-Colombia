@@ -175,3 +175,13 @@ test("COD cohort break-even retail price includes advertising per created order"
  assert.equal(result.projectedProfit,"0.00");
  assert.equal(suggestCODBreakEvenPrice({...scenario,paidPercentOfDelivered:"0"}).price,null);
 });
+
+test("COD does not deduct product-level advertising and reserves twice",()=>{
+ const item={...base,advertising:"5.00",codReserve:"3.00",returnsReserve:"2.00"};
+ const scenario={product:item,createdOrders:"10",shippedPercent:"100",deliveredPercentOfShipped:"100",
+  paidPercentOfDelivered:"100",failedAttemptCost:"0",returnShippingCost:"0",
+  advertisingPerCreatedOrder:"5.00",extraCODFeePerPaidOrder:"0",lossReservePerFailedOrder:"0"};
+ const result=simulateCOD(scenario);
+ // 10 × (100 - 50) - 10 × 5, not (100 - 50 - 5 - 3 - 2) - 10 × 5.
+ assert.equal(result.expectedProfit,"450.00");
+});
