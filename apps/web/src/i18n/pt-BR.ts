@@ -616,5 +616,6 @@ export const ptBR: Record<string,string> = {
   "Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.": "Outra aba alterou o catálogo de moedas. Exporte os dados e atualize a página.",
   "Introduce un nombre para guardar el precio.": "Informe um nome para salvar o preço.",
   "Historial de precios anteriores": "Histórico de preços anteriores",
-  "Sin conexión: solo están disponibles los informes guardados con permiso.": "Sem conexão: somente relatórios salvos com autorização estão disponíveis."
+  "Sin conexión: solo están disponibles los informes guardados con permiso.": "Sem conexão: somente relatórios salvos com autorização estão disponíveis.",
+  "Confirmar eliminación": "Confirmar exclusão"
 };
