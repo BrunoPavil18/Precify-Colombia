@@ -37,3 +37,30 @@ The current Vezura Store has **not** been modified to provide this contract. Hos
 ## Testing & release gate
 
 \`node --test integrations/tests/site-owned-sync.test.mjs\` verifies cursor continuation, atomic commit contracts, replay, account isolation, concurrent-call coalescing, backoff, insecure origins and malformed responses. Browser IndexedDB, real hosted source APIs, OAuth and offline/online E2E require live acceptance before general release.
+
+
+### Store-side handler (Next.js, Node, Deno with Web Fetch APIs)
+
+A reusable adapter lives in \`integrations/site-owned-feed.mjs\`. Its two callbacks are deliberately owned by the merchant and **never** replace its order database:
+
+\`\`\`js
+import {createSiteFeedHandler} from "./integrations/site-owned-feed.mjs";
+
+const handle=createSiteFeedHandler({
+  allowedOrigins:["https://precify.example.com"],
+  authorize: async token => {
+    // Verify short-lived, read-only user permission in YOUR store backend.
+    // Return {subject:stableTenantId} or null; do not use global API secrets.
+    return await verifyStoreViewerToken(token);
+  },
+  readChanges: async ({subject,cursor,limit}) => {
+    // Query YOUR durable, commit-ordered outbox by subject/tenant.
+    // Return {changes,nextCursor,hasMore}; do not use offset paging.
+    return await storeDatabase.readFinancialChangeFeed({subject,cursor,limit});
+  }
+});
+export const GET=handle;
+export const OPTIONS=handle;
+\`\`\`
+
+The placeholders \`verifyStoreViewerToken\` and \`storeDatabase.readFinancialChangeFeed\` must be implemented by the actual store. Import this handler **only on the server**. It does not install a database, persist merchant events, authenticate Vezura customers by itself or expose data until the merchant explicitly implements the two callbacks.
