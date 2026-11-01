@@ -1,15 +1,14 @@
 import { createContext, useContext } from "react";
 import { ptBR } from "./pt-BR";
 import { en } from "./en";
-import { redesignedPtBR, redesignedEn } from "./redesign-locales";
 import { ptErrors } from "./pt-BR-errors";
 import { enErrors } from "./en-errors";
 
 export const locales=["es-CO","pt-BR","en"] as const;
 export type Locale=(typeof locales)[number];
 const dictionary: Record<Exclude<Locale,"es-CO">,Record<string,string>> = {
- "pt-BR": {...ptBR,...ptErrors,...redesignedPtBR},
- en: {...en,...enErrors,...redesignedEn}
+ "pt-BR": {...ptBR,...ptErrors},
+ en: {...en,...enErrors}
 };
 export const LocaleContext=createContext<Locale>("es-CO");
 
