@@ -48,3 +48,26 @@ test("advertising indicators keep platform attribution separate from orders and 
  assert.equal(x.cpm,"10.00");assert.equal(x.attributedRoas,"5.00");
  assert.equal(advertisingIndicators({...c,impressions:"0",clicks:"0"}).cpc,null);
 });
+
+
+test("sparse paid and refund event snapshots preserve original sale, attribution and distinguish physical returns",()=>{
+ const events=[
+  mk("a","created","20",{grossRevenue:"120.00",productCost:"50.00",shippingCost:"10.00",campaignId:"campaign-1"}),
+  mk("b","shipped","21",{grossRevenue:"0",productCost:"0",shippingCost:"0",campaignId:null}),
+  mk("c","paid","22",{grossRevenue:"0",productCost:"0",shippingCost:"0",campaignId:null}),
+  mk("d","refunded","23",{grossRevenue:"0",productCost:"0",shippingCost:"0",refundAmount:"20.00",campaignId:null})
+ ];
+ const x=computeCODFunnel(events);
+ assert.equal(x.paid,1);assert.equal(x.refunded,1);assert.equal(x.returned,0);
+ assert.equal(x.grossCollected,"120.00");assert.equal(x.refunds,"20.00");
+ assert.equal(x.netCollected,"100.00");
+ assert.equal(x.snapshots[0].campaignId,"campaign-1");
+});
+test("conflicting duplicate events are rejected instead of silently ignored",()=>{
+ const a=mk("same","created","20");
+ assert.throws(()=>computeCODFunnel([a,{...a,grossRevenue:"999.00"}]));
+});
+test("invalid negative order costs and fictional currency codes are rejected",()=>{
+ assert.throws(()=>computeCODFunnel([mk("neg","paid","20",{shippingCost:"-10.00"})]));
+ assert.throws(()=>computeCODFunnel([mk("cur","paid","20",{currency:"ZZZ"})]));
+});
