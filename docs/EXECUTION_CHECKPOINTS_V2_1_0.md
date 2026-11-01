@@ -24,8 +24,8 @@
 | CP01 | IMPLEMENTED — UNVERIFIED | ISO minor-unit conversions, Frankfurter daily FX per-pair cache, offline fallback, *native international pricing* UI and tests, PT/EN strings | Currency, global pricing and FX commits; still require build/typecheck/test |
 | CP02 | IMPLEMENTED — UNVERIFIED | COD event funnel, ad reconciliation, CPA matrix, CSV mapping, browser-local operational dashboard, manual competitor price history and exports | Core operations, operational-csv and OperationsLab commits; tests pending |
 | CP03 | IMPLEMENTED — UNVERIFIED | PostgreSQL/Supabase tables + RLS/revoked grants, organization roles, backend identity validation, REST, API keys, webhook signatures, export/deletion, connected web UI | apps/service server + SQL + ConnectedLab; needs deployment and integration tests |
-| CP04 | PARTIAL — UNVERIFIED | OAuth state, encrypted Meta access token, ad account discovery, initial insights import and UI | Meta app review/real credentials and pagination/expiration handling pending |
-| CP05 | IN PROGRESS | Local dashboard, connected summaries, sign-in, teams, server API and Vezura-compatible generic integration docs present; comprehensive UX and data quality still pending | OperationsLab, ConnectedLab and docs |
+| CP04 | IMPLEMENTED — EXTERNAL VALIDATION PENDING | Meta OAuth one-use state, token expiry/exchange, accounts, cursor-paginated insights at campaign/adset/ad level, aggregate demographics, disconnect, v26.0 default | Real Meta credentials, review, permissions, pagination acceptance and deployed integration still pending |
+| CP05 | IN PROGRESS | Local dashboard, connected summaries, optional sessions/teams, generic REST + server SDK and stateless standalone iframe calculator, ES/PT/EN strings | UI QA, integration and pricing-history UX validation pending |
 | CP06 | NEXT | Compatibility, automated tests, production/offline/browser verification, docs and release preparation | Pending |
 
 ## Decisions and hard safety boundaries
@@ -52,3 +52,18 @@ On the next ChatGPT conversation, provide this document path and request a fresh
 - Added [connected integration/deployment guide](CONNECTED_API_V2_1_0.md). **Vezura repository untouched.** Supabase project and Meta app are not configured by this work.
 - Current code is **NOT TESTED / NOT DEPLOYED / NOT RELEASE READY**. Remaining: production-grade pagination/token lifecycle, full integrity/authorization tests, international calculations UI review, offline/PWA integration, final docs, compatibility and functional validation.
 - Do not merge/publish or claim functional completeness. Continue from this checkpoint on the same branch.
+
+### Resume checkpoint — 2026-11-01 after connection interruption
+
+**New commits since the interruption** (all on `feat/precify-colombia-v2.1.0`, with no merge):
+- Embedded iframe calculator (`?embed=1&lang=pt-BR`) for Vezura/other sites: no account, storage or API credentials. Hosted page requires separate origin and framing policy. Web service worker is not registered in embedded mode.
+- Reconciliation safety: sparse paid/refunded order status events retain previously supplied sale amounts, costs and campaign ID; conflicting duplicate IDs are rejected; refunds without a physical return do not automatically incur reverse shipping. Meta campaign reconciliation matches raw campaign IDs only at campaign level and within the recorded time range.
+- Monetary validation: unsupported fictional ISO currency identifiers and negative operational costs are rejected, while signed calculated results remain allowed. Native pricing and conversions remain separate from legacy COP pricing.
+- Database: tenant-scoped, transactional order-event batches via `precify_import_order_batch`, one-time OAuth state consumption, paginated financial reports that fail rather than silently truncate, optional per-user auth session refresh and owner-confirmed organization deletion.
+- Meta: `v26.0` default replacing old `v24.0`, multiple insight levels, cursor pagination (fail closed if capped), permission-scoped demographic aggregates, encrypted token handling and expiry checks.
+- Security/privacy UX: explicit import/backup restore, recovery of damaged raw local data, offline-cache consent revocation and full-org deletion confirmation. New ES/PT/EN strings and source-level translation coverage tests.
+- Documentation: `docs/CONNECTED_API_V2_1_0.md` explains direct Vezura iframe and server-side SDK routes. **No changes to the Vezura repository.**
+
+**Known blockers / honesty requirements:** Node/TypeScript builds and automated tests on this feature branch have **not** been executed in this environment (GitHub DNS inaccessible); no PostgreSQL/Supabase project, live Meta app credentials, browser/iframe hosting or actual third-party login were connected. No guarantee of full functionality or compliance until acceptance. The only verification in this turn has been GitHub branch/file reads and GitHub-confirmed commits, together with focused static checks of relevant source translations.
+
+**Next steps (continue in the SAME branch, not from main):** finish connected-service consistency, integration/security checks and UI details; run one consolidated local `pnpm install --frozen-lockfile`, typecheck/lint/unit/integration tests, build, SDK tests, browser/offline PWA checks, Postgres tenant isolation, Meta OAuth and webhook smoke tests (when external credentials are provided), then final overall audit/documentation and ONE PR. No GitHub Actions, merge or release yet.
