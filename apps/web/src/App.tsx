@@ -499,7 +499,7 @@ export default function App(){
       </aside>
      </div>}
      {page==="cambio"&&<CurrencyLab/>}
-     {page==="operaciones"&&<OperationsLab/>}
+     {page==="operaciones"&&<OperationsLab products={workspace.products}/>}
      {page==="conectado"&&<ConnectedLab/>}
      {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
       onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
