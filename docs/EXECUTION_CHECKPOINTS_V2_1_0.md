@@ -21,8 +21,8 @@
 | ID | State | Summary | Evidence / commit |
 |---|---|---|---|
 | CP00 | COMPLETE | Created feature branch and this durable recovery document | See branch commit history |
-| CP01 | NEXT | Add currency catalog, exact conversion, FX cache, and offline-aware UI | Pending |
-| CP02 | NEXT | Build combined financial intelligence functions, COD funnel, CPA matrix, reconciliation and CSV mapping | Pending |
+| CP01 | IMPLEMENTED — UNVERIFIED | ISO minor-unit conversions, Frankfurter daily FX per-pair cache, offline fallback, independent exchange page, PT/EN strings, unit tests | See commits following CP00; run build/typecheck/tests before marking COMPLETE |
+| CP02 | IN PROGRESS | COD event funnel, ad attribution reconciliation, CPA sensitivity and tests committed; CSV mapping and UI pending | See core operations commits |
 | CP03 | NEXT | Build opt-in connected-service data model, API, authorization, tenant boundaries and durable persistence | Pending |
 | CP04 | NEXT | Add Meta OAuth + insights integration; secure tokens, API/webhook contract and operational metrics | Pending |
 | CP05 | NEXT | Integrate dashboard, accounts, import, history, reports and embed UI; static translations | Pending |
@@ -39,3 +39,8 @@
 
 ## Handoff instructions
 On the next ChatGPT conversation, provide this document path and request a fresh fetch from **the current feature branch**, not main. Continue at the first checkpoint not marked COMPLETE, preserving existing commits and outputs. Read the latest commit SHA and pending blockers. Do not restart from the original plan or redo general audits. Work is not finished until all required modules are integrated and verified, and there is one final consolidated handoff.
+
+### 2026-11-01 incremental checkpoint
+- Created `packages/core/src/fx.ts` and `packages/core/tests/fx.test.mjs` (pure integer conversion; configurable ISO currencies), `apps/web/src/CurrencyLab.tsx` (Frankfurter daily quotes with local cache and offline fallback), and integrated currency navigation. Existing COP pricing workflow untouched.
+- Created `packages/core/src/operations.ts` and tests for event-based order funnel, source-identified reconciliations and CPA × delivery matrix. Exported from core. No external platform credentials connected.
+- **Environment limitation:** this agent's container cannot resolve github.com; GitHub connector has been used for commits. Build/tests of this branch have not yet been executed. No general audit, CI, PR, merge or release.
