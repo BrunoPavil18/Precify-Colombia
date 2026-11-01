@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from "react";
 import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
  reconcileCampaigns,simulateCPASensitivity,exportOperationsCSV,validateOrderEvent,validateAdCampaign,
- type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
+ currencyCatalog,minorAmount,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
 import {useTranslator} from "./i18n";
 
 const KEY="precify-colombia:operations:v1";
@@ -22,7 +22,7 @@ function readOperations():{value:LocalOperations;error:string|null;raw:string|nu
 }
 const requiredFields=["id","orderId","status","occurredAt"] as const;
 const inputFields=["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount","campaignId","currency"] as const;
-const defaultCPA:CPASensitivityInput={createdOrders:"100",shippedPercent:"100",
+const defaultCPA:CPASensitivityInput={currency:"COP",createdOrders:"100",shippedPercent:"100",
  deliveredPercentOfShipped:"70",paidPercentOfDelivered:"90",contributionPerPaid:"50000.00",
  failedDeliveryCost:"10000.00",reverseShippingPerUnpaid:"5000.00",
  advertisementPerCreated:"0",otherFixedCosts:"0"};
@@ -152,7 +152,7 @@ export function OperationsLab(){
   </div>}
   {tab==="matrix"&&<div className="advanced-results">
    <h3>{t("Matriz: CPA frente a entregas y pagos")}</h3>
-   <div className="advanced-grid">{(Object.keys(cpa) as Array<keyof CPASensitivityInput>).map(k=><label key={k} className="field"><span>{t(k)}</span><input type="text" inputMode="decimal" value={cpa[k]} onChange={e=>setCPA(prev=>({...prev,[k]:e.target.value}))}/></label>)}</div>
+   <div className="advanced-grid">{(Object.keys(cpa) as Array<keyof CPASensitivityInput>).map(k=><label key={k} className="field"><span>{t(k)}</span>{k==="currency"?<select value={cpa.currency??"COP"} onChange={e=>setCPA(prev=>({...prev,currency:e.target.value}))}>{currencyCatalog().map(code=><option key={code} value={code}>{code}</option>)}</select>:<input type="text" inputMode="decimal" value={cpa[k]??""} onChange={e=>setCPA(prev=>({...prev,[k]:e.target.value}))}/>}</label>)}</div>
    {"values" in matrix&&matrix.values?<div className="table-scroll"><table><thead><tr><th>{t("Entregados (%) / CPA")}</th>{matrix.values[0]?.results.map(c=><th key={c.cpa}>{c.cpa}</th>)}</tr></thead><tbody>
    {matrix.values.map(row=><tr key={row.deliveryPercent}><th>{row.deliveryPercent+"%"}</th>{row.results.map(cell=><td key={cell.cpa} className={cell.feasible?"":"red"}>{cell.profit}</td>)}</tr>)}
    </tbody></table></div>:<p role="alert">{matrix.error}</p>}
