@@ -540,5 +540,11 @@ export const ptBR: Record<string,string> = {
   "Margen sobre venta neta (%)": "Margem sobre venda líquida (%)",
   "Margen sobre cobro total (%)": "Margem sobre recebimento total (%)",
   "Unidades para equilibrio": "Unidades para equilíbrio",
-  "El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.": "O preço sugerido usa a venda líquida do produto como denominador. Impostos são deduções configuráveis, não consultoria tributária."
+  "El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.": "O preço sugerido usa a venda líquida do produto como denominador. Impostos são deduções configuráveis, não consultoria tributária.",
+  "Evolución de pagos registrados por día": "Evolução dos pagamentos registrados por dia",
+  "Todavía no hay eventos de pago.": "Ainda não há eventos de pagamento.",
+  "Pagos registrados por día": "Pagamentos registrados por dia",
+  "Métricas atribuidas de campañas": "Métricas atribuídas das campanhas",
+  "Todavía no hay métricas publicitarias importadas.": "Ainda não há métricas de anúncios importadas.",
+  "Campaña": "Campanha"
 };
