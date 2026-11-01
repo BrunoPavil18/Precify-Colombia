@@ -55,3 +55,60 @@ Calculator, locally imported events, CPA matrix and last FX observations remain 
 ## Caveats and planned acceptance
 
 Full Postgres integration, multi-user authorization, Meta business approval, live webhook senders and production PWA/offline behavior cannot be validated without a configured deployment and credentials. Treat server code as **not yet production-certified** until acceptance checks run. No GitHub Actions, merge or release are authorized by this work.
+
+## Direct website integration — Vezura and other sites
+
+Precify now exposes **two independent integration methods**, without changing Vezura or requiring a native commerce-platform connector.
+
+### A. Embed the free, stateless calculator
+
+After hosting the Precify web build at `https://precify.example.com`, include a sandboxed iframe in your store's information/tools page:
+
+```html
+<iframe
+  title="Precify Colombia – Financial Calculator"
+  src="https://precify.example.com/?embed=1"
+  style="width:100%;min-height:820px;border:0"
+  loading="lazy"
+  referrerpolicy="no-referrer"
+  sandbox="allow-scripts allow-popups"
+></iframe>
+```
+
+Embedded mode renders only the standalone international pricing calculator in ES/PT/EN. It **does not use login, localStorage, customer cookies, store order access or the connected service**. It performs calculations within the iframe. A browser with restrictive third-party storage or connectivity can still use it after the public application assets load. The static-site host must explicitly allow embedding using an appropriate `Content-Security-Policy: frame-ancestors` policy. Never weaken framing permissions for the authenticated full dashboard solely to make the public calculator embeddable.
+
+Do not confuse this with *signed-in integration*: embedded mode is a calculator, not automatic sharing of the Vezura customer's cart, financial records or advertising account.
+
+### B. Server-to-server connected operations
+
+Use `integrations/precify-client.mjs` from the Vezura **server**, or any other backend, with a per-organization API key kept in a secret manager:
+
+```js
+import {PrecifyConnectedClient} from "./precify-client.mjs";
+const client=new PrecifyConnectedClient({
+  baseURL:process.env.PRECIFY_API_URL,
+  apiKey:process.env.PRECIFY_API_KEY
+});
+await client.sendOrderEvents(process.env.PRECIFY_ORG_ID,[orderEvent]);
+const report=await client.dashboard(process.env.PRECIFY_ORG_ID);
+```
+
+Do not call the above SDK directly in browser bundles; its key is privileged and intended for a trusted backend only. Orders must use stable, unique event IDs for idempotent delivery. The PostgreSQL batch import procedure uses a tenant-scoped transaction to avoid partially imported batches and conflicting replays.
+
+The v2.1.0 features are not yet deployed or independently penetration-tested. A Vezura integration still requires future backend configuration and Vezura-side implementation, intentionally **outside this Precify branch**.
+
+### C. Source package
+
+`@precify-colombia/core` exports both the unchanged COP financial contract and separate international operations, FX and global-pricing functions. Compiling local source does **not** imply npm package publication.
+
+## FX and limitations
+
+Frankfurter v2 exposes no-key, generally daily reference rates: https://frankfurter.dev/ . It is **not** a live trading-price feed. The app stores selected rates by base/quote with timestamp, displays stale/offline status and never assumes a rate when none is available. Supported ISO codes can exceed the set of currency pairs currently published by a given provider; failures must be explicit. Native international pricing uses values in exactly one selected currency, independently of exchange conversion.
+
+## Additional privacy and security safeguards
+
+- Complete organization deletion is a separate, owner-only, explicitly confirmed action that cascades to child tables; deleting only operational data does not delete membership.
+- Authenticated web sessions attempt refresh shortly before expiry and clear locally cached connected reports on logout or withdrawn cache consent.
+- API/webhook event uploads use a privileged, transactional SQL routine for conflict-safe idempotency; generic dataset reads are paginated with hard caps rather than silently truncated.
+- The Meta connector targets Marketing API `v26.0` by default; live integration requires valid provider credentials, permissions and an operational deployment.
+- Full reports, webhook tests, PWA offline usage and third-party embedding require browser/host validation before claiming production readiness.
