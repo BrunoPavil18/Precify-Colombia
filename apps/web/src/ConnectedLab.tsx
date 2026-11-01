@@ -48,6 +48,8 @@ export function ConnectedLab(){
  const [cacheConsent,setCacheConsent]=useState(false),[offline,setOffline]=useState(false);
  const [metaAccounts,setMetaAccounts]=useState<AdAccount[]>([]);
  const [adAccount,setAdAccount]=useState(""),[since,setSince]=useState(""),[until,setUntil]=useState("");
+ const [metaLevel,setMetaLevel]=useState("campaign");
+ const [breakdowns,setBreakdowns]=useState<Array<{campaignId:string;age:string;gender:string;impressions:string;clicks:string;spend:string}>>([]);
  const [memberId,setMemberId]=useState(""),[memberRole,setMemberRole]=useState("viewer");
  const [newKey,setNewKey]=useState(""),[newHook,setNewHook]=useState<{endpoint:string;secret:string}|null>(null);
  const [deletePhrase,setDeletePhrase]=useState("");
@@ -132,10 +134,16 @@ export function ConnectedLab(){
  async function syncMeta(){
   if(!session||!selected||!adAccount)return;
   try{setBusy(true);
-   const result=await request<{count:number;hasNextPage:boolean}>(session,"/v1/orgs/"+selected+"/meta/sync","POST",{accountId:adAccount,since,until});
+   const result=await request<{count:number;hasNextPage:boolean}>(session,"/v1/orgs/"+selected+"/meta/sync","POST",{accountId:adAccount,since,until,level:metaLevel});
    setNotice(t("Informes publicitarios importados")+": "+result.count+(result.hasNextPage?" · "+t("Resultado parcial: existen páginas adicionales."):""));
    await report(selected,session);
   }catch(e){setNotice(String(e));}finally{setBusy(false);}
+ }
+ async function loadBreakdowns(){
+  if(!session||!selected||!adAccount)return;
+  try{setBusy(true);const report=await request<{aggregates:typeof breakdowns}>(session,"/v1/orgs/"+selected+"/meta/breakdowns","POST",{accountId:adAccount,since,until});
+   setBreakdowns(report.aggregates);setNotice(t("Datos demográficos agregados actualizados."));}
+  catch(e){setNotice(String(e));}finally{setBusy(false);}
  }
  async function addMember(){
   if(!session||!selected)return;
@@ -209,10 +217,15 @@ export function ConnectedLab(){
       <button disabled={busy||offline} className="secondary" onClick={()=>{void loadMetaAccounts();}}>{t("Consultar cuentas de anuncios")}</button></div>
      {metaAccounts.length>0&&<div className="advanced-grid">
       <label className="field"><span>{t("Cuenta de anuncios")}</span><select value={adAccount} onChange={e=>setAdAccount(e.target.value)}>{metaAccounts.map(a=><option key={a.id} value={a.id}>{a.name+" ("+a.currency+")"}</option>)}</select></label>
+      <label className="field"><span>{t("Nivel del informe")}</span><select value={metaLevel} onChange={e=>setMetaLevel(e.target.value)}><option value="campaign">{t("Campaña")}</option><option value="adset">{t("Conjunto de anuncios")}</option><option value="ad">{t("Anuncio")}</option></select></label>
       <label className="field"><span>{t("Desde")}</span><input type="date" value={since} onChange={e=>setSince(e.target.value)}/></label>
       <label className="field"><span>{t("Hasta")}</span><input type="date" value={until} onChange={e=>setUntil(e.target.value)}/></label>
       <button disabled={busy||offline||!since||!until} onClick={()=>{void syncMeta();}}>{t("Importar métricas de Facebook Ads")}</button>
+      <button className="secondary" disabled={busy||offline||!since||!until} onClick={()=>{void loadBreakdowns();}}>{t("Consultar datos agregados de edad y género")}</button>
      </div>}
+     {breakdowns.length>0&&<div className="table-scroll"><table><thead><tr><th>{t("Campaña")}</th><th>{t("Edad")}</th><th>{t("Género")}</th><th>{t("Impresiones")}</th><th>{t("Clics")}</th><th>{t("Gasto")}</th></tr></thead><tbody>
+      {breakdowns.map((v,i)=><tr key={i}><td>{v.campaignId}</td><td>{v.age}</td><td>{v.gender}</td><td>{v.impressions}</td><td>{v.clicks}</td><td>{v.spend}</td></tr>)}
+     </tbody></table></div>}
      <p className="muted">{t("Meta puede exigir revisión del aplicativo y permisos ads_read para acceder a cuentas de terceros.")}</p>
     </div>
     <div className="advanced-results">
