@@ -88,3 +88,6 @@ On the next ChatGPT conversation, provide this document path and request a fresh
 - **Git policy**: no GitHub Actions intentionally executed, no PR yet, no merge, no release. The `main` remains the v2.0.1 baseline; Vezura untouched.
 
 **Resume next**: finish focused typed API/React integration review, security permissions/remote report edge cases and multilingual UX; then run the consolidated suite in `docs/TESTING_V2_1_0.md`. A live external acceptance environment requires a separate authorized Supabase project and approved Meta app. Do not run Github Actions. Only after real local verification create **one consolidated PR**.
+
+### 2026-11-01 — explicit GitHub Actions authorization
+The owner explicitly authorized GitHub Actions for validation in this conversation. The GitHub connector has no workflow-dispatch operation and this repository has no workflow on `main`; no change to `main` is authorized. A temporary feature-branch-only workflow is therefore limited to pushes affecting `.github/validation-trigger-2.1.0.txt` (normal code/PR pushes do not run it), one Ubuntu/Node22/pnpm10 job, 12-minute maximum, read-only token, no secrets, no deployment or release. Results are not yet known. Once evidence is gathered, remove the temporary workflow and trigger so it cannot start again accidentally. Real Meta/Postgres/browser checks are not replaced by this run.
