@@ -124,3 +124,9 @@ Order and campaign imports share the advisory lock; same-ID campaign updates mus
 The React connected UI caches read-only financial summaries only with permission for the **selected organization**, avoids two refresh-token renewals per request and clears the previous organization's visible report on selection. Cache is optional; the legacy local COP workspace remains independent.
 
 [Successful CI after these changes (90 tests)](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163). No real Meta credentials, automatic deployment or GitHub Actions workflow remain configured.
+
+## Supabase 2026 API key transition
+
+The connected backend now prefers `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY` from a **private server environment**. Existing `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_KEY` remain accepted as fallback. For the current React build, set the public `VITE_SUPABASE_ANON_KEY` variable to a **publishable** or legacy anon key; do not place any secret/server key in a `VITE_` variable.
+
+Supabase documents its migration away from legacy JWT API keys. See https://supabase.com/docs/guides/getting-started/api-keys and https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys. The opaque secret key must remain on the backend and be used only with the project's trusted Supabase gateway; this has not yet been proven with this application's real project or account. Never copy keys into this PR or a chat message.
