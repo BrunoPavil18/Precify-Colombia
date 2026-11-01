@@ -66,6 +66,15 @@ async function request<T>(session:Session,path:string,method:"GET"|"POST"|"DELET
  return response as T;
 }
 function summaryKey(user:string,org:string){return "precify-colombia:connected-summary:v1:"+user+":"+org;}
+function savedOrgs(user:string):Org[]{
+ const prefix="precify-colombia:connected-summary:v1:"+user+":";
+ try{
+  return Object.keys(localStorage).filter(key=>key.startsWith(prefix))
+   .map(key=>key.slice(prefix.length))
+   .filter(id=>/^[a-f0-9-]{36}$/i.test(id))
+   .map(id=>({id,name:"Offline "+id.slice(0,8),role:"cached"}));
+ }catch{return [];}
+}
 export function ConnectedLab(){
  const t=useTranslator();
  const [session,setSession]=useState<Session|null>(readSession);
@@ -92,7 +101,7 @@ export function ConnectedLab(){
    setDashboard(value);setOffline(false);
    if(cacheConsent)try{localStorage.setItem(summaryKey(access.user.id,org),JSON.stringify(value));}catch{}
   }catch(e){
-   const raw=localStorage.getItem(summaryKey(access.user.id,org));
+   let raw:string|null=null;try{raw=localStorage.getItem(summaryKey(access.user.id,org));}catch{/* Browser storage denied */}
    if(raw){try{setDashboard(JSON.parse(raw) as Dash);setOffline(true);}catch{setDashboard(null);}}
    else{setDashboard(null);setNotice(String(e));setOffline(true);}
   }
@@ -102,7 +111,14 @@ export function ConnectedLab(){
    const id=list.find(v=>v.id===selected)?.id??list[0]?.id??"";
    setSelected(id);
    if(id)await report(id,access);
-  }catch(e){setNotice(String(e));setOffline(true);}
+  }catch(e){
+   setNotice("Sin conexión: solo están disponibles los informes guardados con permiso.");
+   setOffline(true);
+   const saved=savedOrgs(access.user.id);setOrgs(saved);
+   const id=saved.find(o=>o.id===selected)?.id??saved[0]?.id??"";
+   setSelected(id);
+   if(id)await report(id,access);
+  }
  },[report,selected]);
  useEffect(()=>{if(session)void loadOrgs(session);},[session]); // Organization selection refresh is deliberate.
  async function submitAuth(mode:"login"|"signup"){
@@ -128,7 +144,7 @@ export function ConnectedLab(){
   }catch(e){setNotice(String(e));}finally{setBusy(false);}
  }
  function logout(){
-  if(session){for(const key of Object.keys(localStorage))if(key.startsWith("precify-colombia:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}
+  if(session)try{for(const key of Object.keys(localStorage))if(key.startsWith("precify-colombia:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}catch{/* Storage may be unavailable */}
   storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setNewKey("");setNewHook(null);
  }
  async function uploadLocal(){
