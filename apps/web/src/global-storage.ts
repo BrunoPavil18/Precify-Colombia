@@ -1,7 +1,8 @@
 import {globalPrice,type GlobalPriceInput} from "@precify-colombia/core";
 
 export const GLOBAL_PRODUCTS_KEY="precify-colombia:global-pricing:v1";
-export type GlobalSavedProduct={id:string;name:string;input:GlobalPriceInput;updatedAt:string};
+export type GlobalPriceHistory={salePrice:string;currency:string;at:string};
+export type GlobalSavedProduct={id:string;name:string;input:GlobalPriceInput;updatedAt:string;history?:GlobalPriceHistory[]};
 export type GlobalSavedCatalog={version:1;products:GlobalSavedProduct[]};
 const empty=():GlobalSavedCatalog=>({version:1,products:[]});
 function validateCatalog(value:unknown):GlobalSavedCatalog {
@@ -18,6 +19,16 @@ function validateCatalog(value:unknown):GlobalSavedCatalog {
   if(typeof record.updatedAt!=="string"||!Number.isFinite(Date.parse(record.updatedAt)))
    throw new Error("Invalid global product timestamp");
   globalPrice(record.input);
+  if(record.history!==undefined){
+   if(!Array.isArray(record.history)||record.history.length>100)throw new Error("Invalid price history");
+   for(const historic of record.history){
+    if(typeof historic.at!=="string"||!Number.isFinite(Date.parse(historic.at))||
+       typeof historic.currency!=="string"||typeof historic.salePrice!=="string")
+     throw new Error("Invalid price history entry");
+    const historical={...record.input,currency:historic.currency,salePrice:historic.salePrice};
+    globalPrice(historical);
+   }
+  }
  }
  return v;
 }
