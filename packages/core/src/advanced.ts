@@ -25,8 +25,9 @@ export function simulateCOD(input:CODSimulationInput){
  const paid=roundDiv(delivered*bps(input.paidPercentOfDelivered),10000n);
  const failed=created-paid,notShipped=created-shipped,shipFailures=shipped-delivered,deliveredUnpaid=delivered-paid;
  const standard=signed(analyze(v).contribution);
- // Existing advertising and COD/returns reserves are NOT duplicated.
- const perPaid=standard-parseDecimal(v.advertising)-parseDecimal(v.codReserve)-parseDecimal(v.returnsReserve)
+ // Base product contribution already deducts advertising/COD/returns reserves.
+ // Add them back before charging the explicit order-stage expenses once.
+ const perPaid=standard+parseDecimal(v.advertising)+parseDecimal(v.codReserve)+parseDecimal(v.returnsReserve)
    -parseDecimal(input.extraCODFeePerPaidOrder);
  const ad=created*parseDecimal(input.advertisingPerCreatedOrder);
  const failures=shipFailures*parseDecimal(input.failedAttemptCost)+failed*parseDecimal(input.lossReservePerFailedOrder);
