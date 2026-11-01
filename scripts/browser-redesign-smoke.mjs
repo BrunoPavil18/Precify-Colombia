@@ -81,6 +81,7 @@ try{
  if(!(await evaluate('document.querySelector(".sidebar").classList.contains("mobile-open")')))throw Error("Mobile sidebar did not open");
  await shot("overview-mobile.png");
  await nav("Calculadora","Calculadora de precios");
+ await wait(350);
  if(await evaluate('document.querySelector(".sidebar").classList.contains("mobile-open")'))throw Error("Mobile sidebar did not close after navigation");
  await shot("calculator-mobile.png");
  if(errors.length)throw Error("Unhandled React/JS errors: "+JSON.stringify(errors.slice(0,4)));

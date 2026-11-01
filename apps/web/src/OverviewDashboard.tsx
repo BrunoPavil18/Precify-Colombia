@@ -1,5 +1,6 @@
 import {useMemo} from "react";
-import {analyze,type Product,type Workspace} from "@precify-colombia/core";
+import {analyze,computeCODFunnel,type Product,type Workspace,type OrderEvent} from "@precify-colombia/core";
+import {readOperations} from "./OperationsLab";
 import {useTranslator} from "./i18n";
 import {UIIcon} from "./UIIcon";
 
@@ -10,6 +11,17 @@ export function OverviewDashboard({workspace,ranked,format,onNavigate,date}:{
  onNavigate:(page:Target)=>void;date:(value:string)=>string
 }){
  const t=useTranslator();
+ const operations=useMemo(readOperations,[]);
+ const codByCurrency=useMemo(()=>{
+  try{
+   const map=new Map<string,OrderEvent[]>();
+   for(const event of operations.value.events){const rows=map.get(event.currency)??[];rows.push(event);map.set(event.currency,rows);}
+   return [...map].map(([currency,events])=>{
+    const results=computeCODFunnel(events);
+    return {currency,created:results.created,paid:results.paid,returned:results.returned};
+   });
+  }catch{return [];}
+ },[operations.value.events]);
  const stats=useMemo(()=>{
   const valid=ranked.filter((row):row is Item&{result:ReturnType<typeof analyze>}=>!!row.result);
   return {valid:valid.length,unviable:valid.filter(row=>!row.result.feasible).length,leader:valid.find(row=>row.result.feasible)??valid[0]??null};
@@ -34,6 +46,14 @@ export function OverviewDashboard({workspace,ranked,format,onNavigate,date}:{
    <div className="overview-stat"><span>{t("Análisis guardados")}</span><strong>{workspace.advancedSimulations.length}</strong><small>{t("COD, CAC y otras simulaciones")}</small><UIIcon name="activity" size={22}/></div>
    <div className="overview-stat"><span>{t("Productos a revisar")}</span><strong className={stats.unviable?"negative-number":""}>{stats.unviable}</strong><small>{t("Contribución no viable entre los calculables")}</small><UIIcon name="shield" size={22}/></div>
   </div>
+  {(codByCurrency.length>0||operations.value.campaigns.length>0||operations.error)&&<section className="main-card overview-imported" aria-label={t("Actividad operacional importada")}>
+   <div className="section-head"><div><span className="eyebrow">{t("DATOS IMPORTADOS, NO VERIFICADOS POR PRECIFY")}</span>
+    <h3>{t("Operaciones y anuncios")}</h3></div><button className="secondary" onClick={()=>onNavigate("operaciones")}>{t("Abrir panel COD")}</button></div>
+   {operations.error?<p role="alert" className="muted">{t("Hay datos operativos inválidos. Revisa el módulo de importaciones sin sobrescribir la copia original.")}</p>:
+    <div className="overview-observed-grid">{codByCurrency.map(item=><div className="overview-observed" key={item.currency}><span>{item.currency} · {t("Pedidos importados")}</span><strong>{item.created}</strong>
+     <small>{t("Pagos registrados")}: {item.paid} · {t("Devoluciones registradas")}: {item.returned}</small></div>)}
+     {operations.value.campaigns.length>0&&<div className="overview-observed"><span>{t("Campañas importadas")}</span><strong>{operations.value.campaigns.length}</strong><small>{t("Métricas declaradas por la fuente")}</small></div>}</div>}
+  </section>}
   {workspace.products.length===0?<section className="overview-onboarding main-card">
    <div className="onboarding-icon"><UIIcon name="spark" size={30}/></div>
    <div><span className="eyebrow">{t("PRIMEROS PASOS")}</span><h3>{t("Empieza con tu primer producto")}</h3>

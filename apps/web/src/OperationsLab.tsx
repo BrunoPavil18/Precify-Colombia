@@ -31,7 +31,7 @@ function validateLocalOps(candidate:unknown):LocalOperations{
  }
  return v;
 }
-function readOperations():{value:LocalOperations;error:string|null;raw:string|null}{
+export function readOperations():{value:LocalOperations;error:string|null;raw:string|null}{
  try{
   const raw=localStorage.getItem(KEY);
   if(!raw)return {value:empty(),error:null,raw:null};
