@@ -398,6 +398,28 @@ async function handler(req,res){
    return respond(res,201,{id:rows[0].id,endpoint:new URL("/v1/hooks/"+rows[0].id,publicURL).toString(),
     secret,signature:"HMAC-SHA256(timestamp + '.' + exact UTF-8 body)",warning:"Secret is shown only once"});
   }
+  if(path==="api-keys"&&req.method==="GET"){
+   await authorize(auth,org,"owner");
+   return respond(res,200,await query("precify_api_keys",{org_id:"eq."+org},"id,scope,created_at,revoked_at"));
+  }
+  const revokeKey=path.match(/^api-keys\/([a-f0-9-]{36})$/i);
+  if(revokeKey&&req.method==="DELETE"){
+   await authorize(auth,org,"owner");
+   await remove("precify_api_keys",{org_id:"eq."+org,id:"eq."+revokeKey[1]});
+   await audit(org,auth,"key.revoke",{id:revokeKey[1]});
+   return respond(res,200,{revoked:true});
+  }
+  if(path==="webhooks"&&req.method==="GET"){
+   await authorize(auth,org,"admin");
+   return respond(res,200,await query("precify_webhooks",{org_id:"eq."+org},"id,created_at,revoked_at"));
+  }
+  const revokeHook=path.match(/^webhooks\/([a-f0-9-]{36})$/i);
+  if(revokeHook&&req.method==="DELETE"){
+   await authorize(auth,org,"admin");
+   await remove("precify_webhooks",{org_id:"eq."+org,id:"eq."+revokeHook[1]});
+   await audit(org,auth,"webhook.revoke",{id:revokeHook[1]});
+   return respond(res,200,{revoked:true});
+  }
   if(path==="meta/connect"&&req.method==="POST"){
    await authorize(auth,org,"admin");
    if(auth.type!=="user"||!env.META_APP_ID||!env.META_APP_SECRET)fail(503,"Meta OAuth is not configured");
