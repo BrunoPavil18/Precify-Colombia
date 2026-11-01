@@ -3,7 +3,7 @@
 **Data:** 2026-11-01  
 **Repositório:** BrunoPavil18/Precify-Colombia  
 **Base de revisão:** PR #4, commit `f73c1166e4e15a28d6183466b96e1a78659de769`, código, capturas de nove páginas do usuário, vídeo tutorial fornecido e documentação pública do PrecifyCOD: https://precifycod.com/landing e https://precifycod.com/app-description.  
-**Natureza:** especificação executável, auditoria e backlog priorizado — **não** é declaração de redesign implementado.
+**Natureza original:** especificação e auditoria. **Atualização de 2026-11-01:** o redesign de interface foi implementado e validado em Chromium; consultar [relatório de entrega](REDESIGN_DELIVERY_V2_1_0.md) para separar o que está implementado das evoluções futuras.
 
 ## 0. Decisões aprovadas / limites
 

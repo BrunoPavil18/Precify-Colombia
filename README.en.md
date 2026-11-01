@@ -6,6 +6,11 @@
 
 **Version 2.1.0 in development (UNRELEASED) · Latest stable version: 2.0.1 · Apache License 2.0**
 
+
+## 2.1.0 dark-first redesign — consolidated candidate
+
+Implemented a **Jet Black `#121212`** theme, task-first grouped navigation, new **Overview** dashboard, direct COD/CAC/CPA/PUM entry points, searchable catalog, report filters, smooth default microinteractions and a mobile navigation drawer. Existing financial formulas and offline behavior remain intact. **108 automated tests** and real Chromium UI acceptance (19 routes, save and reload) passed. [Delivery record](docs/REDESIGN_DELIVERY_V2_1_0.md) · [CI evidence](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932). This is still an unreleased draft; Vezura was not modified.
+
 ## Version 2.1.0 development — not production-certified
 
 This feature branch adds native ISO-currency pricing, dated daily FX references with offline caches, an independent international catalog, a COD funnel, CPA matrix, CSV imports, dashboards and an optional REST service with organizations, roles, signed webhooks and Facebook Ads. A stateless iframe calculator (`?embed=1`) can be embedded in Vezura or another website **without modifying Vezura's repository**. Connected capabilities require PostgreSQL/Supabase, Meta credentials and external integration testing; they are NOT production-ready. [Progress checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integration guide](docs/CONNECTED_API_V2_1_0.md).

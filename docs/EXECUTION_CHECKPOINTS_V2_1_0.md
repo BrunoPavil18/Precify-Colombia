@@ -183,3 +183,12 @@ Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flo
 - Manual synchronization uses the same tracked execution path as scheduled polling. Site handler distinguishes cursor expiration with HTTP 410 rather than silently discarding history.
 - Real Chromium test script `scripts/browser-sync-smoke.mjs` retained. Temporary GitHub Actions workflow removed after green gate to conserve CI minutes. Original branch stays **DRAFT / not production certified**.
 - Remaining required store work and owner actions: [Vezura integration gate](VEZURA_INTEGRATION_NEXT.md). No live store data, API token or Hostinger/Supabase migration was modified in CP08.
+
+
+## CP09 — Redesign visual e funcional dark-first consolidado (2026-11-01)
+
+O Plano Mestre `docs/REDESIGN_MASTER_PLAN_V2_1_0.md` foi implementado no escopo de experiência local: tema Jet Black `#121212`, 19 rotas, Visão Geral com indicadores baseados em dados locais, COD/CAC/CPA/PUM expostos, UI ES/PT/EN, catálogo e relatórios pesquisáveis, microinterações normais por padrão e drawer mobile. Preservados motor financeiro e dados locais; Vezura não foi modificada.
+
+Aprovação automática: [Actions #41323103932](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932), HEAD `c5abb3e55d49fbf7b341b544b7245ddda5fd47ba`. 108 testes, build/TS/lint e Chromium real (19 rotas, mobile, salvar e recarregar produto). Evidências visuais em `precify-dark-ui`. O workflow temporário é removido após coleta das evidências para evitar consumo extra. [Relatório consolidado](REDESIGN_DELIVERY_V2_1_0.md).
+
+PR #4 mantida em draft. Não houve release/merge/deploy de produção; integrações externas continuam dependentes de validação própria.

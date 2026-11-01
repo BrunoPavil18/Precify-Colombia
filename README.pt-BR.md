@@ -6,6 +6,11 @@
 
 **Desenvolvimento da 2.1.0 (NÃO lançada) · Última versão estável: 2.0.1 · Apache License 2.0**
 
+
+## Redesign dark-first 2.1.0 — entrega consolidada (candidata)
+
+Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tarefas, nova **Visão Geral**, acesso direto a COD/CAC/CPA/PUM, catálogo pesquisável, relatórios com filtros, microanimações normais por padrão e menu mobile. Os cálculos e o funcionamento offline foram preservados. **108 testes automatizados** e aceitação real no Chromium (19 rotas, salvamento e recarga) aprovados. [Relatório da entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidência do CI](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932). A branch continua não publicada e não altera a Vezura.
+
 ## Desenvolvimento da 2.1.0 — ainda não homologada
 
 Esta branch acrescenta precificação nativa em moedas ISO, cotações indicativas diárias com cache offline, catálogo internacional independente, funil COD, matriz CPA, importação CSV, dashboards e uma API REST opcional com organizações, permissões, webhooks assinados e Facebook Ads. Também oferece calculadora incorporável por iframe (`?embed=1`), utilizável na Vezura e em outros sites, **sem modificar o repositório da Vezura**. Os serviços conectados dependem de PostgreSQL/Supabase, credenciais da Meta e testes externos; não estão prontos para produção. [Checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integração](docs/CONNECTED_API_V2_1_0.md).

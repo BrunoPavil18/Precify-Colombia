@@ -6,6 +6,11 @@
 
 **Desarrollo v2.1.0 (NO publicado) · Última versión estable: 2.0.1 · Apache License 2.0**
 
+
+## Rediseño dark-first 2.1.0 — entrega consolidada (candidata)
+
+Se implementó un panel con base **Jet Black `#121212`**, navegación organizada por tareas, nueva **Visión general**, acceso directo a COD/CAC/CPA/PUM, catálogo con búsqueda, informes con filtros, microanimaciones normales por defecto y menú móvil. Se preservaron los cálculos y el funcionamiento local/offline. **108 pruebas automatizadas** y aceptación visual en Chromium (19 rutas, guardado y recarga) superadas. [Informe de entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidencia de CI](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932). Esta rama sigue sin publicarse y no modifica Vezura.
+
 ## Desarrollo de 2.1.0 — todavía sin homologar
 
 Esta branch experimental añade precios nativos en monedas ISO, cotizaciones orientativas diarias con cache offline, catálogo internacional independiente, panel COD y CPA, importación de pedidos/anuncios CSV, dashboard y una API REST conectada opcional con organizaciones, roles, webhooks firmados y Facebook Ads. También permite integrar una calculadora sin cuentas mediante `?embed=1`, por ejemplo en Vezura, **sin modificar el repositorio de Vezura**. Las funciones conectadas requieren servidor PostgreSQL/Supabase, credenciales Meta y validación externa; aún NO se consideran listas para producción. [Checkpoints de ejecución](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Guía de integración](docs/CONNECTED_API_V2_1_0.md).
