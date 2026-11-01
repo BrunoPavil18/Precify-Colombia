@@ -23,7 +23,9 @@ async function authRequest(path:string,body:unknown){
  if(!res.ok)throw new Error(String(data.msg??data.message??data.error_description??"Error de autenticación"));
  return data;
 }
+let activeSession:Session|null=readSession();
 function storeSession(value:Session|null){
+ activeSession=value;
  try{if(value)sessionStorage.setItem(SESSION,JSON.stringify(value));else sessionStorage.removeItem(SESSION);}catch{/* Session persistence optional */ }
 }
 async function renewSession(session:Session):Promise<void>{
@@ -40,11 +42,23 @@ async function renewSession(session:Session):Promise<void>{
  session.expires_at=Date.now()+Number(updated.expires_in??3600)*1000;
  storeSession(session);
 }
+async function ensureFreshSession(session:Session):Promise<Session>{
+ const current=activeSession?.user.id===session.user.id?activeSession:session;
+ if(Date.now()<current.expires_at-60000)return current;
+ if(!current.refresh_token)throw new Error("Sesión expirada. Inicia sesión nuevamente.");
+ const fresh=await authRequest("token?grant_type=refresh_token",{refresh_token:current.refresh_token});
+ if(typeof fresh.access_token!=="string"||!fresh.user?.id)throw new Error("No se pudo renovar la sesión.");
+ const updated:Session={access_token:fresh.access_token,refresh_token:String(fresh.refresh_token??current.refresh_token),
+  expires_at:Date.now()+Number(fresh.expires_in??3600)*1000,user:{id:fresh.user.id,email:fresh.user.email}};
+ storeSession(updated);
+ return updated;
+}
 async function request<T>(session:Session,path:string,method:"GET"|"POST"|"DELETE"="GET",body?:unknown):Promise<T>{
  await renewSession(session);
  if(!API)throw new Error("Servidor conectado no configurado.");
+ const current=await ensureFreshSession(session);
  const res=await fetch(API+path,{method,headers:{
-  Authorization:"Bearer "+session.access_token,
+  Authorization:"Bearer "+current.access_token,
   "Content-Type":"application/json","Accept":"application/json"
  },cache:"no-store",body:body===undefined?undefined:JSON.stringify(body)});
  const response=await res.json();
@@ -113,7 +127,7 @@ export function ConnectedLab(){
   }catch(e){setNotice(String(e));}finally{setBusy(false);}
  }
  function logout(){
-  if(session&&selected)localStorage.removeItem(summaryKey(session.user.id,selected));
+  if(session){for(const key of Object.keys(localStorage))if(key.startsWith("precify-colombia:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}
   storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setNewKey("");setNewHook(null);
  }
  async function uploadLocal(){
