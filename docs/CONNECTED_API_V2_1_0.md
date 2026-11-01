@@ -112,3 +112,15 @@ Frankfurter v2 exposes no-key, generally daily reference rates: https://frankfur
 - API/webhook event uploads use a privileged, transactional SQL routine for conflict-safe idempotency; generic dataset reads are paginated with hard caps rather than silently truncated.
 - The Meta connector targets Marketing API `v26.0` by default; live integration requires valid provider credentials, permissions and an operational deployment.
 - Full reports, webhook tests, PWA offline usage and third-party embedding require browser/host validation before claiming production readiness.
+
+## Transaction-safe operations — current 2.1.0 candidate
+
+After upgrading the feature branch in a **dedicated test project**, reapply `apps/service/sql/001_connected_schema.sql` explicitly. The script uses idempotent `create if not exists` and `create or replace function` statements: older installations of the development schema need the updated functions `precify_import_campaign_batch` and `precify_erase_operational_data`, as well as the previous `precify_import_order_batch`. Do **not** apply it to a merchant's existing production database without a reviewed migration/backup.
+
+The server owner-only `DELETE /v1/orgs/:id/data` now uses **one PostgreSQL transaction** and an organization-scoped advisory lock to delete only that organization's operational events, campaigns, prices, Meta connections, OAuth states, API keys and webhook secrets. Memberships and the organization survive. A minimal audit of erasure remains. Full-organization deletion is a **separate**, explicitly ID-confirmed owner action.
+
+Order and campaign imports share the advisory lock; same-ID campaign updates must retain source and currency, while conflicting duplicate IDs within one batch are rejected. `void` RPC success may have an empty response body, handled by the server. This design has passed **static contract tests** but has NOT yet been checked against a provisioned PostgreSQL/Supabase database; transactional behavior and tenant isolation must be confirmed by a real integration test before deploying connected mode to merchants.
+
+The React connected UI caches read-only financial summaries only with permission for the **selected organization**, avoids two refresh-token renewals per request and clears the previous organization's visible report on selection. Cache is optional; the legacy local COP workspace remains independent.
+
+[Successful CI after these changes (90 tests)](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163). No real Meta credentials, automatic deployment or GitHub Actions workflow remain configured.
