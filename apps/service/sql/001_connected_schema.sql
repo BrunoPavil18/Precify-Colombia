@@ -103,3 +103,33 @@ returns table(org_id uuid,user_id uuid) language sql security invoker as $$
 $$;
 revoke all on function public.precify_consume_oauth_state(text) from public,anon,authenticated;
 grant execute on function public.precify_consume_oauth_state(text) to service_role;
+
+-- A batch must either insert consistently or fail without partial writes.
+-- The service validates each payload first and ensures the caller owns org permissions.
+-- A transaction-scoped org advisory lock serializes concurrent webhook/API replays.
+create or replace function public.precify_import_order_batch(p_org uuid,p_events jsonb)
+returns integer language plpgsql security invoker as $$
+declare v_event jsonb; v_id text; v_order text; v_existing jsonb; v_count integer:=0;
+begin
+ if jsonb_typeof(p_events) <> 'array' or jsonb_array_length(p_events)>10000
+ then raise exception 'Invalid event batch'; end if;
+ perform pg_advisory_xact_lock(hashtextextended(p_org::text, 2100));
+ for v_event in select value from jsonb_array_elements(p_events) loop
+  v_id:=v_event->>'id';v_order:=v_event->>'orderId';
+  if v_id is null or length(v_id) not between 1 and 128 or
+     v_order is null or length(v_order) not between 1 and 128
+  then raise exception 'Invalid event identity'; end if;
+  select payload into v_existing from public.precify_order_events
+  where org_id=p_org and event_id=v_id for update;
+  if found then
+   if v_existing<>v_event then raise exception 'Conflicting event ID %',v_id; end if;
+  else
+   insert into public.precify_order_events(org_id,event_id,order_id,payload)
+   values(p_org,v_id,v_order,v_event);
+  end if;
+  v_count:=v_count+1;
+ end loop;
+ return v_count;
+end $$;
+revoke all on function public.precify_import_order_batch(uuid,jsonb) from public,anon,authenticated;
+grant execute on function public.precify_import_order_batch(uuid,jsonb) to service_role;
