@@ -1,3 +1,4 @@
+import { ConnectedLab } from "./ConnectedLab";
 import { OperationsLab } from "./OperationsLab";
 import { CurrencyLab } from "./CurrencyLab";
 import { AdvancedLab } from "./AdvancedLab";
@@ -11,7 +12,7 @@ import {
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
 import { downloadFile, loadWorkspace, persistWorkspace } from "./storage";
 
-type Page = "calculadora" | "productos" | "escenarios" | "metas" | "informes" | "datos" | "avanzado" | "cambio" | "operaciones";
+type Page = "calculadora" | "productos" | "escenarios" | "metas" | "informes" | "datos" | "avanzado" | "cambio" | "operaciones" | "conectado";
 const nav: {id:Page;icon:string;label:string;description:string}[]=[
  {id:"calculadora",icon:"◈",label:"Calculadora",description:"Precio recomendado"},
  {id:"productos",icon:"▦",label:"Productos",description:"Catálogo local"},
@@ -22,6 +23,7 @@ const nav: {id:Page;icon:string;label:string;description:string}[]=[
  {id:"avanzado",icon:"◉",label:"Avanzado",description:"COD, campañas y PUM"},
  {id:"cambio",icon:"¤",label:"Divisas",description:"Cambio y uso sin conexión"},
  {id:"operaciones",icon:"⇆",label:"Operaciones COD",description:"Pedidos, CPA y publicidad"},
+ {id:"conectado",icon:"◎",label:"Conexiones",description:"Cuenta opcional, equipos y API"},
 ];
 type MoneyKey = "acquisition"|"packaging"|"shippingCost"|"shippingCharged"|
  "fixedFee"|"advertising"|"returnsReserve"|"codReserve"|"discountFixed"|"currentPrice"|"monthlyFixed";
@@ -387,7 +389,7 @@ export default function App(){
    <div className="content-column">
     <header className="topbar"><div className="breadcrumb">PRECIFY / <strong>{t(titleOf(page)).toUpperCase()}</strong></div><div className="topbar-right"><span className="currency-pill">COP <span aria-hidden="true">▾</span></span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> LOCAL</span></div></header>
     <main id="main-content">
-     <div className="page-heading"><div><div className="eyebrow">{t("HERRAMIENTA FINANCIERA GRATUITA")} <span className="green-line"></span> {t("VERSIÓN 2.0.1")}</div><h1>{t(page==="calculadora"?"Precios que tienen sentido.":page==="productos"?"Tus productos. Tus números.":page==="escenarios"?"Prepárate para cada escenario.":page==="metas"?"Del objetivo al resultado.":page==="informes"?"Decisiones respaldadas por datos.":page==="avanzado"?"Simula tu negocio con precisión.":page==="cambio"?"Cotizaciones para negocios internacionales.":page==="operaciones"?"Tus operaciones en perspectiva.":"Tus datos te pertenecen.")}</h1><p>{t(page==="calculadora"?"Calcula el precio correcto, protege tu margen y toma mejores decisiones para tu negocio.":page==="productos"?"Tu catálogo se guarda exclusivamente en este dispositivo.":page==="escenarios"?"Simula resultados antes de cambiar el precio de un producto.":page==="metas"?"Estima cuánto necesitas vender para cubrir gastos fijos.":page==="informes"?"Compara contribuciones reales y lleva tus reportes contigo.":page==="avanzado"?"Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.":page==="cambio"?"Consulta tasas de referencia indicativas y reutiliza tus últimas cotizaciones sin internet.":page==="operaciones"?"Analiza eventos de pedidos, campañas y tasas de entrega sin perder el control de tus datos.":"Sin cuentas, sin seguimiento y sin enviar tus cifras a ningún servidor.")}</p></div><div className="heading-symbol" aria-hidden="true">✳</div></div>
+     <div className="page-heading"><div><div className="eyebrow">{t("HERRAMIENTA FINANCIERA GRATUITA")} <span className="green-line"></span> {t("VERSIÓN 2.0.1")}</div><h1>{t(page==="calculadora"?"Precios que tienen sentido.":page==="productos"?"Tus productos. Tus números.":page==="escenarios"?"Prepárate para cada escenario.":page==="metas"?"Del objetivo al resultado.":page==="informes"?"Decisiones respaldadas por datos.":page==="avanzado"?"Simula tu negocio con precisión.":page==="cambio"?"Cotizaciones para negocios internacionales.":page==="operaciones"?"Tus operaciones en perspectiva.":page==="conectado"?"Tus operaciones, conectadas cuando tú decidas.":"Tus datos te pertenecen.")}</h1><p>{t(page==="calculadora"?"Calcula el precio correcto, protege tu margen y toma mejores decisiones para tu negocio.":page==="productos"?"Tu catálogo se guarda exclusivamente en este dispositivo.":page==="escenarios"?"Simula resultados antes de cambiar el precio de un producto.":page==="metas"?"Estima cuánto necesitas vender para cubrir gastos fijos.":page==="informes"?"Compara contribuciones reales y lleva tus reportes contigo.":page==="avanzado"?"Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.":page==="cambio"?"Consulta tasas de referencia indicativas y reutiliza tus últimas cotizaciones sin internet.":page==="operaciones"?"Analiza eventos de pedidos, campañas y tasas de entrega sin perder el control de tus datos.":page==="conectado"?"Opcionalmente conecta cuentas, equipos y campañas sin transferir tus datos locales de forma automática.":"Sin cuentas, sin seguimiento y sin enviar tus cifras a ningún servidor.")}</p></div><div className="heading-symbol" aria-hidden="true">✳</div></div>
      {confirmation&&<div className="modal-backdrop" role="presentation">
       <section className="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="precify-confirm-title" aria-describedby="precify-confirm-body">
        <h2 id="precify-confirm-title">{t("Confirmar operación")}</h2>
@@ -498,6 +500,7 @@ export default function App(){
      </div>}
      {page==="cambio"&&<CurrencyLab/>}
      {page==="operaciones"&&<OperationsLab/>}
+     {page==="conectado"&&<ConnectedLab/>}
      {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
       onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
       onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
