@@ -124,7 +124,7 @@ export function OperationsLab({products}:{products:Product[]}){
   }catch(e){return [{currency:"?",error:String(e)}];}
  },[data.events]);
  const reconciled=useMemo(()=>{
-  try{return data.campaigns.map(c=>reconcileCampaigns(data.events.filter(e=>e.currency===c.currency),[c])[0]);}
+  try{return data.campaigns.flatMap(c=>reconcileCampaigns(data.events.filter(e=>e.currency===c.currency),[c]));}
   catch{return [];}
  },[data.events,data.campaigns]);
  const marketing=useMemo(()=>{try{return data.campaigns.map(advertisingIndicators);}catch{return []; }},[data.campaigns]);
