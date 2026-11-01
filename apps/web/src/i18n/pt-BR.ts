@@ -597,5 +597,9 @@ export const ptBR: Record<string,string> = {
   "Respaldo validado. Confirma la sustitución antes de continuar.": "Backup validado. Confirme a substituição antes de continuar.",
   "Respaldo operacional restaurado.": "Backup operacional restaurado.",
   "Calculadora integrable. Sin cuenta ni transferencia de datos a la tienda o al servidor.": "Calculadora incorporável, sem conta nem envio de dados para a loja ou servidor.",
-  "Valores estimados. No son asesoría fiscal ni precios garantizados.": "Valores estimados. Não são orientação tributária nem preços garantidos."
+  "Valores estimados. No son asesoría fiscal ni precios garantizados.": "Valores estimados. Não são orientação tributária nem preços garantidos.",
+  "La eliminación anterior conserva tu organización y sus miembros. Para eliminar también cuenta de organización, equipos, llaves y conexiones, escribe el ID de la organización.": "A exclusão anterior preserva a organização e seus membros. Para excluir também organização, equipes, chaves e conexões, digite o ID da organização.",
+  "Confirma el ID completo de la organización": "Confirme o ID completo da organização",
+  "Eliminar toda la organización permanentemente": "Excluir toda a organização permanentemente",
+  "Organización y datos conectados eliminados permanentemente.": "Organização e dados conectados excluídos permanentemente."
 };
