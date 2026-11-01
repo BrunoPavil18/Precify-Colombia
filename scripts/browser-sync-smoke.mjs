@@ -34,32 +34,41 @@ async function evaluate(expression){
  return r.result.value;
 }
 async function browserCases(){
+ let stage="import";
+ try {
  const m=await import("/db.js");
  const stamp=String(Date.now()),a="storeA:"+stamp,b="storeB:"+stamp;
  const change=(id,amount)=>({id,kind:"order",operation:"upsert",value:{id,amount}});
  const check=(x,msg)=>{if(!x)throw Error(msg);};
+ stage="initial insert";
  await m.applySitePage(a,[change("evt1","100")],"c1",null);
  let cp=await m.readSiteCheckpoint(a);
  check(cp.cursor==="c1"&&cp.count===1,"initial checkpoint");
+ stage="conflicting immutable event";
  let conflicting=false;
  try{await m.applySitePage(a,[change("evt1","200")],"c2","c1");}catch{conflicting=true;}
  check(conflicting,"immutable order event replay");
  check((await m.readSiteCheckpoint(a)).cursor==="c1","conflict rollback");
+ stage="stale cursor";
  let stale=false;
  try{await m.applySitePage(a,[change("evt2","200")],"c2","wrong");}catch{stale=true;}
  check(stale,"cross-tab stale cursor rejection");
  check((await m.readSiteCheckpoint(a)).cursor==="c1","stale cursor rollback");
+ stage="other tenant insert";
  await m.applySitePage(b,[change("evt1","other")],"other-c1",null);
+ stage="concurrent writes";
  const concurrent=await Promise.allSettled([
   m.applySitePage(a,[change("evt2","201")],"c2","c1"),
   m.applySitePage(a,[change("evt3","202")],"c3","c1")
  ]);
  check(concurrent.filter(x=>x.status==="fulfilled").length===1,"concurrent writers");
  check((await m.readSiteRows(a)).length===2,"local record count");
+ stage="source cache deletion";
  await m.purgeSiteCache("storeA");
  check((await m.readSiteCheckpoint(a))===null,"source revoke");
  check((await m.readSiteRows(b)).length===1,"unrelated tenant retained");
  return {ok:true,scope:b,checks:9};
+ }catch(error){return {ok:false,stage,error:String(error)}}
 }
 async function persistentCase(scope){
  const m=await import("/db.js");
@@ -93,7 +102,7 @@ try{
  if(nav.errorText)throw Error("Chrome navigation failed: "+nav.errorText);
  await until(()=>evaluate('document.readyState==="complete" && location.origin==='+JSON.stringify(origin)));
  const result=await evaluate("("+browserCases.toString()+")()");
- if(!result?.ok)throw Error("Browser IndexedDB check returned empty result");
+ if(!result?.ok)throw Error("Browser IndexedDB check failed: "+JSON.stringify(result));
  await command("Page.reload",{ignoreCache:true});
  await until(()=>evaluate('document.readyState==="complete" && location.origin==='+JSON.stringify(origin)));
  const reload=await evaluate("("+persistentCase.toString()+")("+JSON.stringify(result.scope)+")");
