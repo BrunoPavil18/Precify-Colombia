@@ -44,7 +44,12 @@ export function GlobalPricingLab(){
    globalPrice(input);
    if(!name.trim())throw new Error("Introduce un nombre para guardar el precio.");
    const id=selectedId||crypto.randomUUID(),updatedAt=new Date().toISOString();
-   const row={id,name:name.trim(),input:{...input},updatedAt};
+   const old=catalog.products.find(x=>x.id===id);
+   const previousHistory=old?.history??[];
+   const history=old&&(old.input.salePrice!==input.salePrice||old.input.currency!==input.currency)
+    ?[...previousHistory,{salePrice:old.input.salePrice,currency:old.input.currency,at:old.updatedAt}].slice(-100)
+    :previousHistory;
+   const row={id,name:name.trim(),input:{...input},updatedAt,history};
    const next={version:1 as const,products:[...catalog.products.filter(x=>x.id!==id),row]};
    if(commit(next))setSelectedId(id);
   }catch(e){setNotice(String(e));}
@@ -108,6 +113,12 @@ export function GlobalPricingLab(){
     <div><dt>{t("Precio recomendado")}</dt><dd>{input.currency+" "+outcome.suggestion?.suggestedPrice}</dd></div>
    </dl>
   </div>}
+  {selectedId&&catalog.products.find(x=>x.id===selectedId)?.history?.length?<div className="advanced-results">
+   <h3>{t("Historial de precios anteriores")}</h3>
+   {catalog.products.find(x=>x.id===selectedId)?.history?.slice().reverse().map((entry,i)=><div className="list-row" key={i}>
+    <span>{entry.currency+" "+entry.salePrice}</span><small>{new Date(entry.at).toLocaleString()}</small>
+   </div>)}
+  </div>:null}
   <p className="muted">{t("El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.")}</p>
  </section>;
 }
