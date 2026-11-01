@@ -5,7 +5,7 @@
 ## Configuration
 
 1. Deploy a dedicated PostgreSQL/Supabase project (free/self-hosted options depend on your operator).
-2. Review, then manually apply `apps/service/sql/001_connected_schema.sql` using a privileged SQL console.
+2. Review and apply both versioned migrations in order: `apps/service/sql/001_connected_schema.sql`, then `apps/service/sql/002_security_hardening.sql`. Do not reapply already recorded migrations.
 3. Copy `apps/service/.env.example` into your deployment's secret manager. Generate a 32-byte random encryption key and provide its **64-character hex representation**. Set TLS origins and secrets. Never put the Supabase service-role key or Meta app secret in the frontend.
 4. Build the core before launching: `pnpm --filter @precify-colombia/core build`; then `node apps/service/server.mjs`.
 5. Deploy behind HTTPS. The service binds to 127.0.0.1 by default and can be reverse-proxied; set a fixed allowed web origin.
@@ -119,7 +119,7 @@ After upgrading the feature branch in a **dedicated test project**, reapply `app
 
 The server owner-only `DELETE /v1/orgs/:id/data` now uses **one PostgreSQL transaction** and an organization-scoped advisory lock to delete only that organization's operational events, campaigns, prices, Meta connections, OAuth states, API keys and webhook secrets. Memberships and the organization survive. A minimal audit of erasure remains. Full-organization deletion is a **separate**, explicitly ID-confirmed owner action.
 
-Order and campaign imports share the advisory lock; same-ID campaign updates must retain source and currency, while conflicting duplicate IDs within one batch are rejected. `void` RPC success may have an empty response body, handled by the server. This design has passed **static contract tests** but has NOT yet been checked against a provisioned PostgreSQL/Supabase database; transactional behavior and tenant isolation must be confirmed by a real integration test before deploying connected mode to merchants.
+Order and campaign imports share the advisory lock; same-ID campaign updates must retain source and currency, while conflicting duplicate IDs within one batch are rejected. `void` RPC success may have an empty response body, handled by the server. This design has passed real PostgreSQL function tests and rollback-only two-tenant smoke tests on the dedicated Precify Supabase project, but true simultaneous sessions, deployed HTTP authorization, live webhooks and third-party authentication remain untested. See [database evidence](SUPABASE_LIVE_VALIDATION_2026-11-01.md).
 
 The React connected UI caches read-only financial summaries only with permission for the **selected organization**, avoids two refresh-token renewals per request and clears the previous organization's visible report on selection. Cache is optional; the legacy local COP workspace remains independent.
 
