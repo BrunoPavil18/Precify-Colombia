@@ -227,3 +227,30 @@ tbody th small{display:block;color:#8b9e96;margin-top:5px}
 .confirmation-dialog p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 .confirmation-dialog .actions{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
 .confirmation-dialog button:focus-visible{outline:3px solid #17ad96;outline-offset:2px}
+
+
+/* 2.1.0: operational tools, connected controls and the independent embedded calculator. */
+.advanced-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0}
+.advanced-actions button{min-height:40px}
+.currency-lab,.global-pricing,.operations-lab,.connected-lab{min-width:0;max-width:100%}
+.operations-lab .main-card,.connected-lab .advanced-results,.global-pricing .advanced-results{margin-top:16px}
+.operations-lab .advanced-results,.connected-lab .advanced-results{min-width:0}
+.operations-lab .list-row,.connected-lab .list-row,.global-pricing .list-row{
+ display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+ overflow-wrap:anywhere
+}
+.operations-lab .table-scroll,.connected-lab .table-scroll,.global-pricing .table-scroll{max-width:100%;overflow:auto}
+.operations-lab table,.connected-lab table{border-collapse:collapse;min-width:580px}
+.operations-lab th,.operations-lab td,.connected-lab th,.connected-lab td{padding:10px 12px;text-align:left;white-space:nowrap}
+.operations-trend{display:grid;gap:8px;max-width:100%}
+.operations-trend .list-row{display:grid;grid-template-columns:minmax(90px,auto) minmax(0,1fr) 40px;gap:8px}
+.embed-calculator .main-card{max-width:100%;margin:14px 0}
+.embed-calculator .advanced-results dl{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:720px){
+ .advanced-actions{align-items:stretch}
+ .advanced-actions button{max-width:100%;white-space:normal}
+ .operations-lab .advanced-tabs{overflow-x:auto}
+ .operations-lab .main-card{padding:14px}
+ .embed-calculator .advanced-results dl{grid-template-columns:1fr}
+ .embed-calculator .advanced-grid{grid-template-columns:1fr}
+}
