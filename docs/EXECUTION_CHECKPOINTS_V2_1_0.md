@@ -26,7 +26,7 @@
 | CP03 | IMPLEMENTED — UNVERIFIED | PostgreSQL/Supabase tables + RLS/revoked grants, organization roles, backend identity validation, REST, API keys, webhook signatures, export/deletion, connected web UI | apps/service server + SQL + ConnectedLab; needs deployment and integration tests |
 | CP04 | IMPLEMENTED — EXTERNAL VALIDATION PENDING | Meta OAuth one-use state, token expiry/exchange, accounts, cursor-paginated insights at campaign/adset/ad level, aggregate demographics, disconnect, v26.0 default | Real Meta credentials, review, permissions, pagination acceptance and deployed integration still pending |
 | CP05 | IN PROGRESS | Local dashboard, connected summaries, optional sessions/teams, generic REST + server SDK and stateless standalone iframe calculator, ES/PT/EN strings | UI QA, integration and pricing-history UX validation pending |
-| CP06 | IN PROGRESS | New local test scripts, consolidated acceptance guide and development README/architecture; execution/deployment, final security audit and release notes remain | docs/TESTING_V2_1_0.md, package scripts; NOT RUN |
+| CP06 | AUTOMATED PASS — EXTERNAL PENDING | Node 22 GitHub Actions approved: install, typecheck, AST lint, 86/86 tests, service syntax, Vite production build, ESM package check, dependency audit. PostgreSQL/Meta/E2E PWA still untested. | Run #41303902552; docs/TESTING_V2_1_0.md |
 
 ## Decisions and hard safety boundaries
 1. A merchant must explicitly opt in to any network data sync; existing browser workspaces are untouched unless they authorize import or sync.
@@ -91,3 +91,17 @@ On the next ChatGPT conversation, provide this document path and request a fresh
 
 ### 2026-11-01 — explicit GitHub Actions authorization
 The owner explicitly authorized GitHub Actions for validation in this conversation. The GitHub connector has no workflow-dispatch operation and this repository has no workflow on `main`; no change to `main` is authorized. A temporary feature-branch-only workflow is therefore limited to pushes affecting `.github/validation-trigger-2.1.0.txt` (normal code/PR pushes do not run it), one Ubuntu/Node22/pnpm10 job, 12-minute maximum, read-only token, no secrets, no deployment or release. Results are not yet known. Once evidence is gathered, remove the temporary workflow and trigger so it cannot start again accidentally. Real Meta/Postgres/browser checks are not replaced by this run.
+
+### Evidence: owner-authorized GitHub Actions — 2026-11-01
+
+The owner explicitly authorized using GitHub Actions for this branch. A temporary, single-branch signal-only workflow ran **five** focused validation attempts (no PR/push-wide automation, no matrix, no release, no deployment):
+
+- [#41303397947](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303397947) — failed: missing nonnegative helper import and optional currency precision type.
+- [#41303498834](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303498834) — failed: COP rounding precision returned 0 in the runner's ICU instead of required 2, and unfinished JSX block.
+- [#41303643271](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303643271) — failed: undefined campaign reconciliation type and static i18n regex.
+- [#41303762517](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303762517) — failed: missing delete-confirmation translation and stale ESM version assert.
+- [#41303902552](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303902552) — **SUCCESS** (commit `dbff5604c9aa3dd9b0968af9b38172293391f498`): frozen install, TypeScript, AST lint, 61 core tests, 22 web tests, 2 service security tests, 1 server SDK integration test = **86/86 tests**, service syntax, production build, ESM exports, `pnpm audit --audit-level moderate` reporting **no known vulnerabilities**.
+
+The total five run durations recorded by GitHub are 23s, 24s, 30s, 37s and 44s (2m38s of elapsed run time; actual billed minutes depend on GitHub's own accounting). The temporary workflow and signal should be removed after recording results. Code changes after the successful SHA are limited to documentation and removal of this temporary CI infrastructure.
+
+**Not covered by this successful Actions job:** real Supabase/PostgreSQL schema migration and tenant-isolation E2E, Meta OAuth/account permissions and real Ads insights, webhook live endpoint, iframe/browser device coverage and offline/PWA E2E, penetration and jurisdiction-specific regulatory review. Do not mark production/homologation complete; no merge or release was authorized.
