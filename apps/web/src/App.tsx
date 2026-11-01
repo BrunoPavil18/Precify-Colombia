@@ -2,6 +2,9 @@ import { ConnectedLab } from "./ConnectedLab";
 import { WebsiteSyncLab } from "./WebsiteSyncLab";
 import { OperationsLab } from "./OperationsLab";
 import { CurrencyLab } from "./CurrencyLab";
+import { GlobalPricingLab } from "./GlobalPricingLab";
+import { OverviewDashboard } from "./OverviewDashboard";
+import { UIIcon } from "./UIIcon";
 import { AdvancedLab } from "./AdvancedLab";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -13,19 +16,158 @@ import {
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
 import { downloadFile, loadWorkspace, persistWorkspace } from "./storage";
 
-type Page = "calculadora" | "productos" | "escenarios" | "metas" | "informes" | "datos" | "avanzado" | "cambio" | "operaciones" | "conectado";
-const nav: {id:Page;icon:string;label:string;description:string}[]=[
- {id:"calculadora",icon:"◈",label:"Calculadora",description:"Precio recomendado"},
- {id:"productos",icon:"▦",label:"Productos",description:"Catálogo local"},
- {id:"escenarios",icon:"◫",label:"Escenarios",description:"Riesgo y oportunidades"},
- {id:"metas",icon:"◎",label:"Metas",description:"Punto de equilibrio"},
- {id:"informes",icon:"▥",label:"Informes",description:"Comparar y exportar"},
- {id:"datos",icon:"◇",label:"Datos",description:"Privacidad y copias"},
- {id:"avanzado",icon:"◉",label:"Avanzado",description:"COD, campañas y PUM"},
- {id:"cambio",icon:"¤",label:"Divisas",description:"Cambio y uso sin conexión"},
- {id:"operaciones",icon:"⇆",label:"Operaciones COD",description:"Pedidos, CPA y publicidad"},
- {id:"conectado",icon:"◎",label:"Conexiones",description:"Cuenta opcional, equipos y API"},
+type Page="inicio"|"calculadora"|"productos"|"escenarios"|"metas"|"pum"|"consumer"|"portfolio"|"global"|"panel-cod"|"cod"|"marketing"|"cpa"|"operaciones"|"importar"|"informes"|"competidores"|"conectado"|"cambio"|"datos"|"avanzado";
+type NavItem={id:Page;icon:string;label:string;description:string};
+const navSections:{name:string;items:NavItem[]}[]=[
+ {
+  "name": "VISIÓN GENERAL",
+  "items": [
+   {
+    "id": "inicio",
+    "icon": "home",
+    "label": "Visión general",
+    "description": "Tu espacio financiero"
+   }
+  ]
+ },
+ {
+  "name": "PRECIFICACIÓN",
+  "items": [
+   {
+    "id": "calculadora",
+    "icon": "calculator",
+    "label": "Calculadora",
+    "description": "Precio y margen"
+   },
+   {
+    "id": "productos",
+    "icon": "products",
+    "label": "Productos",
+    "description": "Catálogo local"
+   },
+   {
+    "id": "escenarios",
+    "icon": "scenarios",
+    "label": "Escenarios",
+    "description": "Comparar hipótesis"
+   },
+   {
+    "id": "metas",
+    "icon": "goals",
+    "label": "Metas",
+    "description": "Punto de equilibrio"
+   },
+   {
+    "id": "pum",
+    "icon": "unit",
+    "label": "Precio por unidad",
+    "description": "PUM"
+   },
+   {
+    "id": "consumer",
+    "icon": "consumer",
+    "label": "Precio al consumidor",
+    "description": "Cargos e impuestos"
+   },
+   {
+    "id": "portfolio",
+    "icon": "portfolio",
+    "label": "Cartera multiproducto",
+    "description": "Rentabilidad del mix"
+   },
+   {
+    "id": "global",
+    "icon": "global",
+    "label": "Precios internacionales",
+    "description": "Catálogo ISO"
+   }
+  ]
+ },
+ {
+  "name": "OPERACIONES COD",
+  "items": [
+   {
+    "id": "panel-cod",
+    "icon": "orders",
+    "label": "Panel COD",
+    "description": "Pedidos y pérdidas"
+   },
+   {
+    "id": "cod",
+    "icon": "cod",
+    "label": "Riesgo COD",
+    "description": "Envío y entrega"
+   },
+   {
+    "id": "marketing",
+    "icon": "marketing",
+    "label": "Marketing y CAC",
+    "description": "CPA y ROAS"
+   },
+   {
+    "id": "cpa",
+    "icon": "matrix",
+    "label": "Matriz CPA",
+    "description": "Sensibilidad"
+   },
+   {
+    "id": "operaciones",
+    "icon": "activity",
+    "label": "Precificación COD",
+    "description": "Embudo y precio"
+   },
+   {
+    "id": "importar",
+    "icon": "import",
+    "label": "Importar CSV",
+    "description": "Pedidos y campañas"
+   }
+  ]
+ },
+ {
+  "name": "INTELIGENCIA",
+  "items": [
+   {
+    "id": "informes",
+    "icon": "reports",
+    "label": "Informes",
+    "description": "Comparar y exportar"
+   },
+   {
+    "id": "competidores",
+    "icon": "competitors",
+    "label": "Competidores",
+    "description": "Referencias de precio"
+   }
+  ]
+ },
+ {
+  "name": "CONEXIONES Y DATOS",
+  "items": [
+   {
+    "id": "conectado",
+    "icon": "connected",
+    "label": "Conexiones",
+    "description": "Fuentes opcionales"
+   },
+   {
+    "id": "cambio",
+    "icon": "currency",
+    "label": "Divisas",
+    "description": "Cambio indicativo"
+   },
+   {
+    "id": "datos",
+    "icon": "data",
+    "label": "Datos y copias",
+    "description": "Privacidad local"
+   }
+  ]
+ }
 ];
+const nav=navSections.flatMap(g=>g.items);
+const advancedPages:Page[]=["avanzado","cod","marketing","pum","consumer","portfolio"];
+const operationPages:Page[]=["operaciones","panel-cod","cpa","importar","competidores"];
 type MoneyKey = "acquisition"|"packaging"|"shippingCost"|"shippingCharged"|
  "fixedFee"|"advertising"|"returnsReserve"|"codReserve"|"discountFixed"|"currentPrice"|"monthlyFixed";
 type PercentKey = "feePercent"|"taxPercent"|"ivaPercent"|"codPercent"|"discountPercent"|"targetMargin";
@@ -135,7 +277,10 @@ export default function App(){
  const [notice,setNotice]=useState(initialized.error??"");
  const [dirtyMoney,setDirtyMoney]=useState<Set<string>>(()=>new Set());
  const markDirty=(key:string,dirty:boolean)=>setDirtyMoney(prev=>{const next=new Set(prev);if(dirty)next.add(key);else next.delete(key);return next;});
- const [page,setPage]=useState<Page>("calculadora");
+ const [page,setPage]=useState<Page>("inicio");
+ const [productSearch,setProductSearch]=useState("");
+ const [productOrder,setProductOrder]=useState<"recent"|"name"|"price">("recent");
+ const [mobileNavOpen,setMobileNavOpen]=useState(false);
  const [draft,setDraft]=useState<PriceInput>(()=>({...EMPTY_INPUT,name:translate(readLocale(),"Producto ejemplo")}));
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
@@ -254,8 +399,8 @@ export default function App(){
   setNotice("Se descartaron los cambios sin guardar. La versión guardada permanece intacta.");
  }
  async function navigate(target:Page){
-  if(target!==page&&page==="avanzado"&&advancedDirty&&!(await askConfirmation(t("Hay simulaciones sin guardar. ¿Salir y descartarlas?"))))return;
-  if(target!==page&&page==="avanzado")setAdvancedDirty(false);
+  if(target!==page&&advancedPages.includes(page)&&advancedDirty&&!(await askConfirmation(t("Hay simulaciones sin guardar. ¿Salir y descartarlas?"))))return;
+  if(target!==page&&advancedPages.includes(page))setAdvancedDirty(false);
   if(target!==page&&page==="escenarios"&&scenarioId){
    if(hasUnsavedDraft&&!(await askConfirmation(t("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?"))))return;
    if(savedProduct)setDraft({...savedProduct.input});
@@ -269,7 +414,7 @@ export default function App(){
    const selected=workspace.products.find(p=>p.id===goalProductId)??workspace.products.find(p=>p.id===activeId)??workspace.products[0];
    setGoalProductId(selected?.id??"");resetGoalDraft();
   }
-  setPage(target);
+  setPage(target);setMobileNavOpen(false);
  }
  async function switchScenarioProduct(id:string){
   if(!scenarioId&&hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?"))))return;
@@ -378,6 +523,11 @@ export default function App(){
   const aVal=signedCents(a.result.contribution),bVal=signedCents(b.result.contribution);
   return bVal>aVal?1:bVal<aVal?-1:0;
  }),[workspace.products]);
+ const visibleProducts=useMemo(()=>{
+   const query=productSearch.trim().toLocaleLowerCase();
+   const list=workspace.products.filter(p=>!query||p.input.name.toLocaleLowerCase().includes(query)||p.input.category.toLocaleLowerCase().includes(query));
+   return list.sort((a,b)=>productOrder==="name"?a.input.name.localeCompare(b.input.name):productOrder==="price"?Number(b.input.currentPrice)-Number(a.input.currentPrice):b.updatedAt.localeCompare(a.updatedAt));
+  },[workspace.products,productSearch,productOrder]);
  return <LocaleContext.Provider value={locale}><div className="app-shell">
    <aside className="sidebar">
     <a className="brand" href="#" onClick={e=>{e.preventDefault();navigate("calculadora");}} aria-label={t("Precify Colombia, inicio")}>
@@ -500,10 +650,11 @@ export default function App(){
       </aside>
      </div>}
      {page==="cambio"&&<CurrencyLab/>}
-     {page==="operaciones"&&<OperationsLab products={workspace.products}/>}
+     {page==="global"&&<GlobalPricingLab/>}
+     {operationPages.includes(page)&&<OperationsLab key={page} products={workspace.products} initialTab={page==="panel-cod"?"dashboard":page==="cpa"?"matrix":page==="importar"?"import":page==="competidores"?"prices":"unified"}/>}
      {page==="conectado"&&<ConnectedLab/>}
      <WebsiteSyncLab visible={page==="conectado"} />
-     {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
+     {advancedPages.includes(page)&&<AdvancedLab key={page} initialPane={page==="marketing"?"campaign":page==="pum"?"pum":page==="consumer"?"consumer":page==="portfolio"?"portfolio":"cod"} workspace={workspace} onDirty={setAdvancedDirty}
       onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
       onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t("Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
