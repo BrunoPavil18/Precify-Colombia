@@ -597,5 +597,9 @@ export const en: Record<string,string> = {
   "Respaldo validado. Confirma la sustitución antes de continuar.": "Backup validated. Confirm replacement before proceeding.",
   "Respaldo operacional restaurado.": "Operations backup restored.",
   "Calculadora integrable. Sin cuenta ni transferencia de datos a la tienda o al servidor.": "Embeddable calculator without an account or transferring data to the store or server.",
-  "Valores estimados. No son asesoría fiscal ni precios garantizados.": "Estimated values, not tax advice or guaranteed prices."
+  "Valores estimados. No son asesoría fiscal ni precios garantizados.": "Estimated values, not tax advice or guaranteed prices.",
+  "La eliminación anterior conserva tu organización y sus miembros. Para eliminar también cuenta de organización, equipos, llaves y conexiones, escribe el ID de la organización.": "The deletion above preserves the organization and its members. To delete the organization, teams, keys and connections, enter the organization ID.",
+  "Confirma el ID completo de la organización": "Confirm the full organization ID",
+  "Eliminar toda la organización permanentemente": "Permanently delete the entire organization",
+  "Organización y datos conectados eliminados permanentemente.": "Organization and connected data permanently deleted."
 };
