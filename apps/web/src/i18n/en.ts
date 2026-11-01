@@ -585,5 +585,15 @@ export const en: Record<string,string> = {
   "Ganancia por pedido creado": "Profit per created order",
   "Ganancia por pedido enviado": "Profit per shipped order",
   "Ganancia por pedido pagado": "Profit per paid order",
-  "Cancelados antes de envío": "Cancelled before shipping"
+  "Cancelados antes de envío": "Cancelled before shipping",
+  "Descargar datos originales dañados": "Download original damaged data",
+  "Restaurar respaldo operacional JSON (hasta 2 MB)": "Restore operations JSON backup (up to 2 MB)",
+  "La restauración sustituirá todos los registros operativos locales actuales, no los productos originales.": "Restore will replace current local operational records, not your original saved products.",
+  "Confirmar restauración": "Confirm restore",
+  "Respaldo operacional inválido.": "Invalid operations backup.",
+  "Formato operacional inválido o demasiado grande.": "Invalid or oversized operations format.",
+  "Historial de precios inválido.": "Invalid price history.",
+  "IDs duplicados en respaldo.": "Duplicate IDs in backup.",
+  "Respaldo validado. Confirma la sustitución antes de continuar.": "Backup validated. Confirm replacement before proceeding.",
+  "Respaldo operacional restaurado.": "Operations backup restored."
 };
