@@ -240,6 +240,29 @@ async function metaSync(org,auth,request){
  await importCampaigns(org,auth,validated);
  return {count:validated.length,hasNextPage:false,level,pagesComplete:true};
 }
+async function metaBreakdowns(org,auth,request){
+ if(auth.type!=="user")fail(403,"User authorization required");
+ const accounts=await query("precify_meta_accounts",{org_id:"eq."+org,user_id:"eq."+auth.id,account_id:"eq."+request.accountId});
+ if(!accounts.length)fail(403,"Ad account not authorized");
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(request.since)||!/^\d{4}-\d{2}-\d{2}$/.test(request.until)||request.since>request.until)
+  fail(400,"Invalid breakdown dates");
+ const rows=await tokenFor(org,auth);
+ if(!rows.length||rows[0].expires_at&&Date.parse(rows[0].expires_at)<=Date.now())
+  fail(401,"Meta authorization expired");
+ const url=new URL("https://graph.facebook.com/"+metaVersion+"/"+request.accountId+"/insights");
+ url.searchParams.set("level","campaign");
+ url.searchParams.set("fields","campaign_id,impressions,clicks,spend");
+ url.searchParams.set("breakdowns","age,gender");
+ url.searchParams.set("time_range",JSON.stringify({since:request.since,until:request.until}));
+ url.searchParams.set("limit","100");
+ const response=await graphPages(url,decrypt(rows[0].token_enc));
+ if(response.incomplete)fail(502,"Meta demographic report exceeded safe page cap");
+ return {source:"meta",currency:accounts[0].currency,from:request.since,to:request.until,
+  aggregates:response.data.map(row=>({
+   campaignId:String(row.campaign_id??""),age:String(row.age??"unknown"),gender:String(row.gender??"unknown"),
+   impressions:String(row.impressions??"0"),clicks:String(row.clicks??"0"),spend:String(row.spend??"0")
+  })),warning:"Only aggregate breakdowns supplied by Meta, not individual demographics."};
+}
 const rateBuckets=new Map();
 function throttle(req){
  const ip=req.socket.remoteAddress||"unknown",now=Date.now(),v=rateBuckets.get(ip);
@@ -390,6 +413,9 @@ async function handler(req,res){
   if(path==="meta/accounts"&&req.method==="GET")return respond(res,200,await metaAccounts(org,auth));
   if(path==="meta/sync"&&req.method==="POST"){
    await authorize(auth,org,"analyst");return respond(res,200,await metaSync(org,auth,await readJSON(req,4096)));
+  }
+  if(path==="meta/breakdowns"&&req.method==="POST"){
+   await authorize(auth,org,"analyst");return respond(res,200,await metaBreakdowns(org,auth,await readJSON(req,4096)));
   }
   if(path==="meta/disconnect"&&req.method==="POST"){
    await authorize(auth,org,"admin");
