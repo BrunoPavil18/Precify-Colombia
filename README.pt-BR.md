@@ -4,7 +4,11 @@
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versão 2.0.1 · Gratuito e open source · Apache License 2.0**
+**Desenvolvimento da 2.1.0 (NÃO lançada) · Última versão estável: 2.0.1 · Apache License 2.0**
+
+## Desenvolvimento da 2.1.0 — ainda não homologada
+
+Esta branch acrescenta precificação nativa em moedas ISO, cotações indicativas diárias com cache offline, catálogo internacional independente, funil COD, matriz CPA, importação CSV, dashboards e uma API REST opcional com organizações, permissões, webhooks assinados e Facebook Ads. Também oferece calculadora incorporável por iframe (`?embed=1`), utilizável na Vezura e em outros sites, **sem modificar o repositório da Vezura**. Os serviços conectados dependem de PostgreSQL/Supabase, credenciais da Meta e testes externos; não estão prontos para produção. [Checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integração](docs/CONNECTED_API_V2_1_0.md).
 
 ## Atualização 2.0.1
 
