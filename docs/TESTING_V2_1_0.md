@@ -43,7 +43,7 @@ The top-level `test` now covers core, web, backend security and the server-side 
 - Prove an iframe has no direct access to a Vezura order, customer session or private API key.
 
 ## Connected service
-- Provision an isolated test PostgreSQL/Supabase project and apply `apps/service/sql/001_connected_schema.sql` manually; configure a separate server on HTTPS and public anon key only in Vite.
+- Provision an isolated test PostgreSQL/Supabase project and apply both `apps/service/sql/001_connected_schema.sql` and `apps/service/sql/002_security_hardening.sql` in order; configure a separate server on HTTPS and public anon key only in Vite.
 - Create two accounts and two organizations; verify viewer/analyst/admin/owner boundaries on each mutation and reads. An API key from org A must be rejected by org B.
 - Create and revoke scoped API keys; signed webhook HMAC success, changed body/expired timestamp/replay/conflicting event, atomic batch rollback and no overwrites.
 - Test exports, price history, account team assignment, deletion of operational data and full-org cascade after owner confirmation. Verify other organizations remain intact.
@@ -93,3 +93,6 @@ These new service tests verify source/SQL **contracts**, not PostgreSQL transact
 [GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309523249) completed **successfully** with **91/91 tests** (61 core, 22 web, 7 service static/security tests, 1 server integration SDK), frozen install, typecheck, AST lint, Node service syntax, production build, ESM package verification and dependency audit with no known moderate-or-higher vulnerabilities. It includes the test for separation of Supabase publishable/secret keys and backward-compatible environment-variable aliases.
 
 The 2026 Supabase key transition is documented but no real Supabase gateway handshake, service-role RLS isolation, SQL execution, Meta OAuth, signed live webhook, browser PWA/iframe E2E or external security review has been performed. The temporary workflow was removed. Automated success should not be described as end-to-end connected-service homologation.
+
+## Executed on live Supabase PostgreSQL — 2026-11-01
+The dedicated project `ugjwlckfscgspjaufsak` has both migrations recorded. The reversible suite `apps/service/sql/tests/connected_live_smoke.sql` executed against real PostgreSQL 17.11 with two synthetic tenant organizations, idempotency, transaction rollback, OAuth nonce replay, tenant-scoped erasure, and a real `service_role` execution context. All fixtures were rolled back. All 11 tables have RLS, and `anon`/`authenticated` cannot directly read tables or execute privileged RPCs. Security advisors have no mutable-function-path findings. [Detailed evidence](SUPABASE_LIVE_VALIDATION_2026-11-01.md). Concurrent multi-session access, Node HTTP/JWT integration, Meta OAuth, webhooks and browser E2E are still pending.
