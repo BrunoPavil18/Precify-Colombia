@@ -20,7 +20,7 @@ export function currencyDigits(code:string):number {
   throw new FinancialInputError("Moneda ISO no compatible.");
  try {
   const d=new Intl.NumberFormat("en",{style:"currency",currency:code}).resolvedOptions().maximumFractionDigits;
-  if(!Number.isInteger(d)||d<0||d>3)throw new Error("Unsupported currency precision");
+  if(typeof d!=="number"||!Number.isInteger(d)||d<0||d>3)throw new Error("Unsupported currency precision");
   return d;
  }catch {throw new FinancialInputError("Moneda ISO no compatible.");}
 }
