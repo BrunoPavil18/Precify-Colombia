@@ -10,12 +10,13 @@
     "dev": "pnpm --filter @precify-colombia/core build && pnpm --filter @precify-colombia/web dev",
     "typecheck": "pnpm --filter @precify-colombia/core build && pnpm -r typecheck",
     "lint": "pnpm --filter @precify-colombia/core build && node scripts/lint.mjs && pnpm -r typecheck",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && pnpm test:connected-api && node --test integrations/tests/*.test.mjs",
     "build": "pnpm -r build",
     "verify": "node scripts/verify-local.mjs",
     "verify:core": "pnpm --filter @precify-colombia/core build && node scripts/verify-core-package.mjs",
     "start:connected-api": "pnpm --filter @precify-colombia/core build && node apps/service/server.mjs",
     "test:connected-api": "node --test apps/service/tests/*.test.mjs",
-    "check:connected-api": "node --check apps/service/server.mjs && node --check apps/service/security.mjs"
+    "check:connected-api": "node --check apps/service/server.mjs && node --check apps/service/security.mjs && node --check integrations/precify-client.mjs",
+    "verify:2.1.0": "pnpm typecheck && pnpm lint && pnpm test && pnpm check:connected-api && pnpm build && pnpm verify:core"
   }
 }
