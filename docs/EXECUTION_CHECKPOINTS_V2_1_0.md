@@ -139,3 +139,15 @@ Official Supabase docs now prefer publishable (`sb_publishable_...`) and server-
 **Final owner-authorized validation:** [GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309523249) — **SUCCESS**: frozen lockfile install, typecheck, AST lint, 61 core + 22 web + 7 service + 1 SDK = **91/91**, service syntax, Vite production build, ESM package check and no known moderate-or-higher vulnerabilities. Temporary workflow and signal removed immediately after success; no ongoing Actions automation configured.
 
 **Release boundary unchanged:** optional connected services need a test PostgreSQL/Supabase project, approved Meta app credentials and real browser/webhook acceptance; source/SQL contract tests do not prove database transactions or OAuth. The consolidated [draft PR #4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4) stays open for continued final verification. No `main` merge or v2.1.0 release.
+
+
+### 2026-11-01 — real Supabase connection and live PostgreSQL verification
+The user authorized Supabase operations and linked the separate project `ugjwlckfscgspjaufsak` (Precif-Colombia, Precify organization). PostgreSQL 17.11, initially empty. Both versioned migrations were applied successfully:
+- `20261101132135_precify_colombia_210_connected_schema_initial`: repository `apps/service/sql/001_connected_schema.sql`.
+- `20261101132339_precify_colombia_210_security_hardening`: new `apps/service/sql/002_security_hardening.sql` (pins five RPC function search paths; indexes OAuth org foreign key).
+
+Confirmed 11 RLS-enabled tables, no direct anon/authenticated table SELECT or RPC EXECUTE privileges, and server `service_role` permissions. Ran real, reversible PostgreSQL transaction tests for two synthetic organizations, order replay and conflict rollback, campaign update and conflict rollback, one-time OAuth state, operational erasure preserving memberships/audit and tenant B data, plus a separate `SET LOCAL ROLE service_role` smoke. The committed suite `apps/service/sql/tests/connected_live_smoke.sql` was executed successfully. All fixtures were rolled back; subsequent count queries showed zero organizations, members, orders, campaigns, audit events, prices and OAuth states.
+
+Post-hardening Supabase Security Advisor: no mutable function search path warnings; 11 informational RLS-without-policy notices are **intentional deny-by-default** because all table access is server mediated, not direct client RLS. Performance Advisor: no unindexed FK notices; only two unused-index informational notices expected in empty database. Source and details: [live verification report](SUPABASE_LIVE_VALIDATION_2026-11-01.md).
+
+Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flows, true simultaneous multi-connection concurrency, Meta OAuth/insights, live signed webhooks and browser/PWA/iframe E2E. **Never claim full connected production homologation**; keep consolidated draft PR #4 unmerged/unreleased. No Vezura or main changes, no customer data or secrets used.
