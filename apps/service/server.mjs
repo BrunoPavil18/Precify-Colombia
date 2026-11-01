@@ -460,6 +460,16 @@ async function handler(req,res){
    await remove("precify_meta_accounts",{org_id:"eq."+org,user_id:"eq."+auth.id});
    return respond(res,200,{disconnected:true});
   }
+  if(path===""&&req.method==="DELETE"){
+   await authorize(auth,org,"owner");
+   if(auth.type!=="user")fail(403,"Owner account required");
+   const body=await readJSON(req,4096);
+   if(body?.confirmOrganization!==org)fail(400,"Confirmation organization ID mismatch");
+   // One FK cascade transaction removes memberships, tokens, payments, reports
+   // and personal data for this specific tenant; other tenants are untouched.
+   await remove("precify_organizations",{id:"eq."+org});
+   return respond(res,200,{organizationDeleted:true,scope:org});
+  }
   if(path==="data"&&req.method==="DELETE"){
    await authorize(auth,org,"owner");
    for(const table of ["precify_order_events","precify_campaigns","precify_prices","precify_meta_accounts","precify_meta_connections","precify_webhooks","precify_api_keys"])
