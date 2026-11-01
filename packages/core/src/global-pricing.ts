@@ -3,7 +3,7 @@
  * Country-specific taxes must be specified explicitly; this is not a tax engine.
  */
 import {FinancialInputError,percentBps,roundDiv,ceilDiv} from "./money.js";
-import {currencyDigits,minorAmount,fromMinor} from "./fx.js";
+import {currencyDigits,minorAmount,nonNegativeMinorAmount,fromMinor} from "./fx.js";
 export type GlobalPriceInput={
  currency:string;salePrice:string;acquisition:string;packaging:string;shippingCost:string;
  shippingCharged:string;fixedFee:string;advertising:string;returnsReserve:string;codReserve:string;
@@ -22,8 +22,8 @@ const signedPct=(a:bigint,b:bigint)=>b>0n?(a<0n?"-":"")+
 export function globalPrice(input:GlobalPriceInput,override?:string):GlobalPriceResult{
  currencyDigits(input.currency);
  if(!count.test(input.monthlyUnits))throw new FinancialInputError("Volumen mensual inválido.");
- const money=(field:keyof GlobalPriceInput)=>minorAmount(String(input[field]),input.currency);
- const sale=override===undefined?money("salePrice"):minorAmount(override,input.currency);
+ const money=(field:keyof GlobalPriceInput)=>nonNegativeMinorAmount(String(input[field]),input.currency);
+ const sale=override===undefined?money("salePrice"):nonNegativeMinorAmount(override,input.currency);
  const fee=percentBps(input.feePercent),tax=percentBps(input.taxDeductionPercent);
  const discountRate=percentBps(input.discountPercent),target=percentBps(input.targetMargin);
  if(fee+tax>=10000n||target>=10000n)throw new FinancialInputError("Porcentajes incompatibles.");
@@ -32,7 +32,7 @@ export function globalPrice(input:GlobalPriceInput,override?:string):GlobalPrice
  const net=sale-discount,received=net+money("shippingCharged");
  const deductions=roundDiv(net*(fee+tax),10000n);
  const cost=["acquisition","packaging","shippingCost","fixedFee","advertising","returnsReserve","codReserve"].reduce(
-  (sum,key)=>sum+minorAmount(String(input[key as keyof GlobalPriceInput]),input.currency),0n);
+  (sum,key)=>sum+nonNegativeMinorAmount(String(input[key as keyof GlobalPriceInput]),input.currency),0n);
  const contribution=received-deductions-cost;
  const fixed=money("monthlyFixed"),units=BigInt(input.monthlyUnits);
  return {currency:input.currency,netProductSale:fromMinor(net,input.currency),
