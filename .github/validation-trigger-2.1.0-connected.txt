@@ -1,2 +1,0 @@
-One-shot focused validation after connected-service transaction, refresh and offline consent corrections.
-Explicit owner permission for GitHub Actions granted 2026-11-01. Run 2 — fixed RPC parse shadowing and per-organization consent guard after initial CI findings.
