@@ -26,7 +26,22 @@ async function authRequest(path:string,body:unknown){
 function storeSession(value:Session|null){
  try{if(value)sessionStorage.setItem(SESSION,JSON.stringify(value));else sessionStorage.removeItem(SESSION);}catch{/* Session persistence optional */ }
 }
+async function renewSession(session:Session):Promise<void>{
+ if(session.expires_at>Date.now()+60000)return;
+ if(!session.refresh_token||!SB||!ANON)throw new Error("Sesión caducada. Inicia sesión de nuevo.");
+ const response=await fetch(SB+"/auth/v1/token?grant_type=refresh_token",{
+  method:"POST",headers:{"content-type":"application/json",apikey:ANON},
+  body:JSON.stringify({refresh_token:session.refresh_token}),cache:"no-store"
+ });
+ const updated=await response.json();
+ if(!response.ok||typeof updated.access_token!=="string")throw new Error("No se pudo renovar la sesión. Inicia sesión de nuevo.");
+ session.access_token=updated.access_token;
+ session.refresh_token=String(updated.refresh_token??session.refresh_token);
+ session.expires_at=Date.now()+Number(updated.expires_in??3600)*1000;
+ storeSession(session);
+}
 async function request<T>(session:Session,path:string,method:"GET"|"POST"|"DELETE"="GET",body?:unknown):Promise<T>{
+ await renewSession(session);
  if(!API)throw new Error("Servidor conectado no configurado.");
  const res=await fetch(API+path,{method,headers:{
   Authorization:"Bearer "+session.access_token,
