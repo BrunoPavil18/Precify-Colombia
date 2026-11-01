@@ -11,8 +11,12 @@ import {
 } from "../../packages/core/dist/index.js";
 
 const env=process.env;
-const required=["SUPABASE_URL","SUPABASE_ANON_KEY","SUPABASE_SERVICE_KEY","PRECIFY_ENCRYPTION_KEY","PRECIFY_WEB_ORIGIN","PRECIFY_PUBLIC_URL"];
+const required=["SUPABASE_URL","PRECIFY_ENCRYPTION_KEY","PRECIFY_WEB_ORIGIN","PRECIFY_PUBLIC_URL"];
 for(const key of required)if(!env[key])throw Error("Missing required environment variable "+key);
+const publicKey=env.SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
+const adminKey=env.SUPABASE_SECRET_KEY||env.SUPABASE_SERVICE_KEY;
+if(!publicKey)throw Error("Missing SUPABASE_PUBLISHABLE_KEY (or legacy SUPABASE_ANON_KEY)");
+if(!adminKey)throw Error("Missing SUPABASE_SECRET_KEY (or legacy SUPABASE_SERVICE_KEY)");
 const dbUrl=new URL(env.SUPABASE_URL);
 if(dbUrl.protocol!=="https:")throw Error("SUPABASE_URL must be HTTPS");
 const publicURL=new URL(env.PRECIFY_PUBLIC_URL);
@@ -27,7 +31,7 @@ if(!/^v\d{1,2}\.\d{1,2}$/.test(metaVersion))throw Error("Invalid Meta Graph API 
 const jsonHeaders={"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"};
 const sha=text=>createHash("sha256").update(text).digest("hex");
 const bearer=value=>({Authorization:"Bearer "+value});
-const serviceHeaders={apikey:env.SUPABASE_SERVICE_KEY,...bearer(env.SUPABASE_SERVICE_KEY)};
+const serviceHeaders={apikey:adminKey,...bearer(adminKey)};
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const roles=["viewer","analyst","admin","owner"];
 const supportedTables=new Set(["precify_organizations","precify_memberships","precify_order_events","precify_campaigns","precify_prices","precify_api_keys","precify_webhooks","precify_oauth_states","precify_meta_connections","precify_meta_accounts","precify_audit"]);
@@ -121,7 +125,7 @@ async function currentUser(req){
  if(!authorization.startsWith("Bearer "))fail(401,"Authentication required");
  const token=authorization.slice(7);
  if(token.length>8192)fail(401,"Invalid token");
- const response=await fetch(new URL("/auth/v1/user",dbUrl),{headers:{apikey:env.SUPABASE_ANON_KEY,...bearer(token)},cache:"no-store"});
+ const response=await fetch(new URL("/auth/v1/user",dbUrl),{headers:{apikey:publicKey,...bearer(token)},cache:"no-store"});
  if(!response.ok)fail(401,"Invalid or expired access token");
  const user=await response.json();
  if(!uuid.test(user.id))fail(401,"Missing user id");
