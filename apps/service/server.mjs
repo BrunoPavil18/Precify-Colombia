@@ -76,7 +76,24 @@ async function rpc(name,body){
  return await response.json();
 }
 async function query(table,filters={},select="*"){
- return await sb("GET",table,{select,...filters});
+ // PostgREST defaults to limited result sets. Never silently report a truncated
+ // order funnel or incomplete financial history as a complete dashboard.
+ const sortBy={
+  precify_organizations:"id",precify_memberships:"user_id",
+  precify_order_events:"event_id",precify_campaigns:"id",precify_prices:"id",
+  precify_api_keys:"id",precify_webhooks:"id",precify_oauth_states:"nonce_hash",
+  precify_meta_connections:"user_id",precify_meta_accounts:"account_id",
+  precify_audit:"id"
+ };
+ const collected=[],pageSize=500,maxRows=30000;
+ for(let offset=0;offset<maxRows;offset+=pageSize){
+  const page=await sb("GET",table,{select,...filters,order:(sortBy[table]??"id")+".asc",limit:pageSize,offset});
+  if(!Array.isArray(page))fail(502,"Invalid database response");
+  collected.push(...page);
+  if(page.length<pageSize)return collected;
+ }
+ // A cap is intentionally an error, not an incomplete financial total.
+ fail(413,"Connected dataset exceeds the verified reporting limit; narrow scope or export in batches.");
 }
 async function insert(table,records,options={}){
  const url=new URL("/rest/v1/"+table,dbUrl);
