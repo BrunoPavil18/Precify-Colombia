@@ -28,20 +28,6 @@ function storeSession(value:Session|null){
  activeSession=value;
  try{if(value)sessionStorage.setItem(SESSION,JSON.stringify(value));else sessionStorage.removeItem(SESSION);}catch{/* Session persistence optional */ }
 }
-async function renewSession(session:Session):Promise<void>{
- if(session.expires_at>Date.now()+60000)return;
- if(!session.refresh_token||!SB||!ANON)throw new Error("Sesión caducada. Inicia sesión de nuevo.");
- const response=await fetch(SB+"/auth/v1/token?grant_type=refresh_token",{
-  method:"POST",headers:{"content-type":"application/json",apikey:ANON},
-  body:JSON.stringify({refresh_token:session.refresh_token}),cache:"no-store"
- });
- const updated=await response.json();
- if(!response.ok||typeof updated.access_token!=="string")throw new Error("No se pudo renovar la sesión. Inicia sesión de nuevo.");
- session.access_token=updated.access_token;
- session.refresh_token=String(updated.refresh_token??session.refresh_token);
- session.expires_at=Date.now()+Number(updated.expires_in??3600)*1000;
- storeSession(session);
-}
 async function ensureFreshSession(session:Session):Promise<Session>{
  const current=activeSession?.user.id===session.user.id?activeSession:session;
  if(Date.now()<current.expires_at-60000)return current;
@@ -54,7 +40,6 @@ async function ensureFreshSession(session:Session):Promise<Session>{
  return updated;
 }
 async function request<T>(session:Session,path:string,method:"GET"|"POST"|"DELETE"="GET",body?:unknown):Promise<T>{
- await renewSession(session);
  if(!API)throw new Error("Servidor conectado no configurado.");
  const current=await ensureFreshSession(session);
  const res=await fetch(API+path,{method,headers:{
@@ -83,7 +68,7 @@ export function ConnectedLab(){
  const [orgs,setOrgs]=useState<Org[]>([]),[selected,setSelected]=useState("");
  const [newOrg,setNewOrg]=useState("");
  const [dashboard,setDashboard]=useState<Dash|null>(null);
- const [cacheConsent,setCacheConsent]=useState(false),[offline,setOffline]=useState(false);
+ const [cacheConsent,setCacheConsent]=useState(false),[consentOrg,setConsentOrg]=useState<string|null>(null),[offline,setOffline]=useState(false);
  const [metaAccounts,setMetaAccounts]=useState<AdAccount[]>([]);
  const [adAccount,setAdAccount]=useState(""),[since,setSince]=useState(""),[until,setUntil]=useState("");
  const [metaLevel,setMetaLevel]=useState("campaign");
@@ -145,7 +130,7 @@ export function ConnectedLab(){
  }
  function logout(){
   if(session)try{for(const key of Object.keys(localStorage))if(key.startsWith("precify-colombia:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}catch{/* Storage may be unavailable */}
-  storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setCacheConsent(false);setNewKey("");setNewHook(null);
+  storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setCacheConsent(false);setConsentOrg(null);setNewKey("");setNewHook(null);
  }
  async function uploadLocal(){
   if(!session||!selected)return;
@@ -246,14 +231,14 @@ export function ConnectedLab(){
   </div>:<>
    <div className="advanced-actions"><span>{session.user.email??session.user.id}</span><button className="secondary" onClick={logout}>{t("Cerrar sesión")}</button></div>
    <div className="advanced-grid">
-    <label className="field"><span>{t("Organización")}</span><select value={selected} onChange={e=>{const id=e.target.value;setSelected(id);void report(id,session);}}>
+    <label className="field"><span>{t("Organización")}</span><select value={selected} onChange={e=>{const id=e.target.value;setSelected(id);setDashboard(null);setCacheConsent(false);setConsentOrg(null);if(id)void report(id,session);}}>
      <option value="">{t("Selecciona una organización")}</option>{orgs.map(o=><option key={o.id} value={o.id}>{o.name+" · "+o.role}</option>)}
     </select></label>
     <label className="field"><span>{t("Nueva organización")}</span><input value={newOrg} onChange={e=>setNewOrg(e.target.value)}/></label>
     <button className="secondary" disabled={busy} onClick={()=>{void createOrg();}}>{t("Crear organización")}</button>
    </div>
    {selected&&<>
-    <label className="field"><input type="checkbox" checked={cacheConsent} onChange={e=>{const consent=e.target.checked;setCacheConsent(consent);if(!consent&&session&&selected){try{localStorage.removeItem(summaryKey(session.user.id,selected));}catch{}}}}/> {t("Guardar un resumen financiero offline solo en este navegador")}</label>
+    <label className="field"><input type="checkbox" checked={cacheConsent&&consentOrg===selected} onChange={e=>{const consent=e.target.checked;setCacheConsent(consent);setConsentOrg(consent?selected:null);if(!consent&&session&&selected){try{localStorage.removeItem(summaryKey(session.user.id,selected));}catch{}}}}/> {t("Guardar un resumen financiero offline solo en este navegador")}</label>
     <div className="advanced-results">
      <h3>{offline?t("Último informe guardado — no actualizado"):t("Informe conectado")}</h3>
      {!dashboard?<p>{t("No hay un informe conectado disponible.")}</p>:
