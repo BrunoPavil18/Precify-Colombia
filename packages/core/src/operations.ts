@@ -144,8 +144,9 @@ export function computeCODFunnel(events:OrderEvent[]):{
    +(wasReturned?money(item.reverseShippingCost):0n)
    +(wasPaid||wasReturned?money(item.productCost):0n);
   grossCollected+=sale;refunds+=returnedValue;incurredCosts+=costs;
+  const createdEvent=group.find(x=>x.status==="created")??group[0]!;
   snapshots.push({orderId:id,status:item.status,campaignId:item.campaignId,currency:item.currency,source:item.source,
-   occurredAt:item.occurredAt,totalEvents:group.length,hasShipped:wasShipped,hasDelivered:wasDelivered,
+   occurredAt:createdEvent.occurredAt,totalEvents:group.length,hasShipped:wasShipped,hasDelivered:wasDelivered,
    hasPaid:wasPaid,hasReturned:wasReturned,hasRefunded:wasRefunded});
  }
  return {currency,orders:groups.size,created,cancelled,shipped,delivered,paid,deliveryFailed,returned,refunded,
@@ -159,7 +160,11 @@ export function reconcileCampaigns(events:OrderEvent[],campaigns:AdCampaign[]){
  return campaigns.map(c=>{
   validateAdCampaign(c);
   if(names.has(c.id))throw new FinancialInputError("Campaña duplicada.");names.add(c.id);
-  const matching=funnel.snapshots.filter(o=>o.campaignId===c.id);
+  const matching=funnel.snapshots.filter(o=>{
+   const campaignMatches=o.campaignId===c.id ||
+    (c.level==="campaign"&&!!c.parentCampaignId&&o.campaignId===c.parentCampaignId);
+   return campaignMatches&&o.occurredAt>=c.observedFrom&&o.occurredAt<=c.observedTo;
+  });
   if(matching.some(o=>o.currency!==c.currency))
    throw new FinancialInputError("Monedas del anuncio y pedidos incompatibles; convierte cada resultado con una tasa fechada.");
   const matchingOrders=normalizeEvents(events);
