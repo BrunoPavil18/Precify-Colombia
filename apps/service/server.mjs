@@ -80,7 +80,8 @@ async function query(table,filters={},select="*"){
 async function insert(table,records,options={}){
  const url=new URL("/rest/v1/"+table,dbUrl);
  if(options.conflict)url.searchParams.set("on_conflict",options.conflict);
- const prefer=options.upsert?"resolution=ignore-duplicates,return=representation":"return=representation";
+ const prefer=options.upsert==="merge"?"resolution=merge-duplicates,return=representation":
+  options.upsert?"resolution=ignore-duplicates,return=representation":"return=representation";
  const response=await fetch(url,{method:"POST",headers:{...serviceHeaders,"content-type":"application/json",Prefer:prefer},body:JSON.stringify(records)});
  if(!response.ok)fail(502,"Database insert failed: "+response.status);
  return await response.json();
@@ -145,7 +146,7 @@ async function importCampaigns(org,auth,rows){
  if(!Array.isArray(rows)||rows.length>10000)fail(400,"Invalid campaign batch");
  const unique=new Map();
  for(const c of rows){validateAdCampaign(c);unique.set(c.id,c);}
- if(unique.size)await insert("precify_campaigns",[...unique.values()].map(c=>({org_id:org,id:c.id,payload:c,updated_at:new Date().toISOString()})),{upsert:true,conflict:"org_id,id"});
+ if(unique.size)await insert("precify_campaigns",[...unique.values()].map(c=>({org_id:org,id:c.id,payload:c,updated_at:new Date().toISOString()})),{upsert:"merge",conflict:"org_id,id"});
  await audit(org,auth,"campaigns.import",{count:unique.size});
  return {imported:unique.size};
 }
@@ -177,17 +178,32 @@ async function graph(url,token){
  if(!response.ok)fail(502,"Meta API request failed: "+response.status);
  return await response.json();
 }
+async function graphPages(url,token,maxPages=40){
+ const data=[],used=new Set();let incomplete=false;
+ for(let pageNumber=0;pageNumber<maxPages;pageNumber++){
+  const page=await graph(url,token);
+  if(!Array.isArray(page.data))fail(502,"Invalid Meta API page");
+  data.push(...page.data);
+  const after=page.paging?.cursors?.after;
+  if(!page.paging?.next){return {data,incomplete:false};}
+  if(typeof after!=="string"||after.length>1024||used.has(after))fail(502,"Invalid/repeated Meta pagination cursor");
+  used.add(after);url.searchParams.set("after",after);
+  if(data.length>10000){incomplete=true;break;}
+ }
+ return {data,incomplete:true};
+}
 async function metaAccounts(org,auth){
  const rows=await tokenFor(org,auth);
  if(!rows.length)fail(404,"No Meta account connected");
  const token=decrypt(rows[0].token_enc);
  const url=new URL("https://graph.facebook.com/"+metaVersion+"/me/adaccounts");
  url.searchParams.set("fields","id,name,currency");url.searchParams.set("limit","100");
- const response=await graph(url,token);
+ const response=await graphPages(url,token);
+ if(response.incomplete)fail(502,"Ad account listing exceeded safe page cap; cannot claim complete enumeration");
  const accounts=(response.data??[]).filter(v=>/^act_\d{4,30}$/.test(v.id)&&/^[A-Z]{3}$/.test(v.currency));
  for(const item of accounts)await insert("precify_meta_accounts",{
   org_id:org,user_id:auth.id,account_id:item.id,account_name:String(item.name??item.id).slice(0,200),currency:item.currency
- },{upsert:true,conflict:"org_id,user_id,account_id"});
+ },{upsert:"merge",conflict:"org_id,user_id,account_id"});
  return accounts;
 }
 async function metaSync(org,auth,request){
@@ -200,14 +216,18 @@ async function metaSync(org,auth,request){
  if(!connection.length)fail(401,"Meta connection expired");
  const token=decrypt(connection[0].token_enc);
  const url=new URL("https://graph.facebook.com/"+metaVersion+"/"+request.accountId+"/insights");
- url.searchParams.set("fields","campaign_id,campaign_name,spend,impressions,clicks,actions,action_values");
- url.searchParams.set("level","campaign");url.searchParams.set("limit","100");
+ url.searchParams.set("fields","campaign_id,campaign_name,adset_id,adset_name,ad_id,ad_name,spend,impressions,clicks,actions,action_values");
+ const level=["campaign","adset","ad"].includes(request.level)?request.level:"campaign";
+ url.searchParams.set("level",level);url.searchParams.set("limit","100");
  url.searchParams.set("time_range",JSON.stringify({since:request.since,until:request.until}));
- const reports=await graph(url,token);
+ const reports=await graphPages(url,token);
+ if(reports.incomplete)fail(502,"Meta insights exceed safe page cap; no partial import performed");
  const rows=(reports.data??[]).map(x=>{
   const purchase=(x.actions??[]).find(z=>z.action_type==="purchase");
   const revenue=(x.action_values??[]).find(z=>z.action_type==="purchase");
-  return {id:"meta:"+request.accountId+":"+x.campaign_id+":"+request.since+":"+request.until,
+  const metricId=level==="ad"?x.ad_id:level==="adset"?x.adset_id:x.campaign_id;
+  return {id:"meta:"+request.accountId+":"+level+":"+metricId+":"+request.since+":"+request.until,
+   level,parentCampaignId:String(x.campaign_id??""),name:String((level==="ad"?x.ad_name:level==="adset"?x.adset_name:x.campaign_name)??"").slice(0,200),
    source:"meta",currency:accounts[0].currency,spend:String(x.spend??"0"),
    impressions:String(x.impressions??"0"),clicks:String(x.clicks??"0"),
    attributedConversions:String(purchase?.value??"0"),attributedRevenue:String(revenue?.value??"0"),
@@ -215,8 +235,7 @@ async function metaSync(org,auth,request){
  });
  const validated=rows.map(validateAdCampaign);
  await importCampaigns(org,auth,validated);
- return {count:validated.length,hasNextPage:!!reports.paging?.next,
-  warning:reports.paging?.next?"Partial page: request pagination support before treating this as a complete Meta report.":null};
+ return {count:validated.length,hasNextPage:false,level,pagesComplete:true};
 }
 const rateBuckets=new Map();
 function throttle(req){
@@ -273,7 +292,7 @@ async function handler(req,res){
    if(typeof body.access_token!=="string")fail(502,"Meta token missing");
    await insert("precify_meta_connections",{org_id:rows[0].org_id,user_id:rows[0].user_id,
     token_enc:crypt(body.access_token),expires_at:body.expires_in?new Date(Date.now()+Number(body.expires_in)*1000).toISOString():null},
-    {upsert:true,conflict:"org_id,user_id"});
+    {upsert:"merge",conflict:"org_id,user_id"});
    res.writeHead(302,{location:webOrigin+"/?precify-meta=connected","cache-control":"no-store"});return res.end();
   }
   const auth=await currentUser(req);
