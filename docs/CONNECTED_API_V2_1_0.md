@@ -130,3 +130,10 @@ The React connected UI caches read-only financial summaries only with permission
 The connected backend now prefers `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY` from a **private server environment**. Existing `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_KEY` remain accepted as fallback. For the current React build, set the public `VITE_SUPABASE_ANON_KEY` variable to a **publishable** or legacy anon key; do not place any secret/server key in a `VITE_` variable.
 
 Supabase documents its migration away from legacy JWT API keys. See https://supabase.com/docs/guides/getting-started/api-keys and https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys. The opaque secret key must remain on the backend and be used only with the project's trusted Supabase gateway; this has not yet been proven with this application's real project or account. Never copy keys into this PR or a chat message.
+
+
+## Novo: sincronização em que cada site é a fonte de verdade (2.1.0 candidata)
+
+Para negócios que já guardam seu próprio histórico, **não é obrigatório importar os dados para o servidor Precify**. Consulte [o contrato independente de sincronização por site](SITE_OWNED_SYNC_V2_1_0.md), que usa `identity` e `changes` com cursor e token de leitura da própria loja. O consumidor PWA local armazena seus dados consentidos no IndexedDB, atualiza sob demanda/periódica e não depende de credenciais da API administrativa do serviço Precify.
+
+O modo REST opcional acima continua válido e separado. A Vezura e Hostinger não foram modificadas ou implantadas nesta branch, e o protocolo só funciona quando a loja fornecer seus endpoints. A sincronização é de leitura; alterações da planilha/lançamentos manuais não são enviadas de volta silenciosamente.

@@ -151,3 +151,18 @@ Confirmed 11 RLS-enabled tables, no direct anon/authenticated table SELECT or RP
 Post-hardening Supabase Security Advisor: no mutable function search path warnings; 11 informational RLS-without-policy notices are **intentional deny-by-default** because all table access is server mediated, not direct client RLS. Performance Advisor: no unindexed FK notices; only two unused-index informational notices expected in empty database. Source and details: [live verification report](SUPABASE_LIVE_VALIDATION_2026-11-01.md).
 
 Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flows, true simultaneous multi-connection concurrency, Meta OAuth/insights, live signed webhooks and browser/PWA/iframe E2E. **Never claim full connected production homologation**; keep consolidated draft PR #4 unmerged/unreleased. No Vezura or main changes, no customer data or secrets used.
+
+
+## CP07 — Arquitetura de sincronização local-first aprovada em 2026-11-01
+
+**Branch:** `feat/precify-colombia-v2.1.0`, PR [#4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4), preservando `main`/v2.0.1; GitHub Actions autorizado pelo responsável nesta etapa (revoga as restrições históricas de não execução de CI para esta sessão).
+
+- Conector genérico site-owned via HTTPS e leitura por conta: identidade tenant, feed incremental por cursor opaco, páginas limitadas, replays idempotentes, tombstones e proteção contra cursor retrocedendo.
+- Adaptador de backend da própria loja (`integrations/site-owned-feed.mjs`) com callback de autenticação isolado por loja/organização; nenhum serviço central do Precify se torna obrigatório.
+- Interface ES/PT/EN de lojas em `apps/web/src/WebsiteSyncLab.tsx` integrada à página Conexões e mantida montada ao navegar: 60 s por padrão, 30 s/5 min/manual, sincronização ao conectar e botão de atualização imediata; retentativa com backoff, um request por fonte.
+- IndexedDB local transacional em `apps/web/src/website-sync-db.ts`, escopo por conector e identidade; payloads financeiros validados com core BigInt, separação por moeda, COD resumo somente leitura; exclusão de fonte limpa o cache.
+- Não há autoenvio da área financeira manual para lojas e nem gravação do token do usuário no armazenamento persistente.
+- Testes unitários/contrato de protocolo e servidor + verificação de build CI. O gate não valida navegador real/IndexedDB E2E nem integração remota com Vezura; não homologar produção até essas verificações e implementação da API de feed na loja.
+- **Sem deploy, sem merge, sem release e sem alterações no repositório Vezura.** O Supabase existente permanece dedicado às funções conectadas opcionais e não é requisito desta sincronização.
+
+**Condição de release:** aceite real com site de teste implementando os endpoints, token read-only (ou OAuth revisado), HTTPS/CORS, persistência outbox enquanto PC fechado, retomada pelo último cursor, casos de duplicação e concorrência entre abas, remoção de consentimento, operação offline e métricas de campanhas; revisão de privacidade/retenção.
