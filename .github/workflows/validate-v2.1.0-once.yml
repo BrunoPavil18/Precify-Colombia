@@ -1,0 +1,86 @@
+name: Precify Colombia 2.1.0 — one-shot validation
+# Temporary branch-only validation signal. Ordinary push/PR commits never run this.
+on:
+  push:
+    branches:
+      - feat/precify-colombia-v2.1.0
+    paths:
+      - .github/validation-trigger-2.1.0.txt
+permissions:
+  contents: read
+concurrency:
+  group: precify-v2-1-0-once
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: Node 22 · pnpm 10 · consolidated checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - id: install
+        name: Reproducible install
+        continue-on-error: true
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - id: typecheck
+        name: TypeScript
+        continue-on-error: true
+        run: pnpm typecheck
+      - id: lint
+        name: AST lint
+        continue-on-error: true
+        run: pnpm lint
+      - id: tests
+        name: Core + web + service security + SDK tests
+        continue-on-error: true
+        run: pnpm test
+      - id: service
+        name: Service syntax
+        continue-on-error: true
+        run: pnpm check:connected-api
+      - id: build
+        name: Production build
+        continue-on-error: true
+        run: pnpm build
+      - id: package
+        name: Core ESM package contract
+        continue-on-error: true
+        run: pnpm verify:core
+      - id: audit
+        name: Dependency audit
+        continue-on-error: true
+        run: pnpm audit --audit-level moderate
+      - name: Results and strict gate
+        if: always()
+        env:
+          INSTALL: ${{ steps.install.outcome }}
+          TYPECHECK: ${{ steps.typecheck.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
+          SERVICE: ${{ steps.service.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          PACKAGE: ${{ steps.package.outcome }}
+          AUDIT: ${{ steps.audit.outcome }}
+        shell: bash
+        run: |
+          echo '## Precify Colombia 2.1.0 — validation evidence' >> "$GITHUB_STEP_SUMMARY"
+          failed=0
+          for name in INSTALL TYPECHECK LINT TESTS SERVICE BUILD PACKAGE AUDIT; do
+            result="${!name}"
+            printf '| %s | %s |\n' "$name" "$result" >> "$GITHUB_STEP_SUMMARY"
+            if [[ "$result" != "success" ]]; then failed=1; fi
+          done
+          if [[ "$failed" -ne 0 ]]; then
+            echo 'At least one validation failed; no release or merge is authorized.'
+            exit 1
+          fi
+          echo 'All automated checks passed. Manual/browser/external checks are still separate.'
