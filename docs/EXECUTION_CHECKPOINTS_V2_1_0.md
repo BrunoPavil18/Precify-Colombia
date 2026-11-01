@@ -21,12 +21,12 @@
 | ID | State | Summary | Evidence / commit |
 |---|---|---|---|
 | CP00 | COMPLETE | Created feature branch and this durable recovery document | See branch commit history |
-| CP01 | IMPLEMENTED — UNVERIFIED | ISO minor-unit conversions, Frankfurter daily FX per-pair cache, offline fallback, *native international pricing* UI and tests, PT/EN strings | Currency, global pricing and FX commits; still require build/typecheck/test |
+| CP01 | IMPLEMENTED — UNVERIFIED | ISO minor-unit FX converter/cache; native international pricing with independent saved catalog, price history and JSON backup, ES/PT/EN UI | Code committed; build/typecheck/tests and offline browser checks pending |
 | CP02 | IMPLEMENTED — UNVERIFIED | COD event funnel, ad reconciliation, CPA matrix, CSV mapping, browser-local operational dashboard, manual competitor price history and exports | Core operations, operational-csv and OperationsLab commits; tests pending |
 | CP03 | IMPLEMENTED — UNVERIFIED | PostgreSQL/Supabase tables + RLS/revoked grants, organization roles, backend identity validation, REST, API keys, webhook signatures, export/deletion, connected web UI | apps/service server + SQL + ConnectedLab; needs deployment and integration tests |
 | CP04 | IMPLEMENTED — EXTERNAL VALIDATION PENDING | Meta OAuth one-use state, token expiry/exchange, accounts, cursor-paginated insights at campaign/adset/ad level, aggregate demographics, disconnect, v26.0 default | Real Meta credentials, review, permissions, pagination acceptance and deployed integration still pending |
 | CP05 | IN PROGRESS | Local dashboard, connected summaries, optional sessions/teams, generic REST + server SDK and stateless standalone iframe calculator, ES/PT/EN strings | UI QA, integration and pricing-history UX validation pending |
-| CP06 | NEXT | Compatibility, automated tests, production/offline/browser verification, docs and release preparation | Pending |
+| CP06 | IN PROGRESS | New local test scripts, consolidated acceptance guide and development README/architecture; execution/deployment, final security audit and release notes remain | docs/TESTING_V2_1_0.md, package scripts; NOT RUN |
 
 ## Decisions and hard safety boundaries
 1. A merchant must explicitly opt in to any network data sync; existing browser workspaces are untouched unless they authorize import or sync.
@@ -67,3 +67,11 @@ On the next ChatGPT conversation, provide this document path and request a fresh
 **Known blockers / honesty requirements:** Node/TypeScript builds and automated tests on this feature branch have **not** been executed in this environment (GitHub DNS inaccessible); no PostgreSQL/Supabase project, live Meta app credentials, browser/iframe hosting or actual third-party login were connected. No guarantee of full functionality or compliance until acceptance. The only verification in this turn has been GitHub branch/file reads and GitHub-confirmed commits, together with focused static checks of relevant source translations.
 
 **Next steps (continue in the SAME branch, not from main):** finish connected-service consistency, integration/security checks and UI details; run one consolidated local `pnpm install --frozen-lockfile`, typecheck/lint/unit/integration tests, build, SDK tests, browser/offline PWA checks, Postgres tenant isolation, Meta OAuth and webhook smoke tests (when external credentials are provided), then final overall audit/documentation and ONE PR. No GitHub Actions, merge or release yet.
+
+### Additional saved-state checkpoint (2026-11-01)
+- Global ISO pricing now saves separate international products with bounded historical sale prices, safe cross-tab collision detection, export/restore, corrupted-raw-data rescue and explicit destructive confirmation. It does **not** rewrite old COP v1/v2 backups.
+- Connected financial reports now support user-consented offline cache restoration after a lost connection and clear cache when consent is revoked/logout occurs; the server rejects incomplete paginated aggregates.
+- Marketing campaign/order reconciliation now respects exact raw source campaign IDs, campaign-level only, and the reported date window; Meta ad/adset breakdowns are never automatically treated as verified paid orders.
+- Server onboarding includes owner-confirmed deletion of an entire tenant and an atomic order batch import. Direct host-independent iframe and server-side Vezura-compatible API integration have separate security boundaries.
+- Updated ES/PT/EN READMEs to show 2.1.0 **unreleased development**; updated architecture, COP/ISO policy and direct integration guide; created [consolidated QA guide](TESTING_V2_1_0.md). Root local test script now includes backend security and SDK tests, but **no automated suite or deployed integration has been executed**.
+- **Next continuation priority:** code/test-driven integration closure (typed endpoint contracts, backend permissions and connected-report accuracy), final i18n/UI responsiveness, then consolidated local CI-less verification and one final PR only. Do not treat branch as homologated or publish it.
