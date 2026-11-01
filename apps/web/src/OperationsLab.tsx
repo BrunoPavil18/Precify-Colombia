@@ -205,7 +205,7 @@ export function OperationsLab({products}:{products:Product[]}){
     <p role="alert">{t("La restauración sustituirá todos los registros operativos locales actuales, no los productos originales.")}</p>
     <button className="primary" disabled={locked} onClick={()=>{if(commit(pendingRestore))setPendingRestore(null);}}>{t("Confirmar restauración")}</button>
     <button className="secondary" onClick={()=>setPendingRestore(null)}>{t("Cancelar")}</button>
-   </div>
+   </div>}
   </div>}
   {tab==="matrix"&&<div className="advanced-results">
    <h3>{t("Matriz: CPA frente a entregas y pagos")}</h3>
