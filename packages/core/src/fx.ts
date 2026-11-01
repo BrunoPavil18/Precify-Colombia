@@ -15,6 +15,9 @@ export function currencyCode(code:string):string {
 }
 export function currencyDigits(code:string):number {
  currencyCode(code);
+ // ISO 4217 defines 2 minor digits for COP despite some CLDR/ICU
+ // cash-format datasets reporting zero (physical coins are a separate concept).
+ if(code==="COP")return 2;
  const intl=Intl as typeof Intl & {supportedValuesOf?:(key:string)=>string[]};
  if(intl.supportedValuesOf&&!intl.supportedValuesOf("currency").includes(code))
   throw new FinancialInputError("Moneda ISO no compatible.");
