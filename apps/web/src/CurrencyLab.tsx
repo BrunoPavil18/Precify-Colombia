@@ -1,3 +1,4 @@
+import { GlobalPricingLab } from "./GlobalPricingLab";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FX_PROVIDER,convertCurrency,currencyCatalog,validateFXQuote,quoteAge,type FXQuote} from "@precify-colombia/core";
 import {useTranslator} from "./i18n";
@@ -65,7 +66,7 @@ export function CurrencyLab(){
    return observation?convertCurrency(amount,base,quote,observation):null;
   }catch{return null;}
  },[amount,base,quote,observation]);
- return <section className="main-card currency-lab">
+ return <><section className="main-card currency-lab">
   <span className="eyebrow">{t("CAMBIO INTERNACIONAL")}</span>
   <h2>{t("Convertidor de divisas con historial de tasas")}</h2>
   <p className="muted">{t("Cotizaciones indicativas de referencia, normalmente diarias. No son precios de negociación en tiempo real ni tipos de cambio fiscales certificados.")}</p>
@@ -95,5 +96,5 @@ export function CurrencyLab(){
   </p>
   {observation&&base!==quote&&<p className="muted">{ageLabel(observation)==="stale"?t("Advertencia: la cotización guardada tiene más de tres días."):t("Consulta de referencia: confirma la fecha antes de tomar decisiones.")}</p>}
   <p className="muted">{t("Las cotizaciones se almacenan únicamente en este navegador y nunca alteran los productos COP existentes. La calculadora histórica sigue en COP.")}</p>
- </section>;
+ </section><GlobalPricingLab/></>;
 }
