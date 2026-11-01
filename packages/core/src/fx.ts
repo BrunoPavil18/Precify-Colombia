@@ -15,6 +15,9 @@ export function currencyCode(code:string):string {
 }
 export function currencyDigits(code:string):number {
  currencyCode(code);
+ const intl=Intl as typeof Intl & {supportedValuesOf?:(key:string)=>string[]};
+ if(intl.supportedValuesOf&&!intl.supportedValuesOf("currency").includes(code))
+  throw new FinancialInputError("Moneda ISO no compatible.");
  try {
   const d=new Intl.NumberFormat("en",{style:"currency",currency:code}).resolvedOptions().maximumFractionDigits;
   if(!Number.isInteger(d)||d<0||d>3)throw new Error("Unsupported currency precision");
@@ -37,6 +40,11 @@ export function minorAmount(amount:string,currency:string):bigint {
  if(fraction.length>d)throw new FinancialInputError("La moneda no admite tantas cifras decimales.");
  const result=BigInt(whole!)*pow10(d)+BigInt(fraction.padEnd(d,"0")||"0");
  return negative?-result:result;
+}
+export function nonNegativeMinorAmount(amount:string,currency:string):bigint {
+ const result=minorAmount(amount,currency);
+ if(result<0n)throw new FinancialInputError("Importe monetario negativo no admitido para esta base.");
+ return result;
 }
 export function fromMinor(amount:bigint,currency:string):string {
  const d=currencyDigits(currency),scale=pow10(d);
