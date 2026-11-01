@@ -145,7 +145,7 @@ export function ConnectedLab(){
  }
  function logout(){
   if(session)try{for(const key of Object.keys(localStorage))if(key.startsWith("precify-colombia:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}catch{/* Storage may be unavailable */}
-  storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setNewKey("");setNewHook(null);
+  storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setCacheConsent(false);setNewKey("");setNewHook(null);
  }
  async function uploadLocal(){
   if(!session||!selected)return;
