@@ -69,7 +69,7 @@ async function sb(method,table,query={},body,prefer){
  const text=await response.text();return text?JSON.parse(text):null;
 }
 async function rpc(name,body){
- if(!["precify_create_org","precify_consume_oauth_state"].includes(name))fail(500,"Unknown RPC");
+ if(!["precify_create_org","precify_consume_oauth_state","precify_import_order_batch"].includes(name))fail(500,"Unknown RPC");
  const url=new URL("/rest/v1/rpc/"+name,dbUrl);
  const response=await fetch(url,{method:"POST",headers:{...serviceHeaders,"content-type":"application/json"},body:JSON.stringify(body)});
  if(!response.ok)fail(502,"Organization creation failed");
@@ -127,21 +127,18 @@ async function audit(org,auth,action,details={}){
 }
 async function importOrders(org,auth,rows){
  if(!Array.isArray(rows)||rows.length>10000)fail(400,"Invalid order events batch");
- const seen=new Map();
+ const unique=new Map();
  for(const row of rows){
   validateOrderEvent(row);
-  const existing=seen.get(row.id);
-  if(existing&&canonicalJSON(existing)!==canonicalJSON(row))fail(409,"Conflicting duplicate event");
-  seen.set(row.id,row);
+  const old=unique.get(row.id);
+  if(old&&canonicalJSON(old)!==canonicalJSON(row))fail(409,"Conflicting duplicate event");
+  unique.set(row.id,row);
  }
- const events=[...seen.values()];
- for(const event of events){
-  const old=await query("precify_order_events",{org_id:"eq."+org,event_id:"eq."+event.id},"payload");
-  if(old.length&&canonicalJSON(old[0].payload)!==canonicalJSON(event))fail(409,"Event ID already exists with another payload");
- }
- if(events.length)await insert("precify_order_events",events.map(e=>({org_id:org,event_id:e.id,order_id:e.orderId,payload:e})),{upsert:true,conflict:"org_id,event_id"});
- await audit(org,auth,"orders.import",{count:events.length});
- return {imported:events.length};
+ // An atomic PostgreSQL transaction rejects conflicting same-ID event replay.
+ // A partially applied order batch is NEVER exposed as a successful import.
+ const count=await rpc("precify_import_order_batch",{p_org:org,p_events:[...unique.values()]});
+ await audit(org,auth,"orders.import",{count});
+ return {imported:count};
 }
 async function importCampaigns(org,auth,rows){
  if(!Array.isArray(rows)||rows.length>10000)fail(400,"Invalid campaign batch");
