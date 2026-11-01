@@ -523,5 +523,22 @@ export const en: Record<string,string> = {
   "Informes publicitarios importados": "Ad reports imported",
   "Resultado parcial: existen páginas adicionales.": "Partial result: additional pages exist.",
   "La clave se muestra una sola vez. No la incluyas en el frontend.": "The key is displayed once. Never put it in the frontend.",
-  "Datos conectados eliminados; el área local no fue modificada.": "Connected data deleted; local records unchanged."
+  "Datos conectados eliminados; el área local no fue modificada.": "Connected data deleted; local records unchanged.",
+  "PRECIFICACIÓN MULTIMONEDA": "MULTI-CURRENCY PRICING",
+  "Calcula márgenes directamente en la moneda elegida": "Calculate margins in your selected currency",
+  "Este cálculo utiliza valores nativos en una sola moneda, no una tasa de cambio implícita. No mezcla importes de diferentes monedas ni calcula tributos oficiales automáticamente.": "This uses amounts in one currency without implicit exchange rates. It does not mix currencies or automatically compute statutory taxes.",
+  "Moneda de cálculo": "Calculation currency",
+  "Precio de venta": "Sale price",
+  "Descuento porcentual (%)": "Percentage discount (%)",
+  "Comisión porcentual (%)": "Percentage commission (%)",
+  "Deducción tributaria estimada (%)": "Estimated tax deduction (%)",
+  "Margen objetivo sobre venta neta (%)": "Target margin on net sale (%)",
+  "Unidades mensuales": "Monthly units",
+  "Resultados de precio internacional": "International pricing results",
+  "Contribución unitaria": "Unit contribution",
+  "Beneficio mensual estimado": "Estimated monthly profit",
+  "Margen sobre venta neta (%)": "Net product sale margin (%)",
+  "Margen sobre cobro total (%)": "Total collected margin (%)",
+  "Unidades para equilibrio": "Break-even units",
+  "El precio sugerido conserva como denominador la venta neta del producto. Los impuestos son deducciones configurables, no asesoría fiscal.": "Suggested price uses net product sale as denominator. Taxes are configurable deductions, not tax advice."
 };
