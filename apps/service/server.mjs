@@ -22,7 +22,7 @@ if(publicURL.protocol!=="https:"&&!["localhost","127.0.0.1"].includes(publicURL.
 const encryptionKey=Buffer.from(env.PRECIFY_ENCRYPTION_KEY,"hex");
 if(encryptionKey.length!==32)throw Error("PRECIFY_ENCRYPTION_KEY must be 32 bytes in hex");
 const port=Number(env.PORT||8787),allowed=new Set([webOrigin,publicURL.origin]);
-const metaVersion=env.META_GRAPH_VERSION||"v24.0";
+const metaVersion=env.META_GRAPH_VERSION||"v26.0";
 if(!/^v\d{1,2}\.\d{1,2}$/.test(metaVersion))throw Error("Invalid Meta Graph API version");
 const jsonHeaders={"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"};
 const sha=text=>createHash("sha256").update(text).digest("hex");
