@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.1.0] — IN DEVELOPMENT / UNRELEASED
+
+**The following items have been committed to the feature branch but have not passed the consolidated build, tests, browser QA, external Meta review or real database acceptance. They are NOT published in a release.**
+
+### Financial intelligence
+- Native ISO minor-unit multi-currency pricing and exact BigInt quote conversion, with no silent changes to the 2.0.1 COP-only API.
+- Dated no-key Frankfurter reference FX rates, per-pair local cache and stale/offline warnings. These are generally daily, not real-time tradable quotes.
+- Local international catalog with save/load, bounded price history, validated independent JSON backups and cross-tab conflict detection.
+- Combined COD pricing, cohort break-even retail price, shipment/payment funnel and CPA-vs-delivery sensitivity matrix.
+- Source-identified order event import/export, conditional transport fees, refunds/physical returns separated and Meta-attributed versus paid-order reconciliation.
+- Operational dashboard with payment trends, campaign CTR/CPC/CPM/ROAS, dated competitor references and manual CSV mapping.
+
+### Optional connected operations
+- PostgreSQL/Supabase organization schema, roles, durable data, export/deletion and owner-confirmed full tenant erasure.
+- Authenticated Node REST service, tenant-scoped server-side API keys, signed webhooks and atomic batch event ingestion.
+- Optional Supabase Auth interface with session refresh and consent-driven cached read-only connected reports.
+- Optional Meta Ads OAuth, account discovery, paginated reporting at campaign/adset/ad levels and aggregate demographic views (external credentials and approvals still needed).
+- Provider-neutral server SDK for Vezura or other websites, plus a stateless public iframe calculator, without changing the Vezura repository or adding native Mastershop/Shopify/Nuvemshop connectors.
+- Existing 2.0.1 local workspace, ES/PT/EN dictionaries and v1/v2 backup schema remain intact.
+
+### Validation status
+- New targeted core, translations, service-security and SDK tests committed; consolidated test execution still outstanding.
+- No GitHub Actions intentionally executed, no merge, no 2.1.0 release.
+- See `docs/EXECUTION_CHECKPOINTS_V2_1_0.md` and `docs/TESTING_V2_1_0.md` for recovery and remaining acceptance.
+
+
 ## [2.0.1] — merged release preparation (2026-10-23)
 
 - Fixed campaign projected profit to account for projected refunds, separated attributed ROAS and projected ROAS, and exposed attribution mismatch and reconciliation data.
