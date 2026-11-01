@@ -31,7 +31,7 @@ test("campaign and order imports share database locking and resolve idempotence 
  assert.match(service,/Conflicting duplicate campaign ID/);
 });
 test("PostgREST void RPC does not attempt to parse an empty response as JSON",()=>{
- assert.match(service,/if\(response.status===204\)return null;\s*const body=await response.text\(\);\s*return body\?JSON.parse\(body\):null/);
+ assert.match(service,/if\(response.status===204\)return null;\s*const responseText=await response.text\(\);\s*return responseText\?JSON.parse\(responseText\):null/);
 });
 test("connected browser caches only the consented organization and avoids duplicate refresh",()=>{
  assert.match(ui,/cacheConsent&&consentOrg===org/);
