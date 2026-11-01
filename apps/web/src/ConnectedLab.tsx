@@ -82,6 +82,7 @@ export function ConnectedLab(){
  const [memberId,setMemberId]=useState(""),[memberRole,setMemberRole]=useState("viewer");
  const [newKey,setNewKey]=useState(""),[newHook,setNewHook]=useState<{endpoint:string;secret:string}|null>(null);
  const [deletePhrase,setDeletePhrase]=useState("");
+ const [organizationConfirmation,setOrganizationConfirmation]=useState("");
  useEffect(()=>{if(new URLSearchParams(window.location.search).get("precify-meta")==="connected")
   setNotice("Facebook autorizado. Regresa al módulo conectado y carga tus cuentas publicitarias.");
  },[]);
@@ -206,6 +207,16 @@ export function ConnectedLab(){
    setNotice(t("Datos conectados eliminados; el área local no fue modificada."));
   }catch(e){setNotice(String(e));}finally{setBusy(false);}
  }
+ async function deleteOrganization(){
+  if(!session||!selected||organizationConfirmation!==selected)return;
+  try{
+   setBusy(true);
+   await request(session,"/v1/orgs/"+selected,"DELETE",{confirmOrganization:selected});
+   try{localStorage.removeItem(summaryKey(session.user.id,selected));}catch{}
+   setOrganizationConfirmation("");setSelected("");setDashboard(null);setNotice(t("Organización y datos conectados eliminados permanentemente."));
+   await loadOrgs(session);
+  }catch(e){setNotice(String(e));}finally{setBusy(false);}
+ }
  return <section className="main-card connected-lab">
   <span className="eyebrow">{t("OPERACIONES CONECTADAS")}</span>
   <h2>{t("Cuenta opcional, control por organización y API abierta")}</h2>
@@ -276,6 +287,10 @@ export function ConnectedLab(){
      <p className="muted">{t("La eliminación borra los datos operativos conectados de esta organización. Tus datos locales se mantienen intactos. Exporta un respaldo antes.")}</p>
      <label className="field"><span>{t("Escribe ELIMINAR para confirmar")}</span><input value={deletePhrase} onChange={e=>setDeletePhrase(e.target.value)}/></label>
      <button className="danger" disabled={busy||deletePhrase!=="ELIMINAR"||offline} onClick={()=>{void eraseData();}}>{t("Eliminar datos conectados")}</button>
+     <p className="muted">{t("La eliminación anterior conserva tu organización y sus miembros. Para eliminar también cuenta de organización, equipos, llaves y conexiones, escribe el ID de la organización.")}</p>
+     <label className="field"><span>{t("Confirma el ID completo de la organización")}: {selected}</span>
+      <input value={organizationConfirmation} onChange={e=>setOrganizationConfirmation(e.target.value)} autoComplete="off"/></label>
+     <button className="danger" disabled={busy||offline||organizationConfirmation!==selected} onClick={()=>{void deleteOrganization();}}>{t("Eliminar toda la organización permanentemente")}</button>
     </div>
    </>}
   </>}
