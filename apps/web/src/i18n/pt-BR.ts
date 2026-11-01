@@ -595,5 +595,7 @@ export const ptBR: Record<string,string> = {
   "Historial de precios inválido.": "Histórico de preços inválido.",
   "IDs duplicados en respaldo.": "IDs duplicados no backup.",
   "Respaldo validado. Confirma la sustitución antes de continuar.": "Backup validado. Confirme a substituição antes de continuar.",
-  "Respaldo operacional restaurado.": "Backup operacional restaurado."
+  "Respaldo operacional restaurado.": "Backup operacional restaurado.",
+  "Calculadora integrable. Sin cuenta ni transferencia de datos a la tienda o al servidor.": "Calculadora incorporável, sem conta nem envio de dados para a loja ou servidor.",
+  "Valores estimados. No son asesoría fiscal ni precios garantizados.": "Valores estimados. Não são orientação tributária nem preços garantidos."
 };
