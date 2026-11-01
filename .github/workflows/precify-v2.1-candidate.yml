@@ -2,8 +2,6 @@ name: Precify 2.1 candidate CI
 on:
   push:
     branches: ['feat/precify-colombia-v2.1.0']
-  pull_request:
-    branches: ['main']
 permissions:
   contents: read
 concurrency:

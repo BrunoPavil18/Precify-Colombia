@@ -58,3 +58,18 @@ export async function purgeSiteCache(sourceId:string):Promise<void>{
   tx.onabort=()=>reject(tx.error??new Error("Cache removal aborted"));
  });}finally{db.close();}
 }
+
+export async function readSiteRows(scope:string,maxRows=20000):Promise<Array<{kind:"order"|"campaign";id:string;value:Record<string,unknown>}>>{
+ const db=await openSyncDB();
+ try{
+  const rows=await new Promise<Array<{kind:"order"|"campaign";id:string;value:Record<string,unknown>}>>((resolve,reject)=>{
+   const tx=db.transaction("rows","readonly");
+   const req=tx.objectStore("rows").index("byScope").getAll(scope,maxRows+1);
+   tx.oncomplete=()=>resolve(req.result);
+   tx.onerror=()=>reject(tx.error??new Error("Site records read failed"));
+   tx.onabort=()=>reject(tx.error??new Error("Site records read aborted"));
+  });
+  if(rows.length>maxRows)throw new Error("Site cache exceeds the verified local report limit; export first");
+  return rows;
+ }finally{db.close();}
+}

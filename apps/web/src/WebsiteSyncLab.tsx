@@ -1,6 +1,7 @@
 import {useContext,useEffect,useRef,useState} from "react";
 import {LocaleContext,type Locale} from "./i18n";
-import {applySitePage,purgeSiteCache,readSiteCheckpoint} from "./website-sync-db";
+import {computeCODFunnel,validateOrderEvent,validateAdCampaign,type OrderEvent,type AdCampaign} from "@precify-colombia/core";
+import {applySitePage,purgeSiteCache,readSiteCheckpoint,readSiteRows} from "./website-sync-db";
 import {createSiteConnector,createSyncController,type SyncStatus} from "../../../integrations/site-owned-sync.mjs";
 
 type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subject?:string};
@@ -12,7 +13,7 @@ const strings={
  consent:"Permitir guardar datos de esta tienda en este dispositivo",manual:"Sincronizar ahora",remove:"Eliminar conexión y caché",
  last:"Última sincronización",pending:"Conecta una cuenta de lectura para comenzar.",never:"Nunca",ready:"Actualizado",running:"Sincronizando",error:"No se pudo sincronizar",inactive:"Sin autorización",offline:"Sin conexión",
  interval:"Intervalo",one:"Cada minuto",thirty:"Cada 30 segundos",five:"Cada 5 minutos",only:"Solo manual",
- imported:"Cambios en la última actualización",rows:"Registros locales",security:"No introduzcas claves administrativas ni secretos globales. El token no se guarda en disco; al volver a abrir la aplicación deberás autenticarte. La sincronización requiere que el sitio implemente la API de cambios del protocolo Precify v1.",
+ imported:"Cambios en la última actualización",rows:"Registros locales",paid:"Pedidos pagados",profit:"Resultado operacional",security:"No introduzcas claves administrativas ni secretos globales. El token no se guarda en disco; al volver a abrir la aplicación deberás autenticarte. La sincronización requiere que el sitio implemente la API de cambios del protocolo Precify v1.",
  fail:"No fue posible guardar el conector.",needsConsent:"Debes autorizar el guardado local antes de sincronizar."
  },
  "pt-BR":{
@@ -21,7 +22,7 @@ const strings={
  consent:"Permitir guardar dados desta loja neste dispositivo",manual:"Sincronizar agora",remove:"Excluir conexão e cache",
  last:"Última sincronização",pending:"Conecte uma conta de leitura para começar.",never:"Nunca",ready:"Atualizado",running:"Sincronizando",error:"Falha na sincronização",inactive:"Sem autorização",offline:"Sem conexão",
  interval:"Intervalo",one:"A cada 1 minuto",thirty:"A cada 30 segundos",five:"A cada 5 minutos",only:"Somente manual",
- imported:"Alterações na última atualização",rows:"Registros locais",security:"Não insira chaves administrativas nem segredos globais. O token não é salvo em disco; ao reabrir o aplicativo, será necessário autenticar-se. A loja precisa implementar a API de alterações do protocolo Precify v1.",
+ imported:"Alterações na última atualização",rows:"Registros locais",paid:"Pedidos pagos",profit:"Resultado operacional",security:"Não insira chaves administrativas nem segredos globais. O token não é salvo em disco; ao reabrir o aplicativo, será necessário autenticar-se. A loja precisa implementar a API de alterações do protocolo Precify v1.",
  fail:"Não foi possível salvar o conector.",needsConsent:"Autorize o armazenamento local para sincronizar."
  },
  en:{
@@ -30,7 +31,7 @@ const strings={
  consent:"Allow this device to save data from this store",manual:"Sync now",remove:"Remove connection and cache",
  last:"Last synchronization",pending:"Connect a read-only account to begin.",never:"Never",ready:"Up to date",running:"Syncing",error:"Sync failed",inactive:"Not authorized",offline:"Offline",
  interval:"Interval",one:"Every minute",thirty:"Every 30 seconds",five:"Every 5 minutes",only:"Manual only",
- imported:"Changes received on last sync",rows:"Local records",security:"Never enter admin API keys or global secrets. Tokens are not saved to disk; sign in again after reopening the app. The store must implement the Precify v1 change-feed API.",
+ imported:"Changes received on last sync",rows:"Local records",paid:"Paid orders",profit:"Operational result",security:"Never enter admin API keys or global secrets. Tokens are not saved to disk; sign in again after reopening the app. The store must implement the Precify v1 change-feed API.",
  fail:"Could not save connector.",needsConsent:"Authorize local storage before syncing."
  }
 } as const;
@@ -50,6 +51,23 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  const [sites,setSites]=useState<Site[]>(loadSites),[tokens,setTokens]=useState<Record<string,string>>({});
  const [statuses,setStatuses]=useState<Record<string,SyncStatus>>({});
  const [stats,setStats]=useState<Record<string,{at:number;count:number}>>({});
+ const [summaries,setSummaries]=useState<Record<string,Array<{currency:string;orders:number;paid:number;projectedNet:string}>>>({});
+ async function loadSnapshot(scope:string,id:string){
+  const checkpoint=await readSiteCheckpoint(scope);
+  if(checkpoint)setStats(previous=>({...previous,[id]:{at:checkpoint.at,count:checkpoint.count}}));
+  const records=await readSiteRows(scope);
+  const byCurrency=new Map<string,OrderEvent[]>();
+  for(const record of records){
+   if(record.kind!=="order")continue;
+   const event=validateOrderEvent(record.value as unknown as OrderEvent);
+   const current=byCurrency.get(event.currency)??[];
+   current.push(event);byCurrency.set(event.currency,current);
+  }
+  setSummaries(previous=>({...previous,[id]:[...byCurrency].map(([currency,events])=>{
+   const result=computeCODFunnel(events);
+   return {currency,orders:result.orders,paid:result.paid,projectedNet:result.projectedNet};
+  })}));
+ }
  const [notice,setNotice]=useState("");
  const [name,setName]=useState(""),[url,setUrl]=useState("");
  const controllers=useRef(new Map<string,Controller>());
@@ -57,9 +75,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  function update(next:Site[]){persistSites(next);setSites(next);}
  useEffect(()=>{
   for(const site of sites){if(!site.subject)continue;
-   void readSiteCheckpoint(site.id+":"+site.subject).then(result=>{
-    if(result)setStats(previous=>({...previous,[site.id]:{at:result.at,count:result.count}}));
-   }).catch(()=>{});
+   void loadSnapshot(site.id+":"+site.subject,site.id).catch(e=>setNotice(String(e)));
   }
  },[sites.map(s=>s.id+":"+s.subject).join("|")]);
  useEffect(()=>{
@@ -82,6 +98,10 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       store:{read:async key=>await readSiteCheckpoint(key),
        apply:async(key,changes,cursor)=>{
         if(stopped||!loadSites().some(x=>x.id===site.id&&x.enabled))throw Error("Sync disabled");
+        for(const change of changes)if(change.operation==="upsert"){
+         if(change.kind==="order")validateOrderEvent(change.value as OrderEvent);
+         else validateAdCampaign(change.value as AdCampaign);
+        }
         await applySitePage(key,changes,cursor);
        }},
       onState:state=>{if(!stopped)setStatuses(previous=>({...previous,[site.id]:state}));}
@@ -94,8 +114,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       await result;
       running.current.delete(site.id);
       if(stopped)return;
-      const checkpoint=await readSiteCheckpoint(scope);
-      if(checkpoint)setStats(previous=>({...previous,[site.id]:{at:checkpoint.at,count:checkpoint.count}}));
+      await loadSnapshot(scope,site.id);
      };
      handler=()=>{void run();};
      if(navigator.onLine)void run();
@@ -121,12 +140,14 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
   try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
   await purgeSiteCache(site.id);
   setStats(previous=>{const next={...previous};delete next[site.id];return next;});
+  setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
  }
  async function revoke(site:Site){
   update(sites.map(s=>s.id===site.id?{...s,enabled:false}:s));
   try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
   await purgeSiteCache(site.id);
   setStats(previous=>{const next={...previous};delete next[site.id];return next;});
+  setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
  }
  function add(){
   try{
@@ -168,10 +189,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     <button className="secondary" disabled={!site.enabled||!tokens[site.id]||!navigator.onLine||statuses[site.id]?.phase==="syncing"}
      onClick={()=>{const controller=controllers.current.get(site.id);
       if(!controller){setNotice(t.pending);return;}
-      void controller.run(true).then(async()=>{if(site.subject){
-       const checkpoint=await readSiteCheckpoint(site.id+":"+site.subject);
-       if(checkpoint)setStats(previous=>({...previous,[site.id]:{at:checkpoint.at,count:checkpoint.count}}));
-      }}).catch(e=>setNotice(String(e)));
+      void controller.run(true).then(async()=>{if(site.subject)await loadSnapshot(site.id+":"+site.subject,site.id);}).catch(e=>setNotice(String(e)));
      }}>{t.manual}</button>
     <button className="danger" onClick={()=>{void remove(site);}}>{t.remove}</button>
    </div>
@@ -180,6 +198,10 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
    <small>{t.last}: {stats[site.id]?.at?new Date(stats[site.id]?.at??0).toLocaleString(locale):t.never}
     {" · "}{t.rows}: {stats[site.id]?.count??0}
     {" · "}{t.imported}: {statuses[site.id]?.pulled??0}</small>
+   {summaries[site.id]?.map((s,index)=><div className="list-row" key={s.currency+index}>
+    <span>{s.currency} · {s.orders} · {t.paid}: {s.paid}</span>
+    <small>{t.profit}: {s.currency} {s.projectedNet}</small>
+   </div>)}
   </div>)}
   <p className="muted"><small>{t.security}</small></p>
   {notice&&<p role="alert">{notice}</p>}
