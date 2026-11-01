@@ -614,5 +614,7 @@ export const en: Record<string,string> = {
   "La restauración sustituirá el catálogo internacional, sin modificar los productos COP originales.": "Restoration replaces the international catalog without changing original COP products.",
   "Respaldo validado; confirma si quieres sustituir el catálogo internacional.": "Backup validated; confirm if you want to replace the international catalog.",
   "Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.": "Another browser tab changed your currency catalog. Export data and reload.",
-  "Introduce un nombre para guardar el precio.": "Enter a name to save this price."
+  "Introduce un nombre para guardar el precio.": "Enter a name to save this price.",
+  "Historial de precios anteriores": "Previous price history",
+  "Sin conexión: solo están disponibles los informes guardados con permiso.": "Offline: only reports saved with consent are available."
 };
