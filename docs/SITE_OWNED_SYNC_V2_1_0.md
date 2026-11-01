@@ -75,3 +75,8 @@ Store upserts must contain complete Precify `OrderEvent` or `AdCampaign` values 
 - A previously synchronized order event ID is immutable: redelivery with the same payload is idempotent; a conflicting payload aborts its IndexedDB transaction without advancing its cursor. Corrections use a new event ID; campaign measurements may update by ID.
 - "Manual only" never triggers an automatic startup, interval, online or visibility pull. Manual refresh can be attempted even when the browser's online indicator is inaccurate.
 - Cached data is isolated by connector ID and verified tenant subject. Switching subjects hides the previous summary from the UI, without merging accounts.
+
+
+### Verified browser acceptance
+
+[Actions run 41317968648](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41317968648) passed 108 unit/contract tests plus a real Chromium/IndexedDB smoke: atomic cache/cursor commits, immutable order ID conflict rollback, expected-cursor check during cross-tab races, tenant separation, selective consent cache deletion and persisted record availability after reloading the browser. The test identified and resolved an actual IndexedDB key-only-cursor deletion bug. Reusable developer test: `scripts/browser-sync-smoke.mjs`. **No Vezura or real merchant server endpoint has been deployed.**

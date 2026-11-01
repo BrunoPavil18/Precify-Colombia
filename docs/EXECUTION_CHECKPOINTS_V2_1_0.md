@@ -173,3 +173,13 @@ Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flo
 - Consolidated candidate verification completed on GitHub Actions: [run 41314800134](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41314800134) for commit `6fa07229a9d16ad99cb03713faa6a061a4a31b13`: 106/106 tests (61 core, 22 web, 7 service, 16 integration), TS typecheck, AST lint, connected service syntax, Vite production build, ESM package check.
 - Temporary branch Actions workflow is removed after successful owner-authorized validation to avoid unnecessary ongoing CI consumption. Keep the evidence links. Later documentation-only changes do not alter tested application/runtime code.
 - Never describe this as browser/merchant production acceptance: real IndexedDB browser integration, Windows/PWA restart behavior, merchant-owned outbox implementation, HTTPS store auth, mobile behavior and Meta/provider credentials still require external validation.
+
+
+## CP08 — Real Chromium browser acceptance and transactional fixes (2026-11-01)
+
+- Owner-authorized [Actions run 41317968648](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41317968648) **passed**: 108/108 automated tests, TypeScript, AST lint, service syntax, Vite production build, ESM package, and 9 additional real Chromium IndexedDB checks.
+- Fixed a real browser defect: cache removal originally called `delete()` on a key-only cursor, causing `AbortError`. Corrected to writable IndexedDB cursor and verified cache revocation without affecting other stores.
+- Cross-tab stale-writer rejection now atomically compares the expected checkpoint in the same IndexedDB transaction as row writes and cursor update; the incremental controller supplies the expected cursor.
+- Manual synchronization uses the same tracked execution path as scheduled polling. Site handler distinguishes cursor expiration with HTTP 410 rather than silently discarding history.
+- Real Chromium test script `scripts/browser-sync-smoke.mjs` retained. Temporary GitHub Actions workflow removed after green gate to conserve CI minutes. Original branch stays **DRAFT / not production certified**.
+- Remaining required store work and owner actions: [Vezura integration gate](VEZURA_INTEGRATION_NEXT.md). No live store data, API token or Hostinger/Supabase migration was modified in CP08.
