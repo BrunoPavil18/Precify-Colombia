@@ -585,5 +585,15 @@ export const ptBR: Record<string,string> = {
   "Ganancia por pedido creado": "Lucro por pedido criado",
   "Ganancia por pedido enviado": "Lucro por pedido enviado",
   "Ganancia por pedido pagado": "Lucro por pedido pago",
-  "Cancelados antes de envío": "Cancelados antes do envio"
+  "Cancelados antes de envío": "Cancelados antes do envio",
+  "Descargar datos originales dañados": "Baixar dados originais corrompidos",
+  "Restaurar respaldo operacional JSON (hasta 2 MB)": "Restaurar backup operacional JSON (até 2 MB)",
+  "La restauración sustituirá todos los registros operativos locales actuales, no los productos originales.": "A restauração substituirá os registros operacionais locais atuais, não os produtos originais.",
+  "Confirmar restauración": "Confirmar restauração",
+  "Respaldo operacional inválido.": "Backup operacional inválido.",
+  "Formato operacional inválido o demasiado grande.": "Formato operacional inválido ou muito grande.",
+  "Historial de precios inválido.": "Histórico de preços inválido.",
+  "IDs duplicados en respaldo.": "IDs duplicados no backup.",
+  "Respaldo validado. Confirma la sustitución antes de continuar.": "Backup validado. Confirme a substituição antes de continuar.",
+  "Respaldo operacional restaurado.": "Backup operacional restaurado."
 };
