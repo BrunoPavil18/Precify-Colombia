@@ -82,3 +82,19 @@ test("translated blank products do not appear modified until a real user edit",(
  assert.ok(app.includes('if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))'));
  assert.ok(app.includes("setDraft(d=>({...d,name:translate(lang,\"Producto ejemplo\")}))"));
 });
+
+test("all 2.1.0 connected, embedded, FX and COD t-literals have ES/PT/EN coverage",()=>{
+ const paths=["CurrencyLab.tsx","GlobalPricingLab.tsx","OperationsLab.tsx",
+  "UnifiedCODLab.tsx","ConnectedLab.tsx","EmbedCalculator.tsx"];
+ let total=0;
+ for(const path of paths){
+  const text=read("../src/"+path);
+  const keys=[...text.matchAll(/\\bt\\("([^"]+)"\\)/g)].map(x=>x[1]);
+  total+=keys.length;
+  for(const key of keys){
+   assert.ok(Object.hasOwn(pt,key),"pt-BR missing ("+path+"): "+key);
+   assert.ok(Object.hasOwn(en,key),"en missing ("+path+"): "+key);
+  }
+ }
+ assert.ok(total>120);
+});
