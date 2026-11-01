@@ -87,7 +87,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod"
   <h2>{t("Decisiones con supuestos explícitos")}</h2>
   <p className="muted">{t("Todos los valores son simulaciones ingresadas por el usuario, no tarifas oficiales. Los borradores de esta sección no modifican productos guardados.")}</p>
   <div className="advanced-tabs" role="group" aria-label={t("Tipo de simulación")}>
-   {panes.map(p=><button key={p} className={p===pane?"primary":"secondary"} aria-pressed={p===pane} onClick={()=>{setPane(p);onDirty(true);}}>{t(({cod:"Riesgo COD",campaign:"Publicidad y CAC",pum:"Precio por unidad",consumer:"Precio al consumidor",portfolio:"Cartera multiproducto"} as Record<Pane,string>)[p])}</button>)}
+   {panes.map(p=><button key={p} className={p===pane?"primary":"secondary"} aria-pressed={p===pane} onClick={()=>setPane(p)}>{t(({cod:"Riesgo COD",campaign:"Publicidad y CAC",pum:"Precio por unidad",consumer:"Precio al consumidor",portfolio:"Cartera multiproducto"} as Record<Pane,string>)[p])}</button>)}
   </div>
   {(pane==="cod"||pane==="campaign")&&<label className="field"><span>{t("Producto que deseas analizar")}</span><select value={product?.id??""} onChange={e=>{setSelected(e.target.value);onDirty(true);}}>
    {workspace.products.length===0?<option value="">{t("Primero guarda un producto")}</option>:workspace.products.map(p=><option key={p.id} value={p.id}>{p.input.name}</option>)}
