@@ -71,11 +71,11 @@ After hosting the Precify web build at `https://precify.example.com`, include a 
   style="width:100%;min-height:820px;border:0"
   loading="lazy"
   referrerpolicy="no-referrer"
-  sandbox="allow-scripts allow-popups"
+  sandbox="allow-scripts allow-same-origin allow-popups"
 ></iframe>
 ```
 
-Embedded mode renders only the standalone international pricing calculator in ES/PT/EN. It **does not use login, localStorage, customer cookies, store order access or the connected service**. It performs calculations within the iframe. A browser with restrictive third-party storage or connectivity can still use it after the public application assets load. The static-site host must explicitly allow embedding using an appropriate `Content-Security-Policy: frame-ancestors` policy. Never weaken framing permissions for the authenticated full dashboard solely to make the public calculator embeddable.
+Embed from a **separate Precify origin** rather than a same-origin store path; this avoids giving a same-origin script-enabled sandbox the power to relax its parent-controlled restrictions. The optional URL parameter `&lang=pt-BR` starts the iframe in Portuguese without reading local storage.\n\nEmbedded mode renders only the standalone international pricing calculator in ES/PT/EN. It **does not use login, localStorage, customer cookies, store order access or the connected service**. It performs calculations within the iframe. A browser with restrictive third-party storage or connectivity can still use it after the public application assets load. The static-site host must explicitly allow embedding using an appropriate `Content-Security-Policy: frame-ancestors` policy. Never weaken framing permissions for the authenticated full dashboard solely to make the public calculator embeddable.
 
 Do not confuse this with *signed-in integration*: embedded mode is a calculator, not automatic sharing of the Vezura customer's cart, financial records or advertising account.
 
