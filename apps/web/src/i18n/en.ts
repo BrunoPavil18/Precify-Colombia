@@ -616,5 +616,6 @@ export const en: Record<string,string> = {
   "Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.": "Another browser tab changed your currency catalog. Export data and reload.",
   "Introduce un nombre para guardar el precio.": "Enter a name to save this price.",
   "Historial de precios anteriores": "Previous price history",
-  "Sin conexión: solo están disponibles los informes guardados con permiso.": "Offline: only reports saved with consent are available."
+  "Sin conexión: solo están disponibles los informes guardados con permiso.": "Offline: only reports saved with consent are available.",
+  "Confirmar eliminación": "Confirm deletion"
 };
