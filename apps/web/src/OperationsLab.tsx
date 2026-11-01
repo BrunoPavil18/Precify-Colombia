@@ -9,17 +9,36 @@ const KEY="precify-colombia:operations:v1";
 type HistoryPrice={id:string;product:string;competitor:string;currency:string;price:string;observedAt:string;source:string};
 type LocalOperations={version:1;events:OrderEvent[];campaigns:AdCampaign[];prices:HistoryPrice[]};
 const empty=():LocalOperations=>({version:1,events:[],campaigns:[],prices:[]});
+function validateLocalOps(candidate:unknown):LocalOperations{
+ if(!candidate||typeof candidate!=="object")throw new Error("Respaldo operacional inválido.");
+ const v=candidate as LocalOperations;
+ if(v.version!==1||!Array.isArray(v.events)||!Array.isArray(v.campaigns)||!Array.isArray(v.prices)
+  ||v.events.length>10000||v.campaigns.length>10000||v.prices.length>10000)
+  throw new Error("Formato operacional inválido o demasiado grande.");
+ v.events.forEach(validateOrderEvent);v.campaigns.forEach(validateAdCampaign);
+ v.prices.forEach(p=>{
+  if(typeof p.id!=="string"||!p.id||p.id.length>128||
+    typeof p.product!=="string"||!p.product.trim()||p.product.length>200||
+    typeof p.competitor!=="string"||!p.competitor.trim()||p.competitor.length>200||
+    typeof p.source!=="string"||p.source.length>500||
+    typeof p.observedAt!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(p.observedAt))
+   throw new Error("Historial de precios inválido.");
+  minorAmount(p.price,p.currency);
+ });
+ for(const group of [v.events,v.campaigns,v.prices]){
+  const ids=group.map(x=>x.id);
+  if(new Set(ids).size!==ids.length)throw new Error("IDs duplicados en respaldo.");
+ }
+ return v;
+}
 function readOperations():{value:LocalOperations;error:string|null;raw:string|null}{
  try{
   const raw=localStorage.getItem(KEY);
   if(!raw)return {value:empty(),error:null,raw:null};
   if(raw.length>2000000)throw new Error("El almacenamiento operacional supera el límite.");
-  const value=JSON.parse(raw) as LocalOperations;
-  if(value.version!==1||!Array.isArray(value.events)||!Array.isArray(value.campaigns)||!Array.isArray(value.prices))
-   throw new Error("Formato de operaciones incompatible.");
-  value.events.forEach(validateOrderEvent);value.campaigns.forEach(validateAdCampaign);
+  const value=validateLocalOps(JSON.parse(raw));
   return {value,error:null,raw};
- }catch(e){return {value:empty(),raw:null,error:e instanceof Error?e.message:String(e)};}
+ }catch(e){return {value:empty(),raw:localStorage.getItem(KEY),error:e instanceof Error?e.message:String(e)};}
 }
 const requiredFields=["id","orderId","status","occurredAt"] as const;
 const inputFields=["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount","campaignId","currency"] as const;
@@ -51,6 +70,7 @@ export function OperationsLab({products}:{products:Product[]}){
  const [csv,setCSV]=useState(""),[headers,setHeaders]=useState<string[]>([]);
  const [mapping,setMapping]=useState<OrderCSVMapping>({});
  const [importMode,setImportMode]=useState<"orders"|"campaigns">("orders");
+ const [pendingRestore,setPendingRestore]=useState<LocalOperations|null>(null);
  const [cpa,setCPA]=useState(defaultCPA);
  const [benchmark,setBenchmark]=useState({product:"",competitor:"",currency:"COP",price:"0",source:"",observedAt:new Date().toISOString().slice(0,10)});
  useEffect(()=>{
@@ -74,6 +94,14 @@ export function OperationsLab({products}:{products:Product[]}){
    setCSV(text);setHeaders(parsed.headers);setMapping({});
    setNotice(t("Revisa el mapeo de columnas antes de importar."));
   }catch(e){setNotice(String(e));}
+ }
+ async function stageBackup(file:File|undefined){
+  if(!file||locked)return;
+  try{
+   if(file.size>2000000)throw new Error("Respaldo operacional superior a 2 MB.");
+   const candidate=validateLocalOps(JSON.parse(await file.text()));
+   setPendingRestore(candidate);setNotice(t("Respaldo validado. Confirma la sustitución antes de continuar."));
+  }catch(e){setPendingRestore(null);setNotice(String(e));}
  }
  function doImport(){
   try{
@@ -115,7 +143,7 @@ export function OperationsLab({products}:{products:Product[]}){
  function addBenchmark(){
   try{
    if(!benchmark.product.trim()||!benchmark.competitor.trim())throw new Error("Producto y competidor obligatorios.");
-   if(!/^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.test(benchmark.price))throw new Error("Precio inválido.");
+   minorAmount(benchmark.price,benchmark.currency);
    const item:HistoryPrice={...benchmark,id:crypto.randomUUID()};
    commit({...data,prices:[...data.prices,item]});
   }catch(e){setNotice(String(e));}
@@ -169,6 +197,14 @@ export function OperationsLab({products}:{products:Product[]}){
    <div className="advanced-actions">
     <button className="secondary" onClick={()=>exportText(exportOperationsCSV(data.events),"precify-cod-orders.csv","text/csv;charset=utf-8")}>{t("Exportar pedidos CSV")}</button>
     <button className="secondary" onClick={()=>exportText(JSON.stringify(data,null,2),"precify-operations-backup.json","application/json")}>{t("Descargar respaldo operacional")}</button>
+    {locked&&initial.raw&&<button className="secondary" onClick={()=>exportText(initial.raw!,"precify-operations-raw-recovery.json","application/json")}>{t("Descargar datos originales dañados")}</button>}
+   </div>
+   <label className="field"><span>{t("Restaurar respaldo operacional JSON (hasta 2 MB)")}</span>
+    <input type="file" accept=".json,application/json" onChange={e=>{void stageBackup(e.target.files?.[0]);}}/></label>
+   {pendingRestore&&<div className="advanced-results">
+    <p role="alert">{t("La restauración sustituirá todos los registros operativos locales actuales, no los productos originales.")}</p>
+    <button className="primary" disabled={locked} onClick={()=>{if(commit(pendingRestore))setPendingRestore(null);}}>{t("Confirmar restauración")}</button>
+    <button className="secondary" onClick={()=>setPendingRestore(null)}>{t("Cancelar")}</button>
    </div>
   </div>}
   {tab==="matrix"&&<div className="advanced-results">
