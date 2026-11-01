@@ -72,8 +72,10 @@ async function rpc(name,body){
  if(!["precify_create_org","precify_consume_oauth_state","precify_import_order_batch","precify_import_campaign_batch","precify_erase_operational_data"].includes(name))fail(500,"Unknown RPC");
  const url=new URL("/rest/v1/rpc/"+name,dbUrl);
  const response=await fetch(url,{method:"POST",headers:{...serviceHeaders,"content-type":"application/json"},body:JSON.stringify(body)});
- if(!response.ok)fail(502,"Organization creation failed");
- return await response.json();
+ if(!response.ok)fail(502,"Database transaction failed: "+name+" ("+response.status+")");
+ if(response.status===204)return null;
+ const body=await response.text();
+ return body?JSON.parse(body):null;
 }
 async function query(table,filters={},select="*"){
  // PostgREST defaults to limited result sets. Never silently report a truncated
