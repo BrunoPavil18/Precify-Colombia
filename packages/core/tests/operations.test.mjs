@@ -71,3 +71,16 @@ test("invalid negative order costs and fictional currency codes are rejected",()
  assert.throws(()=>computeCODFunnel([mk("neg","paid","20",{shippingCost:"-10.00"})]));
  assert.throws(()=>computeCODFunnel([mk("cur","paid","20",{currency:"ZZZ"})]));
 });
+
+test("Meta raw campaign IDs reconcile by campaign and selected date, not by ad-level double count",()=>{
+ const events=[mk("create","created","20",{campaignId:"123456"}),mk("paid","paid","21",{campaignId:null})];
+ const meta={id:"meta:act_55:campaign:123456:2026-10-20:2026-10-23",parentCampaignId:"123456",
+  level:"campaign",source:"meta",currency:"COP",spend:"50.00",impressions:"1000",clicks:"20",
+  attributedConversions:"1",attributedRevenue:"100.00",
+  observedFrom:"2026-10-20T00:00:00Z",observedTo:"2026-10-23T23:59:59Z"};
+ const matched=reconcileCampaigns(events,[meta])[0];
+ assert.equal(matched.matchedOrders,1);
+ assert.equal(matched.observedNetRevenue,"100.00");
+ assert.equal(reconcileCampaigns(events,[{...meta,level:"adset"}])[0].matchedOrders,0);
+ assert.equal(reconcileCampaigns(events,[{...meta,observedFrom:"2026-10-22T00:00:00Z"}])[0].matchedOrders,0);
+});
