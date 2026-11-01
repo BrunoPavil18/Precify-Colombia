@@ -2,6 +2,7 @@
  * Data are locally validated before any caller chooses to persist them.
  */
 import {FinancialInputError} from "./money.js";
+import {currencyDigits} from "./fx.js";
 import {validateAdCampaign,validateOrderEvent,type AdCampaign,type OrderEvent} from "./operations.js";
 
 export function parseCSV(text:string):{headers:string[];rows:Record<string,string>[]} {
@@ -66,14 +67,16 @@ export function importOrdersCSV(csv:string,mapping:OrderCSVMapping={}):OrderEven
  if(rows.length>10000)throw new FinancialInputError("Importación excede 10000 eventos.");
  const get=(row:Record<string,string>,field:keyof OrderEvent,defaultValue="")=>row[col(field)]??defaultValue;
  return rows.map(row=>{
+  const currency=get(row,"currency","COP");
+  const zero=currencyDigits(currency)===0?"0":currencyDigits(currency)===3?"0.000":"0.00";
   const event:OrderEvent={
    id:get(row,"id"),orderId:get(row,"orderId"),status:get(row,"status") as OrderEvent["status"],
    occurredAt:get(row,"occurredAt"),source:get(row,"source","csv"),
-   campaignId:get(row,"campaignId")||null,currency:get(row,"currency","COP"),
-   grossRevenue:get(row,"grossRevenue","0.00"),productCost:get(row,"productCost","0.00"),
-   shippingCost:get(row,"shippingCost","0.00"),reverseShippingCost:get(row,"reverseShippingCost","0.00"),
-   advertisingCost:get(row,"advertisingCost","0.00"),otherCost:get(row,"otherCost","0.00"),
-   refundAmount:get(row,"refundAmount","0.00")
+   campaignId:get(row,"campaignId")||null,currency,
+   grossRevenue:get(row,"grossRevenue",zero),productCost:get(row,"productCost",zero),
+   shippingCost:get(row,"shippingCost",zero),reverseShippingCost:get(row,"reverseShippingCost",zero),
+   advertisingCost:get(row,"advertisingCost",zero),otherCost:get(row,"otherCost",zero),
+   refundAmount:get(row,"refundAmount",zero)
   };
   return validateOrderEvent(event);
  });
@@ -83,13 +86,14 @@ export function importCampaignsCSV(csv:string,columns:Partial<Record<keyof AdCam
  const get=(row:Record<string,string>,field:keyof AdCampaign,defaultValue="")=>row[columns[field]??field]??defaultValue;
  for(const name of ["id","spend","observedFrom","observedTo"] as const)
   if(!headers.includes(columns[name]??name))throw new FinancialInputError("Columna CSV obligatoria ausente: "+name);
- return rows.map(row=>validateAdCampaign({
-  id:get(row,"id"),source:get(row,"source","csv"),currency:get(row,"currency","COP"),
+ return rows.map(row=>{const currency=get(row,"currency","COP");const zero=currencyDigits(currency)===0?"0":currencyDigits(currency)===3?"0.000":"0.00";
+  return validateAdCampaign({
+  id:get(row,"id"),source:get(row,"source","csv"),currency,
   spend:get(row,"spend"),impressions:get(row,"impressions","0"),clicks:get(row,"clicks","0"),
   attributedConversions:get(row,"attributedConversions","0"),
-  attributedRevenue:get(row,"attributedRevenue","0.00"),
+  attributedRevenue:get(row,"attributedRevenue",zero),
   observedFrom:get(row,"observedFrom"),observedTo:get(row,"observedTo")
- }));
+ });});
 }
 export function neutralizeCsvCell(value:string):string {
  const content=String(value);
