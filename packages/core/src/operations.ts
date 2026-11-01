@@ -145,7 +145,7 @@ export function reconcileCampaigns(events:OrderEvent[],campaigns:AdCampaign[]){
 export type CPASensitivityInput={
  currency?:string;createdOrders:string; shippedPercent:string; deliveredPercentOfShipped:string;paidPercentOfDelivered:string;
  contributionPerPaid:string; failedDeliveryCost:string; reverseShippingPerUnpaid:string;
- advertisementPerCreated:string; otherFixedCosts:string;
+ otherFixedCosts:string;
 };
 export function simulateCPASensitivity(input:CPASensitivityInput, deliveryRates:string[], cpaValues:string[]){
  if(!countPattern.test(input.createdOrders))throw new FinancialInputError("Pedidos creados inválidos.");
