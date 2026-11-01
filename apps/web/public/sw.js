@@ -1,5 +1,5 @@
 /* Asset-only offline cache. Local product/backup data are never fetched or cached. */
-const VERSION="precify-colombia-v2-assets-2";
+const VERSION="precify-colombia-v2-assets-3";
 self.addEventListener("install",event=>{
  event.waitUntil((async()=>{
   const cache=await caches.open(VERSION);
@@ -31,7 +31,7 @@ self.addEventListener("message",event=>{
 self.addEventListener("fetch",event=>{
  if(event.request.method!=="GET")return;
  const url=new URL(event.request.url);
- if(url.origin!==self.location.origin || /\/api\//.test(url.pathname))return;
+ if(url.origin!==self.location.origin || /\/(?:api|v1|auth)\//.test(url.pathname))return;
  event.respondWith((async()=>{
   const cache=await caches.open(VERSION);
   if(event.request.mode==="navigate"){
