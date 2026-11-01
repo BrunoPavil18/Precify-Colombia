@@ -21,11 +21,11 @@
 | ID | State | Summary | Evidence / commit |
 |---|---|---|---|
 | CP00 | COMPLETE | Created feature branch and this durable recovery document | See branch commit history |
-| CP01 | IMPLEMENTED — UNVERIFIED | ISO minor-unit conversions, Frankfurter daily FX per-pair cache, offline fallback, independent exchange page, PT/EN strings, unit tests | See commits following CP00; run build/typecheck/tests before marking COMPLETE |
-| CP02 | IN PROGRESS | COD event funnel, ad attribution reconciliation, CPA sensitivity and tests committed; CSV mapping and UI pending | See core operations commits |
-| CP03 | NEXT | Build opt-in connected-service data model, API, authorization, tenant boundaries and durable persistence | Pending |
-| CP04 | NEXT | Add Meta OAuth + insights integration; secure tokens, API/webhook contract and operational metrics | Pending |
-| CP05 | NEXT | Integrate dashboard, accounts, import, history, reports and embed UI; static translations | Pending |
+| CP01 | IMPLEMENTED — UNVERIFIED | ISO minor-unit conversions, Frankfurter daily FX per-pair cache, offline fallback, *native international pricing* UI and tests, PT/EN strings | Currency, global pricing and FX commits; still require build/typecheck/test |
+| CP02 | IMPLEMENTED — UNVERIFIED | COD event funnel, ad reconciliation, CPA matrix, CSV mapping, browser-local operational dashboard, manual competitor price history and exports | Core operations, operational-csv and OperationsLab commits; tests pending |
+| CP03 | IMPLEMENTED — UNVERIFIED | PostgreSQL/Supabase tables + RLS/revoked grants, organization roles, backend identity validation, REST, API keys, webhook signatures, export/deletion, connected web UI | apps/service server + SQL + ConnectedLab; needs deployment and integration tests |
+| CP04 | PARTIAL — UNVERIFIED | OAuth state, encrypted Meta access token, ad account discovery, initial insights import and UI | Meta app review/real credentials and pagination/expiration handling pending |
+| CP05 | IN PROGRESS | Local dashboard, connected summaries, sign-in, teams, server API and Vezura-compatible generic integration docs present; comprehensive UX and data quality still pending | OperationsLab, ConnectedLab and docs |
 | CP06 | NEXT | Compatibility, automated tests, production/offline/browser verification, docs and release preparation | Pending |
 
 ## Decisions and hard safety boundaries
@@ -44,3 +44,11 @@ On the next ChatGPT conversation, provide this document path and request a fresh
 - Created `packages/core/src/fx.ts` and `packages/core/tests/fx.test.mjs` (pure integer conversion; configurable ISO currencies), `apps/web/src/CurrencyLab.tsx` (Frankfurter daily quotes with local cache and offline fallback), and integrated currency navigation. Existing COP pricing workflow untouched.
 - Created `packages/core/src/operations.ts` and tests for event-based order funnel, source-identified reconciliations and CPA × delivery matrix. Exported from core. No external platform credentials connected.
 - **Environment limitation:** this agent's container cannot resolve github.com; GitHub connector has been used for commits. Build/tests of this branch have not yet been executed. No general audit, CI, PR, merge or release.
+
+### Additional checkpoint — 2026-11-01
+- Added native global pricing in arbitrary supported ISO currencies with variable minor units while preserving COP-only v2.0.1 API; separate currency calculator UI and quote cache.
+- Added defensively parsed and mapped CSV imports for order events/campaigns, COD dashboards, CPA sensitivity and dated manually recorded competitor prices.
+- Added connected-mode PostgreSQL/Supabase SQL schema, explicit tenant membership roles, server REST service, shared-secret HMAC webhooks, scoped server API keys, Meta authorization initial flow and reporting, and optional login UI. Backend secrets are server only; default local UI does not require account.
+- Added [connected integration/deployment guide](CONNECTED_API_V2_1_0.md). **Vezura repository untouched.** Supabase project and Meta app are not configured by this work.
+- Current code is **NOT TESTED / NOT DEPLOYED / NOT RELEASE READY**. Remaining: production-grade pagination/token lifecycle, full integrity/authorization tests, international calculations UI review, offline/PWA integration, final docs, compatibility and functional validation.
+- Do not merge/publish or claim functional completeness. Continue from this checkpoint on the same branch.
