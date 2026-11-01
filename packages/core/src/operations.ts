@@ -157,7 +157,7 @@ export function reconcileCampaigns(events:OrderEvent[],campaigns:AdCampaign[]){
 export type CPASensitivityInput={
  currency?:string;createdOrders:string; shippedPercent:string; deliveredPercentOfShipped:string;paidPercentOfDelivered:string;
  contributionPerPaid:string; failedDeliveryCost:string; reverseShippingPerUnpaid:string;
- otherFixedCosts:string;
+ otherFixedCosts:string;lossReservePerFailedOrder?:string;
 };
 export function simulateCPASensitivity(input:CPASensitivityInput, deliveryRates:string[], cpaValues:string[]){
  if(!countPattern.test(input.createdOrders))throw new FinancialInputError("Pedidos creados inválidos.");
@@ -169,6 +169,7 @@ export function simulateCPASensitivity(input:CPASensitivityInput, deliveryRates:
  const fixed=money(input.otherFixedCosts);
  const contribution=money(input.contributionPerPaid);
  const failedCost=money(input.failedDeliveryCost),reverse=money(input.reverseShippingPerUnpaid);
+ const lost=money(input.lossReservePerFailedOrder??"0");
  if(deliveryRates.length>20||cpaValues.length>20)throw new FinancialInputError("Matriz demasiado grande.");
  return deliveryRates.map(deliveryPercent=>{
   const delivered=roundDiv(shipped*percent(deliveryPercent),10000n);
@@ -176,7 +177,7 @@ export function simulateCPASensitivity(input:CPASensitivityInput, deliveryRates:
   return {deliveryPercent,shippedOrders:shipped.toString(),deliveredOrders:delivered.toString(),paidOrders:paid.toString(),
    results:cpaValues.map(cpa=>{
     const cp=money(cpa);
-    const result=paid*contribution-count*cp-failed*failedCost-unpaid*reverse-fixed;
+    const result=paid*contribution-count*cp-failed*failedCost-(failed+unpaid)*reverse-(count-paid)*lost-fixed;
     return {cpa,profit:fromMinor(result,currency),currency,feasible:result>=0n};
    })};
  });
