@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from "react";
 import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
- reconcileCampaigns,simulateCPASensitivity,exportOperationsCSV,validateOrderEvent,validateAdCampaign,
+ reconcileCampaigns,advertisingIndicators,simulateCPASensitivity,exportOperationsCSV,validateOrderEvent,validateAdCampaign,
  currencyCatalog,minorAmount,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
 import {useTranslator} from "./i18n";
 
@@ -98,6 +98,15 @@ export function OperationsLab(){
   try{return data.campaigns.map(c=>reconcileCampaigns(data.events.filter(e=>e.currency===c.currency),[c])[0]);}
   catch{return [];}
  },[data.events,data.campaigns]);
+ const marketing=useMemo(()=>{try{return data.campaigns.map(advertisingIndicators);}catch{return []; }},[data.campaigns]);
+ const paidByDay=useMemo(()=>{
+  const totals=new Map<string,number>(),seen=new Set<string>();
+  for(const ev of data.events)if(ev.status==="paid"){
+   const day=ev.occurredAt.slice(0,10),key=day+":"+ev.orderId;
+   if(seen.has(key))continue;seen.add(key);totals.set(day,(totals.get(day)??0)+1);
+  }
+  return [...totals.entries()].sort((a,b)=>a[0].localeCompare(b[0])).slice(-14);
+ },[data.events]);
  const matrix=useMemo(()=>{
   try{return {values:simulateCPASensitivity(cpa,["30","40","50","60","70","80","90","100"],["10000","20000","30000","40000"])};}
   catch(e){return {error:String(e)};}
@@ -129,6 +138,16 @@ export function OperationsLab(){
       {([["created","Pedidos creados"],["shipped","Pedidos enviados"],["delivered","Entregados"],["paid","Pedidos pagados"],["cancelled","Cancelados"],["deliveryFailed","Entrega fallida"],["returned","Devueltos"],["refunded","Reembolsados"],["netCollected","Ingresos pagados netos"],["incurredCosts","Costos incurridos"],["projectedNet","Resultado operacional simplificado"]] as const).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{String(x.result[key])}{typeof x.result[key]==="string"&&["netCollected","incurredCosts","projectedNet"].includes(key)?" "+x.currency:""}</dd></div>)}
      </dl>}
     </section>)}
+   <h3>{t("Evolución de pagos registrados por día")}</h3>
+   {paidByDay.length===0?<p className="muted">{t("Todavía no hay eventos de pago.")}</p>:<div className="operations-trend" role="img" aria-label={t("Pagos registrados por día")}>
+    {paidByDay.map(([day,count])=><div className="list-row" key={day}><span>{day}</span>
+     <div style={{flex:1,background:"var(--surface-muted, #e1ebe7)",borderRadius:6,height:14,overflow:"hidden"}}><div style={{width:(100*count/Math.max(...paidByDay.map(x=>x[1]),1))+"%",height:"100%",background:"#178669"}}/></div><strong>{count}</strong></div>)}
+   </div>}
+   <h3>{t("Métricas atribuidas de campañas")}</h3>
+   {marketing.length===0?<p className="muted">{t("Todavía no hay métricas publicitarias importadas.")}</p>:
+    <div className="table-scroll"><table><thead><tr><th>{t("Campaña")}</th><th>CTR</th><th>CPC</th><th>CPM</th><th>ROAS</th></tr></thead><tbody>
+    {marketing.map(m=><tr key={m.id}><th>{m.id}</th><td>{m.ctrPercent??"—"}%</td><td>{m.cpc??"—"} {m.currency}</td><td>{m.cpm??"—"} {m.currency}</td><td>{m.attributedRoas??"—"}×</td></tr>)}
+    </tbody></table></div>}
    <h3>{t("Confrontación entre atribución publicitaria y pedidos pagados")}</h3>
    {reconciled.length===0?<p>{t("Importa anuncios y pedidos con un ID de campaña explícito para conciliar.")}</p>:reconciled.map(c=><div className="list-row" key={c.campaignId}><span>{c.campaignId} · {t("Pedidos pagos")} {c.paidOrders} · {t("Ingresos reales conciliados")} {c.currency+" "+c.observedNetRevenue}</span><small>{t("Diferencia frente a la atribución")} {c.currency+" "+c.discrepancy}</small></div>)}
   </div>}
