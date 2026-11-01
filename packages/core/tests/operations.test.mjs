@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {computeCODFunnel,reconcileCampaigns,simulateCPASensitivity} from "../dist/index.js";
+import {computeCODFunnel,reconcileCampaigns,simulateCPASensitivity,advertisingIndicators} from "../dist/index.js";
 
 const mk=(id,status,time,extra={})=>({
  id,orderId:"order-1",source:"csv",occurredAt:"2026-10-"+time+"T12:00:00Z",status,
@@ -37,4 +37,14 @@ test("CPA matrix uses shipped failures instead of all created orders",()=>{
  const x=simulateCPASensitivity(params,["0","100"],["10.00"]);
  assert.equal(x[0].results[0].profit,"-1500.00");
  assert.equal(x[1].results[0].profit,"4000.00");
+});
+
+test("advertising indicators keep platform attribution separate from orders and handle zeros",()=>{
+ const c={id:"meta:123",source:"meta",currency:"USD",spend:"100.00",
+ impressions:"10000",clicks:"200",attributedConversions:"10",attributedRevenue:"500.00",
+ observedFrom:"2026-10-20T00:00:00Z",observedTo:"2026-10-23T00:00:00Z"};
+ const x=advertisingIndicators(c);
+ assert.equal(x.ctrPercent,"2.00");assert.equal(x.cpc,"0.50");
+ assert.equal(x.cpm,"10.00");assert.equal(x.attributedRoas,"5.00");
+ assert.equal(advertisingIndicators({...c,impressions:"0",clicks:"0"}).cpc,null);
 });
