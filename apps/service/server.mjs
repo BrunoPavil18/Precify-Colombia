@@ -69,7 +69,7 @@ async function sb(method,table,query={},body,prefer){
  const text=await response.text();return text?JSON.parse(text):null;
 }
 async function rpc(name,body){
- if(name!=="precify_create_org")fail(500,"Unknown RPC");
+ if(!["precify_create_org","precify_consume_oauth_state"].includes(name))fail(500,"Unknown RPC");
  const url=new URL("/rest/v1/rpc/"+name,dbUrl);
  const response=await fetch(url,{method:"POST",headers:{...serviceHeaders,"content-type":"application/json"},body:JSON.stringify(body)});
  if(!response.ok)fail(502,"Organization creation failed");
@@ -196,6 +196,7 @@ async function graphPages(url,token,maxPages=40){
 async function metaAccounts(org,auth){
  const rows=await tokenFor(org,auth);
  if(!rows.length)fail(404,"No Meta account connected");
+ if(rows[0].expires_at&&Date.parse(rows[0].expires_at)<=Date.now())fail(401,"Meta authorization expired; reconnect");
  const token=decrypt(rows[0].token_enc);
  const url=new URL("https://graph.facebook.com/"+metaVersion+"/me/adaccounts");
  url.searchParams.set("fields","id,name,currency");url.searchParams.set("limit","100");
@@ -215,6 +216,7 @@ async function metaSync(org,auth,request){
  if(!isoDate.test(request.since)||!isoDate.test(request.until)||request.since>request.until)fail(400,"Invalid date range");
  const connection=await tokenFor(org,auth);
  if(!connection.length)fail(401,"Meta connection expired");
+ if(connection[0].expires_at&&Date.parse(connection[0].expires_at)<=Date.now())fail(401,"Meta authorization expired; reconnect");
  const token=decrypt(connection[0].token_enc);
  const url=new URL("https://graph.facebook.com/"+metaVersion+"/"+request.accountId+"/insights");
  url.searchParams.set("fields","campaign_id,campaign_name,adset_id,adset_name,ad_id,ad_name,spend,impressions,clicks,actions,action_values");
@@ -275,9 +277,8 @@ async function handler(req,res){
   if(url.pathname==="/v1/oauth/meta/callback"&&req.method==="GET"){
    const state=url.searchParams.get("state"),code=url.searchParams.get("code");
    if(!state||!/^[-_a-zA-Z0-9]{35,100}$/.test(state)||!code||code.length>4096)fail(400,"Invalid OAuth callback");
-   const rows=await query("precify_oauth_states",{nonce_hash:"eq."+sha(state)});
-   if(rows.length!==1||Date.parse(rows[0].expires_at)<Date.now())fail(401,"OAuth state expired");
-   await remove("precify_oauth_states",{nonce_hash:"eq."+sha(state)});
+   const rows=await rpc("precify_consume_oauth_state",{p_nonce_hash:sha(state)});
+   if(!Array.isArray(rows)||rows.length!==1)fail(401,"OAuth state expired or already consumed");
    if(!env.META_APP_ID||!env.META_APP_SECRET)fail(503,"Meta connector not configured");
    const redirect=new URL("/v1/oauth/meta/callback",publicURL).toString();
    const tokenUrl=new URL("https://graph.facebook.com/"+metaVersion+"/oauth/access_token");
@@ -289,8 +290,19 @@ async function handler(req,res){
    if(!response.ok)fail(502,"Meta OAuth exchange failed");
    const body=await response.json();
    if(typeof body.access_token!=="string")fail(502,"Meta token missing");
+   // Upgrade short-lived authorization when the Meta app permits this exchange.
+   let accessToken=body.access_token,ttl=Number(body.expires_in??3600);
+   try{
+    const extended=new URL("https://graph.facebook.com/"+metaVersion+"/oauth/access_token");
+    extended.searchParams.set("grant_type","fb_exchange_token");
+    extended.searchParams.set("client_id",env.META_APP_ID);
+    extended.searchParams.set("client_secret",env.META_APP_SECRET);
+    extended.searchParams.set("fb_exchange_token",accessToken);
+    const longer=await fetch(extended,{cache:"no-store"});
+    if(longer.ok){const parsed=await longer.json();if(typeof parsed.access_token==="string"){accessToken=parsed.access_token;ttl=Number(parsed.expires_in??ttl);}}
+   }catch{/* A valid short-lived token remains usable until its real expiration. */}
    await insert("precify_meta_connections",{org_id:rows[0].org_id,user_id:rows[0].user_id,
-    token_enc:crypt(body.access_token),expires_at:body.expires_in?new Date(Date.now()+Number(body.expires_in)*1000).toISOString():null},
+    token_enc:crypt(accessToken),expires_at:Number.isFinite(ttl)&&ttl>0?new Date(Date.now()+ttl*1000).toISOString():null},
     {upsert:"merge",conflict:"org_id,user_id"});
    res.writeHead(302,{location:webOrigin+"/?precify-meta=connected","cache-control":"no-store"});return res.end();
   }
