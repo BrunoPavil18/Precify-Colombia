@@ -4,7 +4,11 @@
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versión 2.0.1 · Aplicación gratuita y de código abierto · Apache License 2.0**
+**Desarrollo v2.1.0 (NO publicado) · Última versión estable: 2.0.1 · Apache License 2.0**
+
+## Desarrollo de 2.1.0 — todavía sin homologar
+
+Esta branch experimental añade precios nativos en monedas ISO, cotizaciones orientativas diarias con cache offline, catálogo internacional independiente, panel COD y CPA, importación de pedidos/anuncios CSV, dashboard y una API REST conectada opcional con organizaciones, roles, webhooks firmados y Facebook Ads. También permite integrar una calculadora sin cuentas mediante `?embed=1`, por ejemplo en Vezura, **sin modificar el repositorio de Vezura**. Las funciones conectadas requieren servidor PostgreSQL/Supabase, credenciales Meta y validación externa; aún NO se consideran listas para producción. [Checkpoints de ejecución](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Guía de integración](docs/CONNECTED_API_V2_1_0.md).
 
 ## Actualización 2.0.1
 
