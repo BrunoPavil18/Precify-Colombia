@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EMPTY_INPUT, analyze, simulateCOD, simulateCampaign, pricePerMeasure,
+import { EMPTY_INPUT, analyze, simulateCOD, suggestCODBreakEvenPrice, simulateCampaign, pricePerMeasure,
  consumerPricePreview, simulatePortfolio, parseLocalizedPercent, emptyWorkspace, encodeBackup, decodeBackup } from "../dist/index.js";
 
 const base={...EMPTY_INPUT,acquisition:"50.00",packaging:"0",shippingCost:"0",fixedFee:"0",advertising:"0",currentPrice:"100.00",monthlyFixed:"0",monthlyUnits:"10"};
@@ -164,4 +164,14 @@ test("PUM explicitly selects source and reference units without silently changin
  assert.equal(pricePerMeasure("1000.00","150.00","cm","m").pricePerUnit,"666.67");
  assert.throws(()=>pricePerMeasure("1000.00","500.00","g","l"));
  assert.equal(pricePerMeasure("1000.00","6.00","unit","unit").regulatoryTruncatedPrice,"166.66");
+});
+
+test("COD cohort break-even retail price includes advertising per created order",()=>{
+ const scenario={product:base,createdOrders:"10",shippedPercent:"100",deliveredPercentOfShipped:"100",
+  paidPercentOfDelivered:"100",failedAttemptCost:"0",returnShippingCost:"0",
+  advertisingPerCreatedOrder:"3.00",extraCODFeePerPaidOrder:"0",lossReservePerFailedOrder:"0"};
+ const result=suggestCODBreakEvenPrice(scenario);
+ assert.equal(result.price,"53.00");
+ assert.equal(result.projectedProfit,"0.00");
+ assert.equal(suggestCODBreakEvenPrice({...scenario,paidPercentOfDelivered:"0"}).price,null);
 });
