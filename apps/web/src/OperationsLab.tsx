@@ -1,7 +1,8 @@
+import {UnifiedCODLab} from "./UnifiedCODLab";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
  reconcileCampaigns,advertisingIndicators,simulateCPASensitivity,exportOperationsCSV,validateOrderEvent,validateAdCampaign,
- currencyCatalog,minorAmount,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
+ currencyCatalog,minorAmount,type Product,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
 import {useTranslator} from "./i18n";
 
 const KEY="precify-colombia:operations:v1";
@@ -39,14 +40,14 @@ function exportText(content:string,filename:string,type:string){
  const url=URL.createObjectURL(new Blob([content],{type}));
  const a=document.createElement("a");a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
-export function OperationsLab(){
+export function OperationsLab({products}:{products:Product[]}){
  const t=useTranslator();
  const initial=useMemo(readOperations,[]);
  const [data,setData]=useState(initial.value);
  const baseline=useRef(initial.raw);
  const [locked,setLocked]=useState(!!initial.error);
  const [notice,setNotice]=useState(initial.error??"");
- const [tab,setTab]=useState<"dashboard"|"import"|"matrix"|"prices">("dashboard");
+ const [tab,setTab]=useState<"unified"|"dashboard"|"import"|"matrix"|"prices">("unified");
  const [csv,setCSV]=useState(""),[headers,setHeaders]=useState<string[]>([]);
  const [mapping,setMapping]=useState<OrderCSVMapping>({});
  const [importMode,setImportMode]=useState<"orders"|"campaigns">("orders");
@@ -119,7 +120,7 @@ export function OperationsLab(){
    commit({...data,prices:[...data.prices,item]});
   }catch(e){setNotice(String(e));}
  }
- const tabs=[["dashboard","Panel COD"],["import","Importar CSV"],["matrix","Matriz CPA"],["prices","Precios de competidores"]] as const;
+ const tabs=[["unified","Precificación COD integrada"],["dashboard","Panel COD"],["import","Importar CSV"],["matrix","Matriz CPA"],["prices","Precios de competidores"]] as const;
  return <section className="main-card operations-lab">
   <span className="eyebrow">{t("INTELIGENCIA OPERACIONAL")}</span>
   <h2>{t("Pedidos, publicidad y rentabilidad explicable")}</h2>
@@ -129,6 +130,7 @@ export function OperationsLab(){
   </div>
   {notice&&<p role="status" className="muted">{t(notice)}</p>}
   {locked&&<p role="alert">{t("Edición local bloqueada para evitar sobrescrituras; exporta tus datos y recarga.")}</p>}
+  {tab==="unified"&&<UnifiedCODLab products={products}/>}
   {tab==="dashboard"&&<div className="advanced-results">
    <h3>{t("Funil de pedidos observados")}</h3>
    {funnels.length===0?<p>{t("Todavía no hay pedidos importados.")}</p>:funnels.map(x=>
