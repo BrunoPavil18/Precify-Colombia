@@ -4,6 +4,7 @@
  * by the operator; there are no hard-coded credentials or automatic migrations.
  */
 import http from "node:http";
+import {canonicalJSON,verifyWebhookSignature} from "./security.mjs";
 import {createHash,createHmac,createCipheriv,createDecipheriv,randomBytes,timingSafeEqual} from "node:crypto";
 import {
  validateOrderEvent,validateAdCampaign,computeCODFunnel,reconcileCampaigns
@@ -130,13 +131,13 @@ async function importOrders(org,auth,rows){
  for(const row of rows){
   validateOrderEvent(row);
   const existing=seen.get(row.id);
-  if(existing&&JSON.stringify(existing)!==JSON.stringify(row))fail(409,"Conflicting duplicate event");
+  if(existing&&canonicalJSON(existing)!==canonicalJSON(row))fail(409,"Conflicting duplicate event");
   seen.set(row.id,row);
  }
  const events=[...seen.values()];
  for(const event of events){
   const old=await query("precify_order_events",{org_id:"eq."+org,event_id:"eq."+event.id},"payload");
-  if(old.length&&JSON.stringify(old[0].payload)!==JSON.stringify(event))fail(409,"Event ID already exists with another payload");
+  if(old.length&&canonicalJSON(old[0].payload)!==canonicalJSON(event))fail(409,"Event ID already exists with another payload");
  }
  if(events.length)await insert("precify_order_events",events.map(e=>({org_id:org,event_id:e.id,order_id:e.orderId,payload:e})),{upsert:true,conflict:"org_id,event_id"});
  await audit(org,auth,"orders.import",{count:events.length});
@@ -265,9 +266,7 @@ async function handler(req,res){
    if(!Number.isSafeInteger(ms)||Math.abs(Date.now()-ms)>300000)fail(401,"Webhook timestamp outside tolerance");
    const raw=await readRaw(req);
    const secret=decrypt(rows[0].secret_enc);
-   const expected=createHmac("sha256",secret).update(timestamp+".").update(raw).digest();
-   const supplied=String(req.headers["x-precify-signature"]||"").replace(/^sha256=/,"");
-   if(!/^[a-f0-9]{64}$/i.test(supplied)||!timingSafeEqual(expected,Buffer.from(supplied,"hex")))fail(401,"Invalid webhook signature");
+   if(!verifyWebhookSignature(secret,timestamp,raw,String(req.headers["x-precify-signature"]||"")))fail(401,"Invalid webhook signature");
    const body=JSON.parse(raw.toString("utf8"));
    const org=rows[0].org_id,auth={type:"api",orgId:org,scope:"write",id:"webhook:"+hook[1]};
    return respond(res,202,await importOrders(org,auth,Array.isArray(body)?body:[body]));
