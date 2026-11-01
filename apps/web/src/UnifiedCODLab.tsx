@@ -36,8 +36,8 @@ export function UnifiedCODLab({products}:{products:Product[]}){
    const breakdown=analyze(product.input);
    const positive=breakdown.contribution.startsWith("-")
     ?-parseDecimal(breakdown.contribution.slice(1)):parseDecimal(breakdown.contribution);
-   const perPaid=positive-parseDecimal(product.input.advertising)
-    -parseDecimal(product.input.codReserve)-parseDecimal(product.input.returnsReserve)
+   const perPaid=positive+parseDecimal(product.input.advertising)
+    +parseDecimal(product.input.codReserve)+parseDecimal(product.input.returnsReserve)
     -parseDecimal(inputs.extraCODFeePerPaidOrder);
    if(perPaid<0n)return {result,breakEven,error:t("La contribución unitaria sin publicidad es negativa; revisa los costos.")};
    const cpa=[...new Set(["0","5000","10000","15000","20000","30000",inputs.advertisingPerCreatedOrder])];
