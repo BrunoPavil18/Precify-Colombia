@@ -614,5 +614,7 @@ export const ptBR: Record<string,string> = {
   "La restauración sustituirá el catálogo internacional, sin modificar los productos COP originales.": "A restauração substituirá o catálogo internacional sem alterar os produtos COP originais.",
   "Respaldo validado; confirma si quieres sustituir el catálogo internacional.": "Backup validado; confirme se deseja substituir o catálogo internacional.",
   "Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.": "Outra aba alterou o catálogo de moedas. Exporte os dados e atualize a página.",
-  "Introduce un nombre para guardar el precio.": "Informe um nome para salvar o preço."
+  "Introduce un nombre para guardar el precio.": "Informe um nome para salvar o preço.",
+  "Historial de precios anteriores": "Histórico de preços anteriores",
+  "Sin conexión: solo están disponibles los informes guardados con permiso.": "Sem conexão: somente relatórios salvos com autorização estão disponíveis."
 };
