@@ -22,3 +22,13 @@ Two installations can access the same store using **two independently issued cod
 ## Local validation and integration boundary
 
 Run `node --test integrations/tests/device-enrollment.test.mjs`. Production requires real durable store database transactions, request rate limiting, HTTPS, CORS origin allowlists and admin-side device revocation. Integrate the store adapter in Vezura in the separate Vezura project. The prior site-owned v1 bearer endpoint remains available for migration only; new sites use device v2 by default.
+
+## Postgres pronto para adaptação no site
+
+A migração `integrations/sql/precify-financy-device-v2.sql` e o adapter `integrations/device-store-postgres.mjs` permitem ao servidor de uma loja criar suas próprias tabelas de convites, dispositivos e nonces. Eles **não mexem no banco da Vezura** automaticamente. Para usar, o backend da loja aplica a migração, fornece um pool PostgreSQL existente a `createPostgresDeviceStore(pool)` e conecta o objeto retornado ao `createDeviceFeedHandler`.
+
+A transação de ativação consome o convite por `UPDATE ... WHERE consumed_at IS NULL ... RETURNING`, registra a chave pública e faz `COMMIT`. Um segundo pedido concorrente obtém nenhum registro, por design. Se o insert do dispositivo falhar, `ROLLBACK` recupera a disponibilidade do convite. A tentativa não expõe dados financeiros de outro tenant.
+
+O backend da loja continua responsável pela tela administrativa de emissão/revogação, pelo feed de pedidos com outbox e pelo rate limiting. Agende expurgo de nonces expirados e **não reatribua IDs revogados**. Se o banco da loja não for PostgreSQL (por exemplo MySQL), traduza a migração e preserve a mesma atomicidade. Não configure silenciosamente uma segunda instância PostgreSQL na Vezura.
+
+O identificador e o segredo de instalação não são uma senha compartilhada; o código de convite é de uso único e a chave privada fica no computador. A verificação de assinatura deve ocorrer em cada acesso. O aplicativo não depende de cadastro de funcionário no serviço do Precify.
