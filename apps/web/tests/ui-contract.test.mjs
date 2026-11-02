@@ -142,6 +142,7 @@ test("integration guide is in-app rather than relying on WebView2 external links
  const src=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
  for(const token of ['setGuideOpen(value=>!value)','aria-expanded={guideOpen}','aria-controls="precify-site-integration-guide"','role="region"','POST /precify/v2/activate','GET  /precify/v2/changes'])
   assert.ok(src.includes(token),token);
+ assert.ok(src.includes("onFocus={e=>e.target.select()}"),"external-document fallback URL must be selectable");
 });
 test("device activation is recoverable if invitation is consumed before the local confirmation",()=>{
  const vault=readFileSync(new URL("../src/device-vault.ts",import.meta.url),"utf8");
