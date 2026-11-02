@@ -436,6 +436,12 @@ main>.main-card,main>.two-column,main>.advanced-results{animation:pc-reveal .25s
 .connection-onboarding ol{margin:8px 0 12px;padding-left:22px;line-height:1.65}
 .connection-onboarding li{padding-left:3px;margin:6px 0}
 .connection-onboarding a{color:var(--pc-accent,#87e5c0);text-decoration:underline;text-underline-offset:3px}
+.connection-onboarding>button{max-width:100%;margin:6px 0;text-align:left;white-space:normal}
+.connection-technical-guide{margin-top:16px;padding:18px;border:1px solid var(--pc-border);border-radius:12px;background:var(--pc-surface);overflow-wrap:anywhere}
+.connection-technical-guide h4{font-size:1.08rem;margin:0 0 10px}
+.connection-technical-guide p{margin:12px 0;line-height:1.65}
+.connection-technical-guide pre{padding:14px;max-width:100%;overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--pc-border);border-radius:10px;background:rgba(0,0,0,.22);color:var(--pc-text)}
+.connection-onboarding button:focus-visible{outline:2px solid var(--pc-accent,#87e5c0);outline-offset:3px}
 .optional-cloud-connections{margin-top:20px;padding:18px;border:1px solid var(--pc-border);border-radius:14px}
 .optional-cloud-toggle{display:flex;align-items:center;gap:12px;justify-content:space-between;width:100%;text-align:left}
 .optional-cloud-connections>.muted{font-size:.9rem;margin:10px 0 0}
