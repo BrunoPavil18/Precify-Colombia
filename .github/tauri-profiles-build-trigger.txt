@@ -1,3 +1,4 @@
-Final multi-business candidate validation after native directory backup, operational totals, pinned sync cache and mobile overflow guard.
-Code parent: 75f9e6533bb4eba48b919d8c0f981a32c5a1d525
-Actions: TypeScript tests, browser end-to-end, Rust SQLite tests, Inno setup and ZIP.
+Final navigation hotfix: no silent all-business fallback.
+Code sha: 9463ab14012af6d581ac3b309ef17cd56ba6cb1a
+E2E checks global selection remains, scoped target chosen explicitly, old products persist.
+Runs: full web tests + Chromium + Rust SQLite tests + Windows Tauri + Inno ZIP.
