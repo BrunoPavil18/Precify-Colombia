@@ -1,4 +1,3 @@
-Precify Financy 2.1 final integrity gate
-Source commit: 90574d1120a1412d9caca8e02e6a28366e63da31
-Validate: 109+ TypeScript tests, Chromium PWA, SQLite shared native Windows database, Rust native sync, Inno installer and portable ZIP, Ed25519 single-use device enrollment, MySQL/Postgres store adapters.
-No deployment or main-branch mutation.
+Precify Financy v2.1.0 whole-product audit (2026-11-02)
+Validated candidate commit: cce6f3de9052811f98a2d250dca1d60221dce445
+Device-first connections, optional cloud, scoped storage notifications, SQLite startup recovery, Rust real disk persistence, Chromium 19-page regression, 117 JavaScript tests, Windows x64 Inno + portable ZIP.
