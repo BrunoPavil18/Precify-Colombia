@@ -78,7 +78,7 @@ try{
   await nav(label,title);
   if(label==="Conexiones"){
    await until(()=>evaluate('!!document.querySelector(".connection-onboarding")'));
-   const check=await evaluate('({device:!!document.querySelector(".website-sync-lab"),legacy:!!document.querySelector(".connected-lab"),advanced:document.querySelector(".optional-cloud-toggle")?.getAttribute("aria-expanded"),help:!!document.querySelector(".connection-onboarding a[href*="STORE_DEVICE_API_V2"]")})');
+   const check=await evaluate('({device:!!document.querySelector(".website-sync-lab"),legacy:!!document.querySelector(".connected-lab"),advanced:document.querySelector(".optional-cloud-toggle")?.getAttribute("aria-expanded"),help:!!document.querySelector(".connection-onboarding a[href*=STORE_DEVICE_API_V2]")})');
    if(!check.device||check.legacy||check.advanced!=="false"||!check.help)throw Error("Connection onboarding/legacy separation regression: "+JSON.stringify(check));
    await shot("desktop-conexiones-device-first.png");
    await evaluate('document.querySelector(".optional-cloud-toggle").click()');
