@@ -8,7 +8,7 @@ import {readDevice,enrollDevice,deleteDevice,type DeviceIdentity} from "./device
 
 type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subject?:string;mode?:"device-v2"|"legacy-v1"};
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
-import {mirrorNativeSnapshot} from "./desktop-snapshots";
+import {nativeWrite} from "./native-primary";
 const SETTINGS="precify-financy:site-owned-connectors:v1";
 const siteSettingsKey=()=>businessKey(SETTINGS,getBusinessScope());
 const strings={
@@ -48,7 +48,7 @@ function loadSites():Site[]{
    [0,30000,60000,300000].includes(x.interval)&&typeof x.enabled==="boolean");
  }catch{return [];}
 }
-function persistSites(sites:Site[]){const before=localStorage.getItem(siteSettingsKey());const content=JSON.stringify(sites);localStorage.setItem(siteSettingsKey(),content);mirrorNativeSnapshot("site-connectors",content,before);}
+async function persistSites(sites:Site[]){const before=localStorage.getItem(siteSettingsKey());const content=JSON.stringify(sites);await nativeWrite("site-connectors",getBusinessScope(),content,before);}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
 export function WebsiteSyncLab({visible}:{visible:boolean}){
  const businessId=useRef(getBusinessScope()).current;
@@ -88,7 +88,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  const [name,setName]=useState(""),[url,setUrl]=useState("");
  const controllers=useRef(new Map<string,Controller>());
  const running=useRef(new Map<string,Promise<SyncStatus>>());
- function update(next:Site[]){persistSites(next);setSites(next);}
+ async function update(next:Site[]){try{await persistSites(next);setSites(next);}catch(e){setNotice(String(e));throw e;}}
  useEffect(()=>{
   for(const site of sites){if(!site.subject)continue;
    void loadSnapshot(site.id+":"+site.subject,site.id).catch(e=>setNotice(String(e)));
@@ -109,7 +109,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      if(site.subject!==subject){
       setStats(previous=>{const next={...previous};delete next[site.id];return next;});
       setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
-      setSites(previous=>{const next=previous.map(s=>s.id===site.id?{...s,subject}:s);persistSites(next);return next;});
+      const next=sites.map(s=>s.id===site.id?{...s,subject}:s);await update(next);
      }
      const scope=site.id+":"+subject;
      const controller=createSyncController({
@@ -157,7 +157,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      Object.entries(devices).map(([id,device])=>id+"-"+device.deviceId).join("|")]);
  async function remove(site:Site){
   setTokens(previous=>{const next={...previous};delete next[site.id];return next;});
-  update(sites.filter(s=>s.id!==site.id));
+  await update(sites.filter(s=>s.id!==site.id));
   if(site.mode==="device-v2")await deleteDevice(businessId,site.id);
   try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
   await purgeSiteCache(site.id,businessId);
@@ -165,13 +165,13 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
   setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
  }
  async function revoke(site:Site){
-  update(sites.map(s=>s.id===site.id?{...s,enabled:false}:s));
+  await update(sites.map(s=>s.id===site.id?{...s,enabled:false}:s));
   try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
   await purgeSiteCache(site.id,businessId);
   setStats(previous=>{const next={...previous};delete next[site.id];return next;});
   setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
  }
- function add(){
+ async function add(){
   try{
    const trimmed=name.trim(),base=new URL(url.trim());
    if(!trimmed||trimmed.length>120||!["https:","http:"].includes(base.protocol)||(!["localhost","127.0.0.1"].includes(base.hostname)&&base.protocol!=="https:")||
@@ -192,7 +192,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
   <div className="advanced-grid">
    <label className="field"><span>{t.name}</span><input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label>
    <label className="field"><span>{t.url}</span><input type="url" placeholder="https://store.example" value={url} onChange={e=>setUrl(e.target.value)}/></label>
-   <button className="secondary" onClick={add}>{t.add}</button>
+   <button className="secondary" onClick={()=>{void add();}}>{t.add}</button>
   </div>
   {sites.map(site=><div className="advanced-results" key={site.id}>
    <strong>{site.name}</strong><p className="muted">{site.url}</p>
@@ -210,13 +210,13 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       })();}}>{locale==="pt-BR"?"Ativar instalação":locale==="en"?"Activate installation":"Activar instalación"}</button>
      </>}
     </div>:<label className="field"><span>{t.token}</span><input type="password" autoComplete="off" value={tokens[site.id]??""} onChange={e=>setTokens(old=>({...old,[site.id]:e.target.value}))}/></label>}
-    <label className="field"><span>{t.interval}</span><select value={site.interval} onChange={e=>update(sites.map(s=>s.id===site.id?{...s,interval:Number(e.target.value)}:s))}>
+    <label className="field"><span>{t.interval}</span><select value={site.interval} onChange={e=>{void update(sites.map(s=>s.id===site.id?{...s,interval:Number(e.target.value)}:s)).catch(()=>{});}}>
      <option value={30000}>{t.thirty}</option><option value={60000}>{t.one}</option>
      <option value={300000}>{t.five}</option><option value={0}>{t.only}</option>
     </select></label>
    </div>
    <label className="field"><input type="checkbox" checked={site.enabled} onChange={e=>{
-    if(e.target.checked)update(sites.map(s=>s.id===site.id?{...s,enabled:true}:s));
+    if(e.target.checked)void update(sites.map(s=>s.id===site.id?{...s,enabled:true}:s)).catch(()=>{});
     else void revoke(site);
    }}/> {t.consent}</label>
    <div className="advanced-actions">
