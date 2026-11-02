@@ -2,7 +2,8 @@ import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
 import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,computeCODFunnel,validateOrderEvent,minorAmount,fromMinor,type OrderEvent,type Workspace} from "@precify-financy/core";
 import {UIIcon} from "./UIIcon";
 import {useTranslator} from "./i18n";
-import {initializeNativeSnapshots,mirrorNativeSnapshot,readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
+import {readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
+import {nativeWrite,nativePrimary} from "./native-primary";
 
 /**
  * Business-scoped workspaces. The original "default" business uses the exact
@@ -100,8 +101,8 @@ async function findNativeDirectory(){
 }
 type Context={
  directory:BusinessDirectory;selectedId:string;current:Business|null;error:string|null;
- choose:(id:string)=>void;create:(name:string,website:string)=>string;
- rename:(id:string,name:string,website:string)=>void;
+ choose:(id:string)=>void;create:(name:string,website:string)=>Promise<string>;
+ rename:(id:string,name:string,website:string)=>Promise<void>;
  recover:()=>Promise<void>;
 };
 const ProfileContext=createContext<Context|null>(null);
@@ -118,35 +119,35 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
   if(id!==ALL_BUSINESSES&&!directory.businesses.some(b=>b.id===id))throw Error("Business not found");
   localStorage.setItem(ACTIVE,id);setSelectedId(id);
  }
- function update(next:BusinessDirectory){
+ async function update(next:BusinessDirectory){
   if(error)throw Error(error);
   const valid=validateBusinessDirectory(next);
   const before=localStorage.getItem(DIRECTORY);
   const content=JSON.stringify(valid);
-  localStorage.setItem(DIRECTORY,content);mirrorNativeSnapshot("business-directory",content,before,MAIN_BUSINESS);setDirectory(valid);
+  await nativeWrite("business-directory",MAIN_BUSINESS,content,before);setDirectory(valid);
  }
- function create(name:string,website:string){
+ async function create(name:string,website:string){
   if(directory.businesses.length>=40)throw Error("Too many businesses");
   const id=newId();
-  update({version:1,businesses:[...directory.businesses,{id,name:name.trim(),website:website.trim(),createdAt:new Date().toISOString()}]});
+  await update({version:1,businesses:[...directory.businesses,{id,name:name.trim(),website:website.trim(),createdAt:new Date().toISOString()}]});
   localStorage.setItem(ACTIVE,id);setSelectedId(id);return id;
  }
- function rename(id:string,name:string,website:string){
+ async function rename(id:string,name:string,website:string){
   const valid=directory.businesses.some(b=>b.id===id);
   if(!valid)throw Error("Business not found");
-  update({version:1,businesses:directory.businesses.map(b=>b.id===id?{...b,name:name.trim(),website:website.trim()}:b)});
+  await update({version:1,businesses:directory.businesses.map(b=>b.id===id?{...b,name:name.trim(),website:website.trim()}:b)});
  }
  async function recover(){
   const native=await findNativeDirectory();
   if(!native)throw Error("No SQLite business directory backup");
   if(!window.confirm("¿Restaurar la lista de negocios desde SQLite? No se borrarán los datos de productos."))return;
-  localStorage.setItem(DIRECTORY,JSON.stringify(native));setDirectory(native);setError(null);
+  await nativeWrite("business-directory",MAIN_BUSINESS,JSON.stringify(native),localStorage.getItem(DIRECTORY));setDirectory(native);setError(null);
   if(selectedId!==ALL_BUSINESSES&&!native.businesses.some(b=>b.id===selectedId)){setSelectedId(MAIN_BUSINESS);localStorage.setItem(ACTIVE,MAIN_BUSINESS);}
  }
  const current=directory.businesses.find(b=>b.id===selectedId)??null;
  const ctx={directory,selectedId,current,error,choose,create,rename,recover};
  setBusinessScope(selectedId);
- useEffect(()=>{void initializeNativeSnapshots().catch(e=>console.warn("Native SQLite bootstrap:",e));},[selectedId]);
+ // SQLite is loaded before React mounts. No mirror write-back from localStorage.
  useEffect(()=>{
   if(error)return;
   const listener=(e:StorageEvent)=>{
@@ -224,10 +225,10 @@ export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
  const [nativeDirectory,setNativeDirectory]=useState(false);
  useEffect(()=>{if(supportsDesktopSQLite())void findNativeDirectory().then(x=>setNativeDirectory(!!x)).catch(()=>{});},[]);
  function change(id:string){choose(id);onChange(id);setEditing(false);setRenameMode(false);}
- function submit(){
+ async function submit(){
   try{
-   if(renameMode){if(!current)throw Error("Select a business");rename(current.id,name,website);}
-   else {const id=create(name,website);onChange(id);}
+   if(renameMode){if(!current)throw Error("Select a business");await rename(current.id,name,website);}
+   else {const id=await create(name,website);onChange(id);}
    setName("");setWebsite("");setMessage("");setEditing(false);setRenameMode(false);
   }catch(e){setMessage(e instanceof Error?e.message:String(e));}
  }
@@ -246,7 +247,7 @@ export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
     <label>{t("Sitio HTTPS (opcional)")}<input maxLength={240} value={website} onChange={e=>setWebsite(e.target.value)} placeholder="https://tienda.example"/></label>
     {message&&<p role="alert" className="red">{message}</p>}
     {error&&<p role="alert" className="red">{error}</p>}
-    <div className="actions"><button className="secondary" onClick={()=>setEditing(false)}>{t("Cancelar")}</button><button className="primary" disabled={!!error||!name.trim()} onClick={submit}>{t(renameMode?"Guardar cambios":"Crear perfil")}</button></div>
+    <div className="actions"><button className="secondary" onClick={()=>setEditing(false)}>{t("Cancelar")}</button><button className="primary" disabled={!!error||!name.trim()} onClick={()=>{void submit();}}>{t(renameMode?"Guardar cambios":"Crear perfil")}</button></div>
    </div>}
  </div>;
 }
