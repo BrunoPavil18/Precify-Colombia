@@ -30,7 +30,7 @@ fn ipc_probe() -> tauri::ipc::Response {
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe, native_snapshots::desktop_snapshot_get, native_snapshots::desktop_snapshot_put])
+        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe, native_snapshots::desktop_snapshot_get, native_snapshots::desktop_snapshot_put, native_snapshots::desktop_snapshot_delete])
         .run(tauri::generate_context!())
         .expect("failed to run Precify Financy desktop");
 }

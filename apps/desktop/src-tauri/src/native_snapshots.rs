@@ -97,6 +97,20 @@ pub fn desktop_snapshot_put(app: tauri::AppHandle, business_id: String, kind: St
     let mut db = connection(app)?;
     store(&mut db, &business_id, &kind, &data, expected_revision)
 }
+/// Delete only one scoped snapshot, with optimistic revision protection.
+#[tauri::command]
+pub fn desktop_snapshot_delete(app: tauri::AppHandle, business_id: String, kind: String, expected_revision: i64) -> Result<(), String> {
+    if !valid_business(&business_id) || !valid_kind(&kind) || expected_revision < 1 {
+        return Err("Invalid snapshot delete".into());
+    }
+    let mut db = connection(app)?;
+    let tx = db.transaction_with_behavior(TransactionBehavior::Immediate).map_err(|e|e.to_string())?;
+    let n = tx.execute("DELETE FROM snapshots WHERE business_id=?1 AND kind=?2 AND revision=?3",
+        params![business_id,kind,expected_revision]).map_err(|e|e.to_string())?;
+    if n != 1 { return Err("Snapshot changed or absent; delete refused".into()); }
+    tx.commit().map_err(|e|e.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
