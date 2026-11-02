@@ -124,6 +124,31 @@ mod tests {
         assert!(validate_snapshot("default","workspace","[]").is_err());
     }
     #[test]
+    fn persisted_sqlite_survives_reopen_with_business_isolation_and_wal() {
+        let unique = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+        let path = std::env::temp_dir().join(format!("precify-financy-audit-{}-{}.db", std::process::id(), unique));
+        let business = format!("b_{}", "a".repeat(32));
+        {
+            let mut db = init_db(&path).unwrap();
+            assert_eq!(store(&mut db, "default", "workspace", "{\"items\":1}", None).unwrap(), 1);
+            assert_eq!(store(&mut db, &business, "workspace", "{\"items\":2}", None).unwrap(), 1);
+            assert_eq!(db.query_row("PRAGMA journal_mode", [], |r| r.get::<_,String>(0)).unwrap(), "wal");
+        }
+        {
+            let mut reopened = init_db(&path).unwrap();
+            assert_eq!(fetch(&reopened, "default", "workspace").unwrap().unwrap().data, "{\"items\":1}");
+            assert_eq!(fetch(&reopened, &business, "workspace").unwrap().unwrap().data, "{\"items\":2}");
+            assert!(store(&mut reopened, "default", "workspace", "{\"items\":3}", None).is_err());
+            assert_eq!(store(&mut reopened, "default", "workspace", "{\"items\":3}", Some(1)).unwrap(), 2);
+            let result: String = reopened.query_row("PRAGMA integrity_check", [], |r| r.get(0)).unwrap();
+            assert_eq!(result, "ok");
+        }
+        for ext in ["", "-wal", "-shm"] {
+            let _ = std::fs::remove_file(format!("{}{}", path.display(), ext));
+        }
+    }
+
+    #[test]
     fn snapshot_is_scoped_and_protected_by_revision() {
         let mut db = Connection::open_in_memory().unwrap();
         db.execute_batch("CREATE TABLE snapshots (business_id TEXT NOT NULL, kind TEXT NOT NULL, revision INTEGER NOT NULL, payload TEXT NOT NULL, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(business_id,kind));").unwrap();
