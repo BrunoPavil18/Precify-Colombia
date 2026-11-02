@@ -1,6 +1,7 @@
 //! Minimal desktop bridge. Financial calculations remain in the shared TypeScript core.
 //! Never expose tokens, privileged filesystem commands or arbitrary URL fetching over IPC.
 use serde::Serialize;
+mod native_snapshots;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,7 +30,7 @@ fn ipc_probe() -> tauri::ipc::Response {
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe])
+        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe, native_snapshots::desktop_snapshot_get, native_snapshots::desktop_snapshot_put])
         .run(tauri::generate_context!())
         .expect("failed to run Precify Colombia desktop");
 }
