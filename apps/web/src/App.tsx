@@ -292,6 +292,7 @@ export default function App(){
  const [reportSearch,setReportSearch]=useState("");
  const [reportOrder,setReportOrder]=useState<"contribution"|"margin"|"recent">("contribution");
  const [mobileNavOpen,setMobileNavOpen]=useState(false);
+ const [showAdvancedConnected,setShowAdvancedConnected]=useState(false);
  const [desktopRuntime,setDesktopRuntime]=useState<string|null>(null);
  const [binaryIpcReady,setBinaryIpcReady]=useState(false);
  useEffect(()=>{
@@ -583,7 +584,7 @@ export default function App(){
       </div>
      </details>)}</nav>
     </div>
-    <div className="sidebar-bottom"><span className="privacy-dot"/><span>{t(page==="conectado"?"Cuenta conectada opcional":"Sin cuenta · 100% local")}</span><small>{t("Open source · Apache 2.0")}</small></div>
+    <div className="sidebar-bottom"><span className="privacy-dot"/><span>{t("Sin cuenta · 100% local")}</span><small>{t("Open source · Apache 2.0")}</small></div>
    </aside>
    {mobileNavOpen&&<button aria-label={t("Cerrar menú")} className="mobile-nav-backdrop" onClick={()=>setMobileNavOpen(false)}/>}
    <div className="content-column">
@@ -710,8 +711,16 @@ export default function App(){
      {page==="cambio"&&<CurrencyLab/>}
      {page==="global"&&<GlobalPricingLab/>}
      {operationPages.includes(page)&&<OperationsLab key={page} products={workspace.products} initialTab={page==="panel-cod"?"dashboard":page==="cpa"?"matrix":page==="importar"?"import":page==="competidores"?"prices":"unified"}/>}
-     {page==="conectado"&&<ConnectedLab/>}
      <WebsiteSyncLab visible={page==="conectado"} />
+     {page==="conectado"&&<section className="optional-cloud-connections" aria-label={locale==="pt-BR"?"Serviços de conta avançados":locale==="en"?"Advanced account services":"Servicios de cuenta avanzados"}>
+      <button type="button" className="secondary optional-cloud-toggle" aria-expanded={showAdvancedConnected} aria-controls="optional-cloud-details" onClick={()=>setShowAdvancedConnected(value=>!value)}>
+       <UIIcon name="settings" size={18}/>
+       {locale==="pt-BR"?"Contas e organizações (opcional, avançado)":locale==="en"?"Accounts and organizations (optional, advanced)":"Cuentas y organizaciones (opcional, avanzado)"}
+       <UIIcon name={showAdvancedConnected?"chevron-up":"chevron-down"} size={18}/>
+      </button>
+      <p className="muted">{locale==="pt-BR"?"Este módulo antigo utiliza um servidor conectado separado. Não é necessário para conectar uma loja usando convites de instalação.":locale==="en"?"This older module uses a separate connected account server. It is not required to connect a store using device invitation codes.":"Este módulo anterior utiliza un servidor de cuentas separado. No hace falta para conectar una tienda con códigos de invitación por instalación."}</p>
+      <div id="optional-cloud-details">{showAdvancedConnected&&<ConnectedLab/>}</div>
+     </section>}
      {advancedPages.includes(page)&&<AdvancedLab key={page} initialPane={page==="marketing"?"campaign":page==="pum"?"pum":page==="consumer"?"consumer":page==="portfolio"?"portfolio":"cod"} initialProductId={activeId??""} workspace={workspace} onDirty={setAdvancedDirty}
       onSave={async (record:AdvancedSimulationRecord)=>{const ok=await commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
       onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))await commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}

@@ -78,7 +78,7 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
  const [cpa,setCPA]=useState(defaultCPA);
  const [benchmark,setBenchmark]=useState({product:"",competitor:"",currency:"COP",price:"0",source:"",observedAt:new Date().toISOString().slice(0,10)});
  useEffect(()=>{
-  const onChange=(e:StorageEvent)=>{if(e.key===KEY){setLocked(true);setNotice("Se detectaron cambios en otra pestaña. Exporta una copia y recarga antes de modificar.");}};
+  const onChange=(e:StorageEvent)=>{if(e.key===storageKey()){setLocked(true);setNotice("Se detectaron cambios en otra pestaña. Exporta una copia y recarga antes de modificar.");}};
   window.addEventListener("storage",onChange);return()=>window.removeEventListener("storage",onChange);
  },[]);
  async function commit(next:LocalOperations):Promise<boolean>{

@@ -15,27 +15,27 @@ const strings={
  title:"Sincronización con tiendas propias",description:"Cada tienda conserva sus datos en su propio servidor. Precify descarga cambios cuando está abierto y conectado.",
  add:"Añadir tienda",name:"Nombre de la tienda",url:"URL HTTPS de la tienda",token:"Token personal de lectura (solo esta sesión)",
  consent:"Permitir guardar datos de esta tienda en este dispositivo",manual:"Sincronizar ahora",remove:"Eliminar conexión y caché",
- last:"Última sincronización",pending:"Conecta una cuenta de lectura para comenzar.",never:"Nunca",ready:"Actualizado",running:"Sincronizando",error:"No se pudo sincronizar",inactive:"Sin autorización",offline:"Sin conexión",
+ last:"Última sincronización",pending:"Activa esta instalación con un código emitido por la tienda.",never:"Nunca",ready:"Actualizado",running:"Sincronizando",error:"No se pudo sincronizar",inactive:"Sin autorización",offline:"Sin conexión",
  interval:"Intervalo",one:"Cada minuto",thirty:"Cada 30 segundos",five:"Cada 5 minutos",only:"Solo manual",
- imported:"Cambios en la última actualización",rows:"Registros locales",paid:"Pedidos pagados",profit:"Resultado operacional",security:"No introduzcas claves administrativas ni secretos globales. El token no se guarda en disco; al volver a abrir la aplicación deberás autenticarte. La sincronización requiere que el sitio implemente la API de cambios del protocolo Precify v1.",
+ imported:"Cambios en la última actualización",rows:"Registros locales",paid:"Pedidos pagados",profit:"Resultado operacional",security:"Conexiones nuevas: protocolo v2. Cada instalación tiene su propia clave Ed25519, vinculada a una invitación de un solo uso emitida por la tienda. No introduzcas secretos administrativos. La tienda debe implementar la API v2 para activar y sincronizar.",
  fail:"No fue posible guardar el conector.",needsConsent:"Debes autorizar el guardado local antes de sincronizar."
  },
  "pt-BR":{
  title:"Sincronização com lojas próprias",description:"Cada loja mantém os dados no próprio servidor. O Precify recebe alterações quando está aberto e conectado.",
  add:"Adicionar loja",name:"Nome da loja",url:"URL HTTPS da loja",token:"Token pessoal de leitura (apenas nesta sessão)",
  consent:"Permitir guardar dados desta loja neste dispositivo",manual:"Sincronizar agora",remove:"Excluir conexão e cache",
- last:"Última sincronização",pending:"Conecte uma conta de leitura para começar.",never:"Nunca",ready:"Atualizado",running:"Sincronizando",error:"Falha na sincronização",inactive:"Sem autorização",offline:"Sem conexão",
+ last:"Última sincronização",pending:"Ative esta instalação com um código emitido pela loja.",never:"Nunca",ready:"Atualizado",running:"Sincronizando",error:"Falha na sincronização",inactive:"Sem autorização",offline:"Sem conexão",
  interval:"Intervalo",one:"A cada 1 minuto",thirty:"A cada 30 segundos",five:"A cada 5 minutos",only:"Somente manual",
- imported:"Alterações na última atualização",rows:"Registros locais",paid:"Pedidos pagos",profit:"Resultado operacional",security:"Não insira chaves administrativas nem segredos globais. O token não é salvo em disco; ao reabrir o aplicativo, será necessário autenticar-se. A loja precisa implementar a API de alterações do protocolo Precify v1.",
+ imported:"Alterações na última atualização",rows:"Registros locais",paid:"Pedidos pagos",profit:"Resultado operacional",security:"Novas conexões: protocolo v2. Cada instalação tem sua própria chave Ed25519, ativada por convite de uso único emitido pela loja. Não informe segredos administrativos. A loja precisa implementar a API v2 para ativação e sincronização.",
  fail:"Não foi possível salvar o conector.",needsConsent:"Autorize o armazenamento local para sincronizar."
  },
  en:{
  title:"Connect your own stores",description:"Each store keeps its data on its own server. Precify pulls changes while the app is open and connected.",
  add:"Add store",name:"Store name",url:"Store HTTPS URL",token:"Personal read-only token (this session only)",
  consent:"Allow this device to save data from this store",manual:"Sync now",remove:"Remove connection and cache",
- last:"Last synchronization",pending:"Connect a read-only account to begin.",never:"Never",ready:"Up to date",running:"Syncing",error:"Sync failed",inactive:"Not authorized",offline:"Offline",
+ last:"Last synchronization",pending:"Activate this installation using a code issued by the store.",never:"Never",ready:"Up to date",running:"Syncing",error:"Sync failed",inactive:"Not authorized",offline:"Offline",
  interval:"Interval",one:"Every minute",thirty:"Every 30 seconds",five:"Every 5 minutes",only:"Manual only",
- imported:"Changes received on last sync",rows:"Local records",paid:"Paid orders",profit:"Operational result",security:"Never enter admin API keys or global secrets. Tokens are not saved to disk; sign in again after reopening the app. The store must implement the Precify v1 change-feed API.",
+ imported:"Changes received on last sync",rows:"Local records",paid:"Paid orders",profit:"Operational result",security:"New connections use protocol v2. Each installation has its own Ed25519 key activated by a single-use invitation issued by the store. Never enter administrator secrets. The store must implement the v2 API for activation and synchronization.",
  fail:"Could not save connector.",needsConsent:"Authorize local storage before syncing."
  }
 } as const;
@@ -189,11 +189,22 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  return <section className="advanced-results website-sync-lab" style={{display:visible?undefined:"none"}}>
   <h3>{t.title}</h3><p className="muted">{t.description}</p>
   <p className="muted">{locale==="pt-BR"?"Cada código só ativa um computador. Remover a conexão local não revoga o dispositivo no servidor; revogue-o também no painel da loja.":locale==="en"?"Each code can activate only one installation. Removing the local connection does not revoke the device on the store server; revoke it from the store's admin panel.":"Cada código solo activa una instalación. Eliminar la conexión local no revoca el dispositivo en el servidor; revócalo también en la administración de la tienda."}</p>
+  <div className="connection-onboarding" role="note">
+   <strong>{locale==="pt-BR"?"Como conectar uma loja":locale==="en"?"How to connect a store":"Cómo conectar una tienda"}</strong>
+   <ol>
+    <li>{locale==="pt-BR"?"O administrador da loja habilita a API Precify v2 no próprio site e emite um convite de uso único.":locale==="en"?"The store administrator enables the Precify v2 API on the site and issues a single-use invitation.":"El administrador habilita la API Precify v2 en su sitio y emite una invitación de un solo uso."}</li>
+    <li>{locale==="pt-BR"?"Informe o nome e a URL HTTPS da loja aqui e clique em Adicionar loja.":locale==="en"?"Enter the store name and HTTPS URL here, then select Add store.":"Escribe el nombre y la URL HTTPS de la tienda y selecciona Añadir tienda."}</li>
+    <li>{locale==="pt-BR"?"Cole o convite no cartão da loja, ative esta instalação e autorize a sincronização.":locale==="en"?"Paste the invitation into the store card, activate this installation and authorize synchronization.":"Pega la invitación en la tarjeta de la tienda, activa la instalación y autoriza la sincronización."}</li>
+   </ol>
+   <p className="muted">{locale==="pt-BR"?"Enquanto o site não implementar essa API, você pode cadastrar a loja, mas não ativá-la ou receber pedidos reais. Nenhuma conta central do Precify é necessária.":locale==="en"?"Until the site implements this API, you can add it but cannot activate or receive real orders. No central Precify account is needed.":"Hasta que el sitio implemente esta API, puedes registrarlo, pero no activarlo ni recibir pedidos reales. No necesitas una cuenta central de Precify."}</p>
+   <a href="https://github.com/BrunoPavil18/Precify-Financy/blob/feat/precify-colombia-v2.1.0/docs/STORE_DEVICE_API_V2.md" target="_blank" rel="noopener noreferrer">{locale==="pt-BR"?"Guia técnico para integrar seu site":locale==="en"?"Technical guide for your site's integration":"Guía técnica para integrar tu sitio"}</a>
+  </div>
   <div className="advanced-grid">
    <label className="field"><span>{t.name}</span><input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label>
    <label className="field"><span>{t.url}</span><input type="url" placeholder="https://store.example" value={url} onChange={e=>setUrl(e.target.value)}/></label>
    <button className="secondary" onClick={()=>{void add();}}>{t.add}</button>
   </div>
+  {sites.length===0&&<p role="status" className="muted">{locale==="pt-BR"?"Nenhuma loja cadastrada neste negócio. Cadastre uma loja acima para iniciar o vínculo por dispositivo.":locale==="en"?"No store registered for this business. Add one above to start per-device enrollment.":"No hay tiendas registradas para este negocio. Añade una arriba para comenzar la activación por dispositivo."}</p>}
   {sites.map(site=><div className="advanced-results" key={site.id}>
    <strong>{site.name}</strong><p className="muted">{site.url}</p>
    <div className="advanced-grid">
@@ -238,6 +249,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
    </div>)}
   </div>)}
   <p className="muted"><small>{t.security}</small></p>
+  {sites.some(site=>site.mode!=="device-v2")&&<p className="muted"><small>{locale==="pt-BR"?"Conexões antigas com token v1 continuam disponíveis apenas para compatibilidade; não reutilize tokens administrativos.":locale==="en"?"Existing v1 bearer-token connections remain for compatibility only; never use administrator tokens.":"Las conexiones anteriores con token v1 permanecen solo por compatibilidad; no utilices tokens administrativos."}</small></p>}
   {notice&&<p role="alert">{notice}</p>}
  </section>;
 }

@@ -429,3 +429,15 @@ main>.main-card,main>.two-column,main>.advanced-results{animation:pc-reveal .25s
 .business-route-back{display:inline-flex;align-items:center;gap:10px;justify-self:start;margin-top:6px}
 .business-route-picker .business-card:focus-visible{outline:2px solid #7ce8b5;outline-offset:3px}
 @media(max-width:720px){.business-route-picker{padding-bottom:80px}.business-route-intro{gap:9px}}
+
+/* Device-first connection hub; connected-account mode is advanced, never a prerequisite. */
+.connection-onboarding{padding:18px 20px;margin:16px 0 20px;background:var(--pc-surface);border:1px solid var(--pc-border);border-radius:14px;}
+.connection-onboarding strong{display:block;color:var(--pc-text);margin-bottom:10px}
+.connection-onboarding ol{margin:8px 0 12px;padding-left:22px;line-height:1.65}
+.connection-onboarding li{padding-left:3px;margin:6px 0}
+.connection-onboarding a{color:var(--pc-accent,#87e5c0);text-decoration:underline;text-underline-offset:3px}
+.optional-cloud-connections{margin-top:20px;padding:18px;border:1px solid var(--pc-border);border-radius:14px}
+.optional-cloud-toggle{display:flex;align-items:center;gap:12px;justify-content:space-between;width:100%;text-align:left}
+.optional-cloud-connections>.muted{font-size:.9rem;margin:10px 0 0}
+.optional-cloud-connections .connected-lab{margin-top:18px}
+@media(max-width:680px){.connection-onboarding{padding:15px}.optional-cloud-connections{padding:13px}}

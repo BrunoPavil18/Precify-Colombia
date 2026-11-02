@@ -97,3 +97,20 @@ test("Windows site sync uses native SQLite in the same file as financial snapsho
  assert.ok(primary.includes('await bridge()("desktop_snapshot_put"'),"disk must commit before browser projection");
  assert.ok(primary.indexOf('await bridge()("desktop_snapshot_put"') < primary.indexOf('localStorage.setItem(storeKey(businessId,kind),data);',primary.indexOf('await bridge()("desktop_snapshot_put"')));
 });
+
+test("connection hub prioritizes v2 device enrollment over optional legacy accounts",()=>{
+ const website=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ const app=readFileSync(new URL("../src/App.tsx",import.meta.url),"utf8");
+ assert.ok(app.indexOf("<WebsiteSyncLab visible=")<app.indexOf("showAdvancedConnected&&<ConnectedLab/>"));
+ assert.ok(app.includes("aria-expanded={showAdvancedConnected}"));
+ assert.ok(website.includes("STORE_DEVICE_API_V2.md"));
+ assert.ok(website.includes("sites.length===0"));
+ for(const txt of ["Novas conexões: protocolo v2.","New connections use protocol v2.","Conexiones nuevas: protocolo v2."])
+  assert.ok(website.includes(txt),txt);
+ assert.ok(!website.includes("O token não é salvo em disco"));
+});
+test("operational cross-tab conflict watches the selected business-specific key",()=>{
+ const ops=readFileSync(new URL("../src/OperationsLab.tsx",import.meta.url),"utf8");
+ assert.ok(ops.includes("if(e.key===storageKey())"));
+ assert.ok(!ops.includes("if(e.key===KEY)"));
+});
