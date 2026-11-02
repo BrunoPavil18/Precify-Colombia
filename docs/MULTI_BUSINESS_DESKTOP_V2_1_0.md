@@ -44,3 +44,14 @@ O workflow `.github/workflows/precify-multi-business-candidate.yml` verifica mot
 - O ZIP é portátil **como executável**, mas seus dados persistentes não ficam dentro do diretório extraído: WebView2 e SQLite gravam no perfil de usuário do Windows. Migrar entre máquinas requer backup e restauração intencionais.
 - O Windows WebView2 não está embutido em modo fixed runtime neste pacote. Em máquinas sem o runtime, instalar offline antes de executar.
 - A visão financeira agregada é baseada em eventos locais declarados/importados, sem equivalência automática com extrato bancário nem deduplicação global certificada entre sites repetidos.
+
+## Homologação automatizada final — Windows e navegador
+
+**GitHub Actions:** https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41380518692 — **SUCESSO**, commit de aplicação `befd4d396d664574a47e3e59a17d8021a7a252d6`.
+
+- Web/Chromium: 108 testes Node (61 core, 22 web, 7 serviço, 18 integração), typecheck, lint, build e navegador real. Confirma 19 módulos, tema Jet Black, criação e isolamento de 2 negócios, visão geral com 2 produtos, barra inferior e drawer mobile sem overflow a 390 px, persistência após reload e nenhuma exceção JavaScript.
+- Rust/Windows: `cargo test` (SQLite CAS, isolamento e entradas inválidas), executável Tauri Windows x64 compilado.
+- Empacotamento: Inno Setup e ZIP gerados como artefatos, SHA-256 conferidos.
+  - Setup: `d19240c2d54da9d04651f60210de50609370a53f204efbde04bf3cf5109b7210`.
+  - ZIP: `18437c32a70b1c0f63bb43cf3509eebe90a9e24971326b8cbcedc6e2b6ca175f`.
+- **Ainda é necessário testar manualmente os perfis/SQLite no Windows**; o sucesso automático não substitui essa homologação. Sem publicação/merge/deploy; PR permanece draft.
