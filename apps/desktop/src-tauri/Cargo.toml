@@ -1,0 +1,29 @@
+[package]
+name = "precify-colombia-desktop"
+version = "2.1.0"
+description = "Precify Colombia desktop pilot"
+authors = ["Precify Colombia contributors"]
+edition = "2021"
+rust-version = "1.80"
+build = "build.rs"
+
+[lib]
+name = "precify_colombia_desktop"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "precify-colombia"
+path = "src/main.rs"
+
+[dependencies]
+tauri = { version = "2.12", default-features = true }
+serde = { version = "1", features = ["derive"] }
+
+[build-dependencies]
+tauri-build = { version = "2" }
+
+[profile.release]
+panic = "abort"
+strip = true
+lto = "thin"
+codegen-units = 1
