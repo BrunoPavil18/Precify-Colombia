@@ -1,7 +1,7 @@
 import {getBusinessScope,businessKey,MAIN_BUSINESS} from "./BusinessProfiles";
 import {STORE_KEY,MAX_BACKUP_BYTES,validateWorkspace} from "@precify-colombia/core";
 
-type Kind="workspace"|"operations"|"global-pricing"|"site-connectors";
+type Kind="workspace"|"operations"|"global-pricing"|"site-connectors"|"business-directory";
 type Snapshot={revision:number;data:string};
 type Bridge={core?:{invoke?:(command:string,args?:Record<string,unknown>)=>Promise<unknown>}};
 const native=()=>((window as Window&{__TAURI__?:Bridge}).__TAURI__?.core?.invoke);
@@ -34,7 +34,8 @@ export async function initializeNativeSnapshots():Promise<void>{
  const {GLOBAL_PRODUCTS_KEY}=await import("./global-storage");
  const mappings:[Kind,string][]=[
   ["workspace",STORE_KEY],["operations","precify-colombia:operations:v1"],
-  ["global-pricing",GLOBAL_PRODUCTS_KEY],["site-connectors","precify-colombia:site-owned-connectors:v1"]
+  ["global-pricing",GLOBAL_PRODUCTS_KEY],["site-connectors","precify-colombia:site-owned-connectors:v1"],
+  ["business-directory","precify-colombia:business-directory:v1"]
  ];
  const businessId=getBusinessScope();
  for(const [kind,key] of mappings){

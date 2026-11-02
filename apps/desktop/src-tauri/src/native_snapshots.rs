@@ -17,7 +17,7 @@ fn valid_business(value: &str) -> bool {
             && value[2..].bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase()))
 }
 fn valid_kind(value: &str) -> bool {
-    matches!(value, "workspace" | "operations" | "global-pricing" | "site-connectors")
+    matches!(value, "workspace" | "operations" | "global-pricing" | "site-connectors" | "business-directory")
 }
 fn validate_snapshot(business_id: &str, kind: &str, data: &str) -> Result<(), String> {
     if !valid_business(business_id) || !valid_kind(kind) {

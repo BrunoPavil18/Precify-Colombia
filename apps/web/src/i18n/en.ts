@@ -787,5 +787,6 @@ export const en: Record<string,string> = {
   "Cobrado neto": "Net collected",
   "Costos operativos informados": "Reported operational costs",
   "Resultado calculado de los eventos": "Event-based estimated result",
-  "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Some businesses have invalid operational data and were excluded from totals."
+  "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Some businesses have invalid operational data and were excluded from totals.",
+  "Recuperar perfiles SQLite": "Recover SQLite profiles"
 };

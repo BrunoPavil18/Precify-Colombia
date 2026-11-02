@@ -2,7 +2,7 @@ import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
 import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,computeCODFunnel,validateOrderEvent,minorAmount,fromMinor,type OrderEvent,type Workspace} from "@precify-colombia/core";
 import {UIIcon} from "./UIIcon";
 import {useTranslator} from "./i18n";
-import {initializeNativeSnapshots} from "./desktop-snapshots";
+import {initializeNativeSnapshots,mirrorNativeSnapshot,readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
 
 /**
  * Business-scoped workspaces. The original "default" business uses the exact
@@ -93,10 +93,16 @@ export function aggregateImportedBusinessData(ids:string[]){
   collected:fromMinor(d.collected,currency),costs:fromMinor(d.costs,currency),
   projected:fromMinor(d.projected,currency)})),failures};
 }
+/** Explicit recovery keeps existing browser records until the user approves replacement. */
+async function findNativeDirectory(){
+ const snap=await readNativeSnapshot("business-directory",MAIN_BUSINESS);
+ return snap?validateBusinessDirectory(JSON.parse(snap.data)):null;
+}
 type Context={
  directory:BusinessDirectory;selectedId:string;current:Business|null;error:string|null;
  choose:(id:string)=>void;create:(name:string,website:string)=>string;
  rename:(id:string,name:string,website:string)=>void;
+ recover:()=>Promise<void>;
 };
 const ProfileContext=createContext<Context|null>(null);
 export const useBusinesses=()=>{const ctx=useContext(ProfileContext);if(!ctx)throw Error("Business provider is missing");return ctx;};
@@ -115,7 +121,9 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
  function update(next:BusinessDirectory){
   if(error)throw Error(error);
   const valid=validateBusinessDirectory(next);
-  localStorage.setItem(DIRECTORY,JSON.stringify(valid));setDirectory(valid);
+  const before=localStorage.getItem(DIRECTORY);
+  const content=JSON.stringify(valid);
+  localStorage.setItem(DIRECTORY,content);mirrorNativeSnapshot("business-directory",content,before,MAIN_BUSINESS);setDirectory(valid);
  }
  function create(name:string,website:string){
   if(directory.businesses.length>=40)throw Error("Too many businesses");
@@ -128,8 +136,15 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
   if(!valid)throw Error("Business not found");
   update({version:1,businesses:directory.businesses.map(b=>b.id===id?{...b,name:name.trim(),website:website.trim()}:b)});
  }
+ async function recover(){
+  const native=await findNativeDirectory();
+  if(!native)throw Error("No SQLite business directory backup");
+  if(!window.confirm("¿Restaurar la lista de negocios desde SQLite? No se borrarán los datos de productos."))return;
+  localStorage.setItem(DIRECTORY,JSON.stringify(native));setDirectory(native);setError(null);
+  if(selectedId!==ALL_BUSINESSES&&!native.businesses.some(b=>b.id===selectedId)){setSelectedId(MAIN_BUSINESS);localStorage.setItem(ACTIVE,MAIN_BUSINESS);}
+ }
  const current=directory.businesses.find(b=>b.id===selectedId)??null;
- const ctx={directory,selectedId,current,error,choose,create,rename};
+ const ctx={directory,selectedId,current,error,choose,create,rename,recover};
  setBusinessScope(selectedId);
  useEffect(()=>{void initializeNativeSnapshots().catch(e=>console.warn("Native SQLite bootstrap:",e));},[selectedId]);
  useEffect(()=>{
@@ -177,11 +192,13 @@ export function BusinessPortfolio({onOpen}:{onOpen:()=>void}){
 }
 export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
  const t=useTranslator();
- const {directory,selectedId,choose,error,create,rename,current}=useBusinesses();
+ const {directory,selectedId,choose,error,create,rename,current,recover}=useBusinesses();
  const [editing,setEditing]=useState(false);
  const [name,setName]=useState("");const [website,setWebsite]=useState("");
  const [message,setMessage]=useState("");
  const [renameMode,setRenameMode]=useState(false);
+ const [nativeDirectory,setNativeDirectory]=useState(false);
+ useEffect(()=>{if(supportsDesktopSQLite())void findNativeDirectory().then(x=>setNativeDirectory(!!x)).catch(()=>{});},[]);
  function change(id:string){choose(id);onChange(id);setEditing(false);setRenameMode(false);}
  function submit(){
   try{
@@ -198,6 +215,7 @@ export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
   </select>
   <button className="business-add" title={t("Agregar negocio")} aria-label={t("Agregar negocio")} onClick={()=>{setEditing(v=>!v);setRenameMode(false);setName("");setWebsite("");setMessage("");}}><UIIcon name="more" size={17}/></button>
   {selectedId!==ALL_BUSINESSES&&<button className="business-edit" title={t("Editar nombre y sitio")} aria-label={t("Editar negocio")} onClick={()=>{setEditing(true);setRenameMode(true);setName(current?.name??"");setWebsite(current?.website??"");setMessage("");}}><UIIcon name="settings" size={16}/></button>}
+  {nativeDirectory&&<button className="business-edit" title={t("Recuperar perfiles SQLite")} aria-label={t("Recuperar perfiles SQLite")} onClick={()=>{void recover().catch(e=>setMessage(String(e)));}}><UIIcon name="data" size={16}/></button>}
   {editing&&<div className="business-editor" role="dialog" aria-label={t(renameMode?"Editar negocio":"Crear negocio")}>
     <h3>{t(renameMode?"Editar negocio":"Nuevo negocio")}</h3>
     <label>{t("Nombre")}<input maxLength={80} autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder={t("Mi tienda")}/></label>

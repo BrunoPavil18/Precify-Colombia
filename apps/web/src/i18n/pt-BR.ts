@@ -787,5 +787,6 @@ export const ptBR: Record<string,string> = {
   "Cobrado neto": "Recebido líquido",
   "Costos operativos informados": "Custos operacionais informados",
   "Resultado calculado de los eventos": "Resultado calculado dos eventos",
-  "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Alguns negócios possuem dados operacionais inválidos e não foram somados."
+  "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Alguns negócios possuem dados operacionais inválidos e não foram somados.",
+  "Recuperar perfiles SQLite": "Recuperar perfis SQLite"
 };
