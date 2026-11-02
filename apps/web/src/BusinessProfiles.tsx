@@ -1,6 +1,7 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
 import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,type Workspace} from "@precify-colombia/core";
 import {UIIcon} from "./UIIcon";
+import {useTranslator} from "./i18n";
 import {initializeNativeSnapshots} from "./desktop-snapshots";
 
 /**
@@ -107,29 +108,31 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
 
 /** Cross-business overview never guesses monetary totals from product simulation. */
 export function BusinessPortfolio({onOpen}:{onOpen:()=>void}){
+ const t=useTranslator();
  const {directory,choose}=useBusinesses();
  const overview=directory.businesses.map(b=>({business:b,workspace:loadBusinessWorkspace(b.id)}));
  const products=overview.reduce((n,b)=>n+(b.workspace.locked?0:b.workspace.state.products.length),0);
  const scenarios=overview.reduce((n,b)=>n+(b.workspace.locked?0:b.workspace.state.scenarios.length),0);
  return <section className="business-portfolio">
-   <div className="section-head"><div><span className="eyebrow">VISIÓN MULTINEGOCIO · DATOS LOCALES</span><h2>Todos los negocios</h2><p className="muted">Resumen de catálogos y simulaciones. No representa ventas o utilidad observadas.</p></div></div>
+   <div className="section-head"><div><span className="eyebrow">{t("VISIÓN MULTINEGOCIO · DATOS LOCALES")}</span><h2>{t("Todos los negocios")}</h2><p className="muted">{t("Resumen de catálogos y simulaciones. No representa ventas o utilidad observadas.")}</p></div></div>
    <div className="overview-stats">
-    <div className="overview-stat"><span>Negocios</span><strong>{overview.length}</strong><small>Perfiles independientes</small></div>
-    <div className="overview-stat"><span>Productos</span><strong>{products}</strong><small>En todos los catálogos COP</small></div>
-    <div className="overview-stat"><span>Escenarios</span><strong>{scenarios}</strong><small>Simulaciones declaradas</small></div>
-    <div className="overview-stat"><span>Ganancias verificadas</span><strong>—</strong><small>Sin registros financieros conciliados</small></div>
+    <div className="overview-stat"><span>{t("Negocios")}</span><strong>{overview.length}</strong><small>{t("Perfiles independientes")}</small></div>
+    <div className="overview-stat"><span>{t("Productos")}</span><strong>{products}</strong><small>{t("En todos los catálogos COP")}</small></div>
+    <div className="overview-stat"><span>{t("Escenarios")}</span><strong>{scenarios}</strong><small>{t("Simulaciones declaradas")}</small></div>
+    <div className="overview-stat"><span>{t("Ganancias verificadas")}</span><strong>—</strong><small>{t("Sin registros financieros conciliados")}</small></div>
    </div>
    <div className="business-card-grid">
     {overview.map(({business,workspace})=><button key={business.id} className="business-card" onClick={()=>{choose(business.id);onOpen();}}>
-     <UIIcon name="products" size={22}/><strong>{business.name}</strong><small>{business.website||"Sin sitio web asociado"}</small>
-     {workspace.locked?<span className="red">Datos dañados · no sobrescritos</span>:<span>{workspace.state.products.length} productos · {workspace.state.scenarios.length} escenarios</span>}
-     <span className="business-open">Abrir negocio →</span>
+     <UIIcon name="products" size={22}/><strong>{business.name}</strong><small>{business.website||t("Sin sitio web asociado")}</small>
+     {workspace.locked?<span className="red">{t("Datos dañados · no sobrescritos")}</span>:<span>{workspace.state.products.length} {t("productos")} · {workspace.state.scenarios.length} {t("escenarios")}</span>}
+     <span className="business-open">{t("Abrir negocio")} →</span>
     </button>)}
    </div>
-   <p className="muted">No se suman valores monetarios de diferentes monedas ni se presentan márgenes simulados como ganancias reales.</p>
+   <p className="muted">{t("No se suman valores monetarios de diferentes monedas ni se presentan márgenes simulados como ganancias reales.")}</p>
   </section>;
 }
 export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
+ const t=useTranslator();
  const {directory,selectedId,choose,error,create,rename,current}=useBusinesses();
  const [editing,setEditing]=useState(false);
  const [name,setName]=useState("");const [website,setWebsite]=useState("");
@@ -144,20 +147,20 @@ export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
   }catch(e){setMessage(e instanceof Error?e.message:String(e));}
  }
  return <div className="business-switcher">
-  <label htmlFor="business-select" className="business-label">NEGOCIO</label>
+  <label htmlFor="business-select" className="business-label">{t("NEGOCIO")}</label>
   <select id="business-select" value={selectedId} onChange={e=>change(e.target.value)}>
-   <option value={ALL_BUSINESSES}>Todos los negocios</option>
+   <option value={ALL_BUSINESSES}>{t("Todos los negocios")}</option>
    {directory.businesses.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
   </select>
-  <button className="business-add" title="Agregar negocio" aria-label="Agregar negocio" onClick={()=>{setEditing(v=>!v);setRenameMode(false);setName("");setWebsite("");setMessage("");}}><UIIcon name="more" size={17}/></button>
-  {selectedId!==ALL_BUSINESSES&&<button className="business-edit" title="Editar nombre y sitio" aria-label="Editar negocio" onClick={()=>{setEditing(true);setRenameMode(true);setName(current?.name??"");setWebsite(current?.website??"");setMessage("");}}><UIIcon name="settings" size={16}/></button>}
-  {editing&&<div className="business-editor" role="dialog" aria-label={renameMode?"Editar negocio":"Crear negocio"}>
-    <h3>{renameMode?"Editar negocio":"Nuevo negocio"}</h3>
-    <label>Nombre<input maxLength={80} autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Mi tienda"/></label>
-    <label>Sitio HTTPS (opcional)<input maxLength={240} value={website} onChange={e=>setWebsite(e.target.value)} placeholder="https://tienda.example"/></label>
+  <button className="business-add" title={t("Agregar negocio")} aria-label={t("Agregar negocio")} onClick={()=>{setEditing(v=>!v);setRenameMode(false);setName("");setWebsite("");setMessage("");}}><UIIcon name="more" size={17}/></button>
+  {selectedId!==ALL_BUSINESSES&&<button className="business-edit" title={t("Editar nombre y sitio")} aria-label={t("Editar negocio")} onClick={()=>{setEditing(true);setRenameMode(true);setName(current?.name??"");setWebsite(current?.website??"");setMessage("");}}><UIIcon name="settings" size={16}/></button>}
+  {editing&&<div className="business-editor" role="dialog" aria-label={t(renameMode?"Editar negocio":"Crear negocio")}>
+    <h3>{t(renameMode?"Editar negocio":"Nuevo negocio")}</h3>
+    <label>{t("Nombre")}<input maxLength={80} autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder={t("Mi tienda")}/></label>
+    <label>{t("Sitio HTTPS (opcional)")}<input maxLength={240} value={website} onChange={e=>setWebsite(e.target.value)} placeholder="https://tienda.example"/></label>
     {message&&<p role="alert" className="red">{message}</p>}
     {error&&<p role="alert" className="red">{error}</p>}
-    <div className="actions"><button className="secondary" onClick={()=>setEditing(false)}>Cancelar</button><button className="primary" disabled={!!error||!name.trim()} onClick={submit}>{renameMode?"Guardar cambios":"Crear perfil"}</button></div>
+    <div className="actions"><button className="secondary" onClick={()=>setEditing(false)}>{t("Cancelar")}</button><button className="primary" disabled={!!error||!name.trim()} onClick={submit}>{t(renameMode?"Guardar cambios":"Crear perfil")}</button></div>
    </div>}
  </div>;
 }
