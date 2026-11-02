@@ -1,0 +1,27 @@
+name: Precify Financy 2.1 connection UX audit
+on:
+  push:
+    branches: ['feat/precify-colombia-v2.1.0']
+    paths: ['.github/financy-ux-audit-trigger.txt']
+permissions:
+  contents: read
+jobs:
+  browser-and-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.34.7 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:2.1.0
+      - run: node scripts/browser-redesign-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: precify-financy-2.1-connections-ux-audit
+          path: artifacts/redesign/*.png
+          if-no-files-found: ignore
+          retention-days: 14
