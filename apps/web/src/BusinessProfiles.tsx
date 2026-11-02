@@ -1,5 +1,5 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
-import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,type Workspace} from "@precify-colombia/core";
+import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,computeCODFunnel,validateOrderEvent,minorAmount,fromMinor,type OrderEvent,type Workspace} from "@precify-colombia/core";
 import {UIIcon} from "./UIIcon";
 import {useTranslator} from "./i18n";
 import {initializeNativeSnapshots} from "./desktop-snapshots";
@@ -57,6 +57,42 @@ export function loadBusinessWorkspace(id:string):{state:Workspace;error:string|n
   return {state:validateWorkspace(JSON.parse(raw)),error:null,locked:false};
  }catch(e){return{state:emptyWorkspace(),locked:true,error:String(e)};}
 }
+/** Read-only aggregate of imported order events, NEVER a reconciled bank balance. */
+function importedByBusiness(businessId:string):{currency:string;orders:number;paid:number;collected:string;costs:string;projectedNet:string}[]{
+ const raw=localStorage.getItem(businessKey("precify-colombia:operations:v1",businessId));
+ if(!raw)return [];
+ if(raw.length>2_000_000)throw Error("Operations store too large");
+ const payload=JSON.parse(raw) as {version?:unknown;events?:unknown};
+ if(payload.version!==1||!Array.isArray(payload.events)||payload.events.length>10000)throw Error("Invalid operations");
+ const groups=new Map<string,OrderEvent[]>();
+ for(const input of payload.events){
+  const event=validateOrderEvent(input as OrderEvent);
+  const list=groups.get(event.currency)??[];list.push(event);groups.set(event.currency,list);
+ }
+ return [...groups].map(([currency,events])=>{
+  const r=computeCODFunnel(events);
+  return {currency,orders:r.orders,paid:r.paid,collected:r.netCollected,costs:r.incurredCosts,projectedNet:r.projectedNet};
+ });
+}
+export function aggregateImportedBusinessData(ids:string[]){
+ const map=new Map<string,{orders:number;paid:number;collected:bigint;costs:bigint;projected:bigint}>();
+ const failures:string[]=[];
+ for(const id of ids){
+  try{
+   for(const r of importedByBusiness(id)){
+    const group=map.get(r.currency)??{orders:0,paid:0,collected:0n,costs:0n,projected:0n};
+    group.orders+=r.orders;group.paid+=r.paid;
+    group.collected+=minorAmount(r.collected,r.currency);
+    group.costs+=minorAmount(r.costs,r.currency);
+    group.projected+=minorAmount(r.projectedNet,r.currency);
+    map.set(r.currency,group);
+   }
+  }catch{failures.push(id);}
+ }
+ return {rows:[...map].map(([currency,d])=>({currency,orders:d.orders,paid:d.paid,
+  collected:fromMinor(d.collected,currency),costs:fromMinor(d.costs,currency),
+  projected:fromMinor(d.projected,currency)})),failures};
+}
 type Context={
  directory:BusinessDirectory;selectedId:string;current:Business|null;error:string|null;
  choose:(id:string)=>void;create:(name:string,website:string)=>string;
@@ -113,6 +149,7 @@ export function BusinessPortfolio({onOpen}:{onOpen:()=>void}){
  const overview=directory.businesses.map(b=>({business:b,workspace:loadBusinessWorkspace(b.id)}));
  const products=overview.reduce((n,b)=>n+(b.workspace.locked?0:b.workspace.state.products.length),0);
  const scenarios=overview.reduce((n,b)=>n+(b.workspace.locked?0:b.workspace.state.scenarios.length),0);
+ const imports=useMemo(()=>aggregateImportedBusinessData(directory.businesses.map(b=>b.id)),[directory]);
  return <section className="business-portfolio">
    <div className="section-head"><div><span className="eyebrow">{t("VISIÓN MULTINEGOCIO · DATOS LOCALES")}</span><h2>{t("Todos los negocios")}</h2><p className="muted">{t("Resumen de catálogos y simulaciones. No representa ventas o utilidad observadas.")}</p></div></div>
    <div className="overview-stats">
@@ -121,6 +158,13 @@ export function BusinessPortfolio({onOpen}:{onOpen:()=>void}){
     <div className="overview-stat"><span>{t("Escenarios")}</span><strong>{scenarios}</strong><small>{t("Simulaciones declaradas")}</small></div>
     <div className="overview-stat"><span>{t("Ganancias verificadas")}</span><strong>—</strong><small>{t("Sin registros financieros conciliados")}</small></div>
    </div>
+   {imports.rows.length>0&&<section className="main-card"><span className="eyebrow">{t("DATOS IMPORTADOS · NO CONCILIADOS")}</span>
+    <h3>{t("Operaciones por moneda")}</h3><p className="muted">{t("Importes calculados de eventos declarados por las fuentes. No equivalen a saldo bancario, lucro contable ni auditoría independiente.")}</p>
+    <div className="overview-observed-grid">{imports.rows.map(row=><div className="overview-observed" key={row.currency}>
+     <strong>{row.currency}</strong><small>{t("Pedidos")}: {row.orders} · {t("Pagados")}: {row.paid}</small>
+     <span>{t("Cobrado neto")}: {row.collected}</span><span>{t("Costos operativos informados")}: {row.costs}</span><span>{t("Resultado calculado de los eventos")}: {row.projected}</span>
+    </div>)}</div></section>}
+   {imports.failures.length>0&&<p role="alert" className="red">{t("Algunos negocios tienen datos operativos inválidos y no fueron agregados.")}</p>}
    <div className="business-card-grid">
     {overview.map(({business,workspace})=><button key={business.id} className="business-card" onClick={()=>{choose(business.id);onOpen();}}>
      <UIIcon name="products" size={22}/><strong>{business.name}</strong><small>{business.website||t("Sin sitio web asociado")}</small>

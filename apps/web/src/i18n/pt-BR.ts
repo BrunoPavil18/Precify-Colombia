@@ -778,5 +778,14 @@ export const ptBR: Record<string,string> = {
   "No hay copia SQLite disponible para este negocio.": "Não há backup SQLite disponível para este negócio.",
   "La restauración desde SQLite sustituirá los productos y escenarios de este negocio. Descarga primero un respaldo de los datos actuales. ¿Continuar?": "A restauração pelo SQLite substituirá os produtos e cenários deste negócio. Baixe primeiro um backup dos dados atuais. Continuar?",
   "Instantánea SQLite restaurada y verificada.": "Snapshot SQLite restaurado e verificado.",
-  "Recuperar copia SQLite de este negocio": "Recuperar backup SQLite deste negócio"
+  "Recuperar copia SQLite de este negocio": "Recuperar backup SQLite deste negócio",
+  "DATOS IMPORTADOS · NO CONCILIADOS": "DADOS IMPORTADOS · NÃO CONCILIADOS",
+  "Operaciones por moneda": "Operações por moeda",
+  "Importes calculados de eventos declarados por las fuentes. No equivalen a saldo bancario, lucro contable ni auditoría independiente.": "Valores calculados com eventos declarados pelas fontes. Não equivalem a saldo bancário, lucro contábil nem auditoria independente.",
+  "Pedidos": "Pedidos",
+  "Pagados": "Pagos",
+  "Cobrado neto": "Recebido líquido",
+  "Costos operativos informados": "Custos operacionais informados",
+  "Resultado calculado de los eventos": "Resultado calculado dos eventos",
+  "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Alguns negócios possuem dados operacionais inválidos e não foram somados."
 };

@@ -778,5 +778,14 @@ export const en: Record<string,string> = {
   "No hay copia SQLite disponible para este negocio.": "No SQLite backup exists for this business.",
   "La restauración desde SQLite sustituirá los productos y escenarios de este negocio. Descarga primero un respaldo de los datos actuales. ¿Continuar?": "Restoring from SQLite will replace this business's products and scenarios. Download a backup of the current data first. Continue?",
   "Instantánea SQLite restaurada y verificada.": "SQLite snapshot restored and verified.",
-  "Recuperar copia SQLite de este negocio": "Recover this business from SQLite"
+  "Recuperar copia SQLite de este negocio": "Recover this business from SQLite",
+  "DATOS IMPORTADOS · NO CONCILIADOS": "IMPORTED DATA · NOT RECONCILED",
+  "Operaciones por moneda": "Operations by currency",
+  "Importes calculados de eventos declarados por las fuentes. No equivalen a saldo bancario, lucro contable ni auditoría independiente.": "Amounts computed from source-declared events. Not a bank balance, accounting profit, or independent audit.",
+  "Pedidos": "Orders",
+  "Pagados": "Paid",
+  "Cobrado neto": "Net collected",
+  "Costos operativos informados": "Reported operational costs",
+  "Resultado calculado de los eventos": "Event-based estimated result",
+  "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Some businesses have invalid operational data and were excluded from totals."
 };
