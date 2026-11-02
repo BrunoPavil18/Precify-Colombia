@@ -29,7 +29,7 @@ function displayAdvancedResult(key:string,value:string|number):string{
 
 export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod",initialProductId=""}:{
  initialPane?:Pane;initialProductId?:string;
- workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>boolean;
+ workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>Promise<boolean>;
  onDelete:(id:string)=>void;onDirty:(dirty:boolean)=>void
 }){
  const t=useTranslator();
@@ -62,7 +62,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod"
    kind:pane,productId:(pane==="cod"||pane==="campaign")?product?.id??null:null,
    at:new Date().toISOString(),label:pane+" · "+new Date().toLocaleDateString(),inputs
   };
-  if(onSave(record))onDirty(false);
+  if(await onSave(record))onDirty(false);
  }
  function load(record:AdvancedSimulationRecord){
   setPane(record.kind);

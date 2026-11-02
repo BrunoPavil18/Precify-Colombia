@@ -1,6 +1,6 @@
 import { STORE_KEY, MAX_BACKUP_BYTES, emptyWorkspace, validateWorkspace, type Workspace } from "@precify-financy/core";
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
-import {mirrorNativeSnapshot} from "./desktop-snapshots";
+import {nativeWrite} from "./native-primary";
 export const workspaceStorageKey=()=>businessKey(STORE_KEY,getBusinessScope());
 export type ReadResult={state:Workspace;locked:boolean;error:string|null};
 export function loadWorkspace():ReadResult {
@@ -14,7 +14,7 @@ export function loadWorkspace():ReadResult {
  }
 }
 /** Optimistic revision guard: refuse stale writes from another browser tab. */
-export function persistWorkspace(state:Workspace,expected?:Workspace):void {
+export async function persistWorkspace(state:Workspace,expected?:Workspace):Promise<void> {
  if(expected!==undefined){
   const raw=localStorage.getItem(workspaceStorageKey());
   if(raw===null)throw new Error("Conflicto entre pestañas: los datos cambiaron o fueron borrados. Actualiza y exporta una copia antes de continuar.");
@@ -27,8 +27,7 @@ export function persistWorkspace(state:Workspace,expected?:Workspace):void {
  const data=JSON.stringify(validateWorkspace(state));
  const before=localStorage.getItem(workspaceStorageKey());
  if(new TextEncoder().encode(data).length>MAX_BACKUP_BYTES)throw new Error("Límite local de 2 MB. Exporta un respaldo y reduce tu historial.");
- localStorage.setItem(workspaceStorageKey(),data);
- mirrorNativeSnapshot("workspace",data,before);
+ await nativeWrite("workspace",getBusinessScope(),data,before);
 }
 export function downloadFile(content:string,fileName:string,type:string):void {
  const blob=new Blob([content],{type});

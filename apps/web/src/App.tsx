@@ -17,6 +17,8 @@ import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type L
 import { downloadFile, loadWorkspace, persistWorkspace, workspaceStorageKey } from "./storage";
 import {useBusinesses,ALL_BUSINESSES,BusinessPortfolio,BusinessChooser,BusinessRoutePicker} from "./BusinessProfiles";
 import {readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
+import {nativeRemove} from "./native-primary";
+import {getBusinessScope} from "./BusinessProfiles";
 
 type Page="inicio"|"calculadora"|"productos"|"escenarios"|"metas"|"pum"|"consumer"|"portfolio"|"global"|"panel-cod"|"cod"|"marketing"|"cpa"|"operaciones"|"importar"|"informes"|"competidores"|"conectado"|"cambio"|"datos"|"avanzado";
 type NavItem={id:Page;icon:string;label:string;description:string};
@@ -295,7 +297,7 @@ export default function App(){
    if(!native){setNotice(t("No hay copia SQLite disponible para este negocio."));return;}
    const valid=validateWorkspace(JSON.parse(native.data));
    if(!(await askConfirmation(t("La restauración desde SQLite sustituirá los productos y escenarios de este negocio. Descarga primero un respaldo de los datos actuales. ¿Continuar?"))))return;
-   persistWorkspace(valid,wasStored.current&&!locked?workspace:undefined);
+   await persistWorkspace(valid,wasStored.current&&!locked?workspace:undefined);
    wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setEditorRevision(n=>n+1);
    setNotice(t("Instantánea SQLite restaurada y verificada."));
   }catch(e){setNotice("SQLite: "+String(e));}
@@ -417,12 +419,12 @@ export default function App(){
   if(goalDirty&&!(await askConfirmation(t("Hay cambios sin guardar en Metas. ¿Descartarlos para cambiar de producto?"))))return;
   setGoalProductId(id);resetGoalDraft();
  }
- function saveGoalChanges(){
+ async function saveGoalChanges(){
   if(!goalProduct||!goalInput)return;
   if(goalMoneyUnvalidated){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(goalInput);}catch(e){setNotice("Corrige los campos: "+String(e));return;}
   const now=new Date().toISOString();
-  const ok=commit(w=>({
+  const ok=await commit(w=>({
    ...w,
    products:w.products.map(p=>p.id!==goalProduct.id?p:{
     ...p,updatedAt:now,input:{...p.input,monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits}
@@ -470,11 +472,11 @@ export default function App(){
   const selected=workspace.products.find(p=>p.id===id);
   if(selected){setActiveId(selected.id);setDraft({...selected.input});}
  }
- function commit(change:(prior:Workspace)=>Workspace){
+ async function commit(change:(prior:Workspace)=>Workspace):Promise<boolean>{
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
    const next=validateWorkspace({...change(workspace),updatedAt:new Date().toISOString()});
-   persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
+   await persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice("Datos confirmados en SQLite local.");return true;
   }catch(e){setNotice("No se pudieron guardar los cambios: "+(e instanceof Error?e.message:String(e)));return false;}
  }
  const result=useMemo(()=>{
@@ -486,12 +488,12 @@ export default function App(){
    return {breakdown,suggestion,limit,error:null as string|null};
   }catch(e){return {breakdown:null,suggestion:null,limit:null,error:String(e instanceof Error?e.message:e)};}
  },[draft]);
- function saveProduct(){
+ async function saveProduct(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Corrige los campos: "+String(e));return;}
   const now=new Date().toISOString(),id=activeId??makeId();
   const exists=workspace.products.some(p=>p.id===id);
-  const ok=commit(w=>{
+  const ok=await commit(w=>{
    const p:Product={id,createdAt:w.products.find(p=>p.id===id)?.createdAt??now,updatedAt:now,input:{...draft}};
    return {...w,products:exists?w.products.map(row=>row.id===id?p:row):[...w.products,p],
     history:[...w.history,{id:makeId(),productId:id,at:now,action:exists?"Actualización":"Creación",snapshot:{...draft}}].slice(-3000)};
@@ -502,7 +504,7 @@ export default function App(){
  async function duplicateProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos antes de duplicar?"))))return;setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  async function deleteProduct(p:Product){
   if(!(await askConfirmation(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos."))))return;
-  const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id),advancedSimulations:w.advancedSimulations.filter(x=>x.productId!==p.id)}));
+  const ok=await commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id),advancedSimulations:w.advancedSimulations.filter(x=>x.productId!==p.id)}));
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  async function createScenarios(){
@@ -514,28 +516,28 @@ export default function App(){
    .filter(template=>!existing.some(s=>s.title===template.name))
    .map(template=>({id:makeId(),productId:product.id,title:template.name,note:template.note,values:{...template.values}}));
   if(!presets.length){setNotice("Este producto ya tiene los tres escenarios. Selecciona uno para editarlo.");return;}
-  if(commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){
+  if(await commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){
    const first=presets.find(p=>p.title==="Esperado")??presets[0];
    if(first){setScenarioId(first.id);setActiveId(product.id);setScenarioProductId(product.id);
     setDraft({...first.values});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}
    setPage("escenarios");
   }
  }
- function saveScenario(){
+ async function saveScenario(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   if(!scenarioId||!activeId){setNotice("Selecciona un escenario vinculado a un producto.");return;}
   try{validateInput(draft);}catch(e){setNotice("Escenario inválido: "+String(e));return;}
-  if(commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
+  if(await commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
  }
  async function openScenario(s:SavedScenario){
   if(scenarioId!==s.id&&scenarioId&&hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos y abrir otro escenario?"))))return;
   setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setScenarioProductId(s.productId);
   setDraft({...s.values});setEditorRevision(n=>n+1);setPage("escenarios");
  }
- function saveProfile(){
+ async function saveProfile(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Perfil inválido: "+String(e));return;}
-  commit(w=>({...w,profiles:[...w.profiles,{id:makeId(),name:draft.name+" · configuración",values:{...draft}}]}));
+  await commit(w=>({...w,profiles:[...w.profiles,{id:makeId(),name:draft.name+" · configuración",values:{...draft}}]}));
  }
  async function restoreProfile(id:string){
   const profile=workspace.profiles.find(p=>p.id===id);
@@ -554,7 +556,7 @@ export default function App(){
  }
  async function reset(){
   if(!(await askConfirmation(t("¿Borrar DEFINITIVAMENTE los datos de Precify Financy almacenados en este navegador? Haz una copia de seguridad antes."))))return;
-  try{localStorage.removeItem(workspaceStorageKey());wasStored.current=false;setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
+  try{await nativeRemove("workspace",getBusinessScope());wasStored.current=false;setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
   catch(e){setNotice("No se pudieron borrar los datos: "+String(e));}
  }
  function rawBackup(){
@@ -661,7 +663,7 @@ export default function App(){
           <button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>
           <button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("¿Descartar los cambios no guardados antes de duplicar?"))))return;commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
           <button className="primary" onClick={saveScenario}>{t("Guardar escenario")}</button>
-          <button className="danger-link" onClick={async ()=>{if(await askConfirmation(t("¿Eliminar este escenario?"))&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
+          <button className="danger-link" onClick={async ()=>{if(await askConfirmation(t("¿Eliminar este escenario?"))&&await commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
          </div></div>
         <div className="scenario-preview" aria-live="polite">
          <span className="eyebrow">{t("VISTA PREVIA DE ESTE ESCENARIO · AÚN SIN GUARDAR")}</span>
@@ -730,7 +732,7 @@ export default function App(){
      {page==="conectado"&&<ConnectedLab/>}
      <WebsiteSyncLab visible={page==="conectado"} />
      {advancedPages.includes(page)&&<AdvancedLab key={page} initialPane={page==="marketing"?"campaign":page==="pum"?"pum":page==="consumer"?"consumer":page==="portfolio"?"portfolio":"cod"} initialProductId={activeId??""} workspace={workspace} onDirty={setAdvancedDirty}
-      onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
+      onSave={async (record:AdvancedSimulationRecord)=>{const ok=await commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
       onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t(reportOrder==="margin"?"Ranking por margen":"Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
