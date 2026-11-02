@@ -78,8 +78,16 @@ try{
   await nav(label,title);
   if(label==="Conexiones"){
    await until(()=>evaluate('!!document.querySelector(".connection-onboarding")'));
-   const check=await evaluate('({device:!!document.querySelector(".website-sync-lab"),legacy:!!document.querySelector(".connected-lab"),advanced:document.querySelector(".optional-cloud-toggle")?.getAttribute("aria-expanded"),help:!!document.querySelector(".connection-onboarding a[href*=STORE_DEVICE_API_V2]")})');
+   const check=await evaluate('({device:!!document.querySelector(".website-sync-lab"),legacy:!!document.querySelector(".connected-lab"),advanced:document.querySelector(".optional-cloud-toggle")?.getAttribute("aria-expanded"),help:!!document.querySelector(".connection-onboarding button[aria-controls=precify-site-integration-guide]")})');
    if(!check.device||check.legacy||check.advanced!=="false"||!check.help)throw Error("Connection onboarding/legacy separation regression: "+JSON.stringify(check));
+   // The in-app manual must work in Windows WebView2 even without an external browser opener.
+   await evaluate('document.querySelector(".connection-onboarding button[aria-controls=precify-site-integration-guide]").click()');
+   await until(()=>evaluate('!!document.querySelector("#precify-site-integration-guide")'));
+   const guide=await evaluate('({expanded:document.querySelector(".connection-onboarding button[aria-controls=precify-site-integration-guide]")?.getAttribute("aria-expanded"),endpoints:document.querySelector("#precify-site-integration-guide pre")?.textContent,docs:!!document.querySelector("#precify-site-integration-guide a[href*=STORE_DEVICE_API_V2]")})');
+   if(guide.expanded!=="true"||!guide.endpoints.includes("/precify/v2/activate")||!guide.endpoints.includes("/precify/v2/changes")||!guide.docs)throw Error("In-app integration guide is not usable: "+JSON.stringify(guide));
+   await shot("desktop-conexiones-inline-manual.png");
+   await evaluate('document.querySelector(".connection-onboarding button[aria-controls=precify-site-integration-guide]").click()');
+   if(await evaluate('!!document.querySelector("#precify-site-integration-guide")'))throw Error("Integration guide did not close");
    await shot("desktop-conexiones-device-first.png");
    await evaluate('document.querySelector(".optional-cloud-toggle").click()');
    await until(()=>evaluate('!!document.querySelector(".connected-lab")'));
