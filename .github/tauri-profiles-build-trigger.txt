@@ -1,1 +1,3 @@
-Build profile SQLite candidate at da64f9e70a58e7b4c8ca843ce143268b6633834b
+Final multi-business candidate validation after native directory backup, operational totals, pinned sync cache and mobile overflow guard.
+Code parent: 75f9e6533bb4eba48b919d8c0f981a32c5a1d525
+Actions: TypeScript tests, browser end-to-end, Rust SQLite tests, Inno setup and ZIP.
