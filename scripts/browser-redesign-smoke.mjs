@@ -89,6 +89,32 @@ try{
  const savedCount=await evaluate('document.querySelector(".overview-stat strong")?.textContent.trim()');
  if(savedCount!=="1")throw Error("Saved product was not preserved after browser reload");
  await shot("overview-with-product.png");
+
+ // Business isolation regression: new profile must not inherit the first business's product.
+ await evaluate('document.querySelector(".business-add").click()');
+ const wrote=await evaluate('(()=>{const input=document.querySelector(".business-editor input");if(!input)return false;const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set;set.call(input,"Tienda 2");input.dispatchEvent(new Event("input",{bubbles:true}));return true;})()');
+ if(!wrote)throw Error("Business create editor missing");
+ await until(()=>evaluate('!document.querySelector(".business-editor button.primary")?.disabled'));
+ await evaluate('document.querySelector(".business-editor button.primary").click()');
+ await until(()=>evaluate('document.querySelector("#business-select")?.value.startsWith("b_")'));
+ const fresh=await evaluate('document.querySelector(".overview-stat strong")?.textContent.trim()');
+ if(fresh!=="0")throw Error("New business leaked the default catalog: "+fresh);
+ await nav("Calculadora","Calculadora de precios");
+ const saveSecond=await evaluate('(()=>{const b=[...document.querySelectorAll(".action-strip button")].find(x=>x.textContent.includes("Guardar producto"));if(!b)return false;b.click();return true})()');
+ if(!saveSecond)throw Error("Cannot save in second business");
+ await until(()=>evaluate('document.querySelectorAll(".product-card").length===1'));
+ await evaluate('(()=>{const s=document.querySelector("#business-select");s.value="default";s.dispatchEvent(new Event("change",{bubbles:true}))})()');
+ await until(()=>evaluate('document.querySelector("#business-select")?.value==="default"'));
+ const originalCount=await evaluate('document.querySelector(".overview-stat strong")?.textContent.trim()');
+ if(originalCount!=="1")throw Error("Original business modified during second profile test");
+ await evaluate('(()=>{const s=document.querySelector("#business-select");s.value="all";s.dispatchEvent(new Event("change",{bubbles:true}))})()');
+ await until(()=>evaluate('!!document.querySelector(".business-portfolio")'));
+ const summary=await evaluate('([...document.querySelectorAll(".business-portfolio .overview-stat strong")].map(x=>x.textContent.trim()))');
+ if(summary[0]!=="2"||summary[1]!=="2")throw Error("Multi-business summary incorrect: "+JSON.stringify(summary));
+ await shot("business-portfolio-desktop.png");
+ await evaluate('(()=>{const s=document.querySelector("#business-select");s.value="default";s.dispatchEvent(new Event("change",{bubbles:true}))})()');
+ await until(()=>evaluate('!!document.querySelector(".overview-page")'));
+
  const home=await evaluate('(()=>{const item=[...document.querySelectorAll(".nav-link")].find(x=>x.textContent.includes("Visión general"));if(!item)return false;item.click();return true})()');
  if(!home)throw Error("Dashboard entry missing");
  await until(()=>evaluate('!!document.querySelector(".overview-page")'));
@@ -105,7 +131,7 @@ try{
  if(await evaluate('document.querySelector(".sidebar").classList.contains("mobile-open")'))throw Error("Mobile sidebar did not close after navigation");
  await shot("calculator-mobile.png");
  if(errors.length)throw Error("Unhandled React/JS errors: "+JSON.stringify(errors.slice(0,4)));
- console.log("PASS: Jet Black, normal animation, 19 routed tools, real mobile drawer, no JS exceptions");
+ console.log("PASS: Jet Black, normal animation, 19 routed tools, scoped business isolation and real mobile drawer, no JS exceptions");
 }finally{
  try{ws?.close();}catch{}
  try{child?.kill("SIGKILL");}catch{}
