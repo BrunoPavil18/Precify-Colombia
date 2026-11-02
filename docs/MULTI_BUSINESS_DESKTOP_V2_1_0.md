@@ -1,5 +1,5 @@
 # Precify Financy 2.1 — candidata desktop multinégocio
-**Data:** 2026-11-02 · **Ramo:** `feat/precify-financy-v2.1.0` · **PR #4 (draft)**
+**Data:** 2026-11-02 · **Ramo:** `feat/precify-colombia-v2.1.0` · **PR #4 (draft)**
 
 ## Objetivos e resultado
 
@@ -47,7 +47,7 @@ O workflow `.github/workflows/precify-multi-business-candidate.yml` verifica mot
 
 ## Homologação automatizada final — Windows e navegador
 
-**GitHub Actions:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41380518692 — **SUCESSO**, commit de aplicação `befd4d396d664574a47e3e59a17d8021a7a252d6`.
+**GitHub Actions:** https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41380518692 — **SUCESSO**, commit de aplicação `befd4d396d664574a47e3e59a17d8021a7a252d6`.
 
 - Web/Chromium: 108 testes Node (61 core, 22 web, 7 serviço, 18 integração), typecheck, lint, build e navegador real. Confirma 19 módulos, tema Jet Black, criação e isolamento de 2 negócios, visão geral com 2 produtos, barra inferior e drawer mobile sem overflow a 390 px, persistência após reload e nenhuma exceção JavaScript.
 - Rust/Windows: `cargo test` (SQLite CAS, isolamento e entradas inválidas), executável Tauri Windows x64 compilado.
@@ -64,3 +64,9 @@ A primeira candidata aqui documentada usava SQLite apenas como espelho. **A entr
 Os dados internos de negócios, operação, preços ISO e configurações de conexão ficam no SQLite. O feed de eventos importados e chaves privadas de dispositivos ainda usam IndexedDB como cache e cofre de `CryptoKey`, respectivamente; esse é um componente técnico separado e não um segundo banco financeiro autoritativo para dados editáveis.
 
 A instalação tem uma API v2 assinada e convites por dispositivo, com testes de replay e revogação. Integração de loja real e homologação definitiva Vezura são atividades separadas. Revisão geral em `docs/FINANCY_FINAL_AUDIT.md`.
+
+## Última validação consolidada (02/11/2026)
+
+A implementação Windows agora usa um único banco `precify-financy-local.db` para os snapshots financeiros e o feed SQLite do site, com transação e cursor atômicos. `apps/web/src/website-sync-db.ts` encaminha as operações ao Rust quando detecta o Tauri; a versão PWA utiliza IndexedDB. A identidade criptográfica Ed25519 continua no cofre WebCrypto/IndexedDB, não no banco financeiro.
+
+Última execução de código: [GitHub Actions #41395935905](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41395935905) — SUCESSO. 113 testes JS, 3 testes Rust, build Windows e Inno/ZIP. Auditoria de dependências: [#41396477317](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41396477317), sem vulnerabilidades conhecidas. [Auditoria final](FINANCY_FINAL_AUDIT.md).

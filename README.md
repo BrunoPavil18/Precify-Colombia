@@ -1,4 +1,4 @@
-# Precify Financy 🇨🇴
+# Precify Financy
 
 
 
@@ -6,10 +6,12 @@
 
 **Desarrollo v2.1.0 (NO publicado) · Última versión estable: 2.0.1 · Apache License 2.0**
 
+**Auditoría final de la candidata 2.1.0:** [Precify Financy — verificación consolidada](docs/FINANCY_FINAL_AUDIT.md). Motor TS/BigInt, SQLite principal en Windows y acceso por instalación con clave Ed25519. La validación con una tienda real aún depende de su servidor.
+
 
 ## Rediseño dark-first 2.1.0 — entrega consolidada (candidata)
 
-Se implementó un panel con base **Jet Black `#121212`**, navegación organizada por tareas, nueva **Visión general**, acceso directo a COD/CAC/CPA/PUM, catálogo con búsqueda, informes con filtros, microanimaciones normales por defecto y menú móvil. Se preservaron los cálculos y el funcionamiento local/offline. **108 pruebas automatizadas** y aceptación visual en Chromium (19 rutas, guardado y recarga) superadas. [Informe de entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidencia de CI](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932). Esta rama sigue sin publicarse y no modifica Vezura.
+Se implementó un panel con base **Jet Black `#121212`**, navegación organizada por tareas, nueva **Visión general**, acceso directo a COD/CAC/CPA/PUM, catálogo con búsqueda, informes con filtros, microanimaciones normales por defecto y menú móvil. Se preservaron los cálculos y el funcionamiento local/offline. **113 pruebas automatizadas** y aceptación visual en Chromium (19 rutas, guardado y recarga) superadas. [Informe de entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidencia de CI](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41395935905). Esta rama sigue sin publicarse y no modifica Vezura.
 
 ## Desarrollo de 2.1.0 — todavía sin homologar
 

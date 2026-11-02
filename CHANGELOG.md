@@ -2,7 +2,7 @@
 
 ## [2.1.0] — IN DEVELOPMENT / UNRELEASED
 
-**The following items have been committed to the feature branch but have not passed the consolidated build, tests, browser QA, external Meta review or real database acceptance. They are NOT published in a release.**
+**Precify Financy 2.1.0 candidate:** automated financial, browser, Rust/SQLite and Windows packaging gates have passed. Dependencies were audited with no known advisories at moderate severity or higher on 2026-11-02. Live merchant integration and Meta review remain unverified. Not published in a release. [Final candidate audit](docs/FINANCY_FINAL_AUDIT.md).
 
 ### Financial intelligence
 - Native ISO minor-unit multi-currency pricing and exact BigInt quote conversion, with no silent changes to the 2.0.1 COP-only API.
