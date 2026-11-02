@@ -284,6 +284,23 @@ export default function App(){
  const [reportSearch,setReportSearch]=useState("");
  const [reportOrder,setReportOrder]=useState<"contribution"|"margin"|"recent">("contribution");
  const [mobileNavOpen,setMobileNavOpen]=useState(false);
+ const [desktopRuntime,setDesktopRuntime]=useState<string|null>(null);
+ const [binaryIpcReady,setBinaryIpcReady]=useState(false);
+ useEffect(()=>{
+  type Bridge={core?:{invoke?:(command:string)=>Promise<unknown>}};
+  const api=(window as Window&{__TAURI__?:Bridge}).__TAURI__?.core?.invoke;
+  if(!api)return;
+  let live=true;
+  void Promise.all([api("desktop_runtime"),api("ipc_probe")]).then(([info,raw])=>{
+   if(!live)return;
+   const record=info as {platform?:unknown;architecture?:unknown;appVersion?:unknown;runtime?:unknown};
+   if(record.runtime==="tauri-v2"&&typeof record.platform==="string"&&typeof record.architecture==="string"){
+    setDesktopRuntime(record.platform+" "+record.architecture+" · "+String(record.appVersion??""));
+   }
+   setBinaryIpcReady(raw instanceof ArrayBuffer&&new TextDecoder().decode(raw)==="precify-ipc-v2");
+  }).catch(()=>{/* Native bridge status is optional in web preview. */});
+  return()=>{live=false;};
+ },[]);
  const [draft,setDraft]=useState<PriceInput>(()=>({...EMPTY_INPUT,name:translate(readLocale(),"Producto ejemplo")}));
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
@@ -543,6 +560,7 @@ export default function App(){
     <a className="brand" href="#" onClick={e=>{e.preventDefault();void navigate("inicio");}} aria-label={t("Precify Colombia, inicio")}>
      <span className="brand-mark" aria-hidden="true">P<span>₵</span></span><span><strong>precify<span className="brand-accent">.</span></strong><small>COLOMBIA</small></span>
     </a>
+    <button type="button" className="mobile-close" onClick={()=>setMobileNavOpen(false)} aria-label={t("Cerrar menú")}><UIIcon name="close" size={20}/></button>
     <div className="sidebar-nav-scroll">
      <nav aria-label={t("Navegación principal")}>{navSections.map((group,i)=><details key={group.name} className="nav-group" open={group.items.some(item=>item.id===page)||i<2?true:undefined}>
       <summary className="nav-group-title">{t(group.name)} <UIIcon name="chevron" size={15}/></summary>
@@ -555,7 +573,7 @@ export default function App(){
    <div className="content-column">
     <header className="topbar">
      <div className="topbar-location"><button className="menu-toggle" aria-label={t("Abrir menú")} onClick={()=>setMobileNavOpen(v=>!v)} aria-expanded={mobileNavOpen}><UIIcon name="menu"/></button><div className="breadcrumb">PRECIFY <span>/</span> <strong>{t(titleOf(page))}</strong></div></div>
-     <div className="topbar-right"><span className="currency-pill">{["cambio","operaciones","global","panel-cod","conectado"].includes(page)?"ISO / COP":"COP"}</span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> {t("LOCAL")}</span><span className="version-pill">v2.1</span></div>
+     <div className="topbar-right"><span className="currency-pill">{["cambio","operaciones","global","panel-cod","conectado"].includes(page)?"ISO / COP":"COP"}</span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> {t("LOCAL")}</span>{desktopRuntime&&<span className="desktop-chip" title={desktopRuntime+" · IPC "+(binaryIpcReady?"ArrayBuffer OK":"indisponível")}>APP WINDOWS <span aria-hidden="true">●</span></span>}<span className="version-pill">v2.1</span></div>
     </header>
     <main id="main-content">
      {page!=="inicio"&&<div className="page-heading"><div><div className="eyebrow">{t("ESPACIO DE TRABAJO")} <span className="green-line"/> {t("DATOS LOCALES / OPCIONALES")}</div><h1>{t(pageTitles[page].title)}</h1><p>{t(pageTitles[page].description)}</p></div></div>}

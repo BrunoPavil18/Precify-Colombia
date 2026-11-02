@@ -10,7 +10,7 @@ const embedded=new URL(window.location.href).searchParams.get("embed")==="1";
 createRoot(root).render(<React.StrictMode>{embedded?<EmbedCalculator/>:<App/>}</React.StrictMode>);
 
 // Registration occurs only in production. Updates are not activated without a user choice.
-if(!embedded&&import.meta.env.PROD&&"serviceWorker" in navigator){
+if(!embedded&&import.meta.env.PROD&&!("__TAURI_INTERNALS__" in window)&&"serviceWorker" in navigator){
  window.addEventListener("load",()=>{
   navigator.serviceWorker.register("./sw.js").then(registration=>{
    const notify=()=>window.dispatchEvent(new Event("precify:update-ready"));

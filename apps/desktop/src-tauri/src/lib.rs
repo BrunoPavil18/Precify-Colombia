@@ -21,9 +21,15 @@ fn desktop_runtime() -> DesktopRuntime {
     }
 }
 
+/// A tiny raw-byte IPC probe; consumers receive ArrayBuffer rather than a JSON string.
+#[tauri::command]
+fn ipc_probe() -> tauri::ipc::Response {
+    tauri::ipc::Response::new(b"precify-ipc-v2".to_vec())
+}
+
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![desktop_runtime])
+        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe])
         .run(tauri::generate_context!())
         .expect("failed to run Precify Colombia desktop");
 }
