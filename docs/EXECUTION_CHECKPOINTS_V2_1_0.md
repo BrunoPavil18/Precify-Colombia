@@ -1,10 +1,10 @@
-# Precify Colombia 2.1.0 — Execution checkpoints
+# Precify Financy 2.1.0 — Execution checkpoints
 
 > **Canonical handoff and recovery document.** Updated whenever a coherent implementation increment is committed. This is one consolidated version and **not** authorization to merge, publish or enable GitHub Actions.
 
 **Started:** 2026-11-01
-**Branch:** `feat/precify-colombia-v2.1.0` (branched from `main`, v2.0.1 baseline)
-**Repository:** https://github.com/BrunoPavil18/Precify-Colombia
+**Branch:** `feat/precify-financy-v2.1.0` (branched from `main`, v2.0.1 baseline)
+**Repository:** https://github.com/BrunoPavil18/Precify-Financy
 **Owner direction:** deliver all 2.1.0 capabilities together; do not touch Vezura's repository; make the Precify app itself directly embeddable/integrable into Vezura and other websites. No intermediate PR/release or general code audits until consolidated delivery.
 
 ## Planned delivery contract
@@ -55,7 +55,7 @@ On the next ChatGPT conversation, provide this document path and request a fresh
 
 ### Resume checkpoint — 2026-11-01 after connection interruption
 
-**New commits since the interruption** (all on `feat/precify-colombia-v2.1.0`, with no merge):
+**New commits since the interruption** (all on `feat/precify-financy-v2.1.0`, with no merge):
 - Embedded iframe calculator (`?embed=1&lang=pt-BR`) for Vezura/other sites: no account, storage or API credentials. Hosted page requires separate origin and framing policy. Web service worker is not registered in embedded mode.
 - Reconciliation safety: sparse paid/refunded order status events retain previously supplied sale amounts, costs and campaign ID; conflicting duplicate IDs are rejected; refunds without a physical return do not automatically incur reverse shipping. Meta campaign reconciliation matches raw campaign IDs only at campaign level and within the recorded time range.
 - Monetary validation: unsupported fictional ISO currency identifiers and negative operational costs are rejected, while signed calculated results remain allowed. Native pricing and conversions remain separate from legacy COP pricing.
@@ -96,11 +96,11 @@ The owner explicitly authorized GitHub Actions for validation in this conversati
 
 The owner explicitly authorized using GitHub Actions for this branch. A temporary, single-branch signal-only workflow ran **five** focused validation attempts (no PR/push-wide automation, no matrix, no release, no deployment):
 
-- [#41303397947](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303397947) — failed: missing nonnegative helper import and optional currency precision type.
-- [#41303498834](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303498834) — failed: COP rounding precision returned 0 in the runner's ICU instead of required 2, and unfinished JSX block.
-- [#41303643271](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303643271) — failed: undefined campaign reconciliation type and static i18n regex.
-- [#41303762517](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303762517) — failed: missing delete-confirmation translation and stale ESM version assert.
-- [#41303902552](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303902552) — **SUCCESS** (commit `dbff5604c9aa3dd9b0968af9b38172293391f498`): frozen install, TypeScript, AST lint, 61 core tests, 22 web tests, 2 service security tests, 1 server SDK integration test = **86/86 tests**, service syntax, production build, ESM exports, `pnpm audit --audit-level moderate` reporting **no known vulnerabilities**.
+- [#41303397947](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41303397947) — failed: missing nonnegative helper import and optional currency precision type.
+- [#41303498834](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41303498834) — failed: COP rounding precision returned 0 in the runner's ICU instead of required 2, and unfinished JSX block.
+- [#41303643271](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41303643271) — failed: undefined campaign reconciliation type and static i18n regex.
+- [#41303762517](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41303762517) — failed: missing delete-confirmation translation and stale ESM version assert.
+- [#41303902552](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41303902552) — **SUCCESS** (commit `dbff5604c9aa3dd9b0968af9b38172293391f498`): frozen install, TypeScript, AST lint, 61 core tests, 22 web tests, 2 service security tests, 1 server SDK integration test = **86/86 tests**, service syntax, production build, ESM exports, `pnpm audit --audit-level moderate` reporting **no known vulnerabilities**.
 
 The total five run durations recorded by GitHub are 23s, 24s, 30s, 37s and 44s (2m38s of elapsed run time; actual billed minutes depend on GitHub's own accounting). The temporary workflow and signal should be removed after recording results. Code changes after the successful SHA are limited to documentation and removal of this temporary CI infrastructure.
 
@@ -120,14 +120,14 @@ No user account, paid service, Meta credentials, Supabase deployment or Vezura c
 - Added four source/SQL contract regression tests in `apps/service/tests/connected-contract.test.mjs`; **these assert API and SQL contracts, not actual PostgreSQL transaction execution**.
 
 **Owner-authorized CI evidence:**
-- [#41308887058](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41308887058): failed because of a duplicate `body` variable in the server's RPC response parser and a cache-consent guard not applied; both corrected.
-- [#41309016163](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163): **SUCCESS** with frozen install, typecheck, AST lint, 61 core + 22 web + 6 service + 1 SDK tests = **90/90**, service syntax check, production build, ESM verification and no known moderate-or-higher dependency vulnerabilities.
+- [#41308887058](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41308887058): failed because of a duplicate `body` variable in the server's RPC response parser and a cache-consent guard not applied; both corrected.
+- [#41309016163](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41309016163): **SUCCESS** with frozen install, typecheck, AST lint, 61 core + 22 web + 6 service + 1 SDK tests = **90/90**, service syntax check, production build, ESM verification and no known moderate-or-higher dependency vulnerabilities.
 - Removed temporary workflow and signal after validation. Neither `main` nor Vezura was changed. No automatic Actions configured.
 
 **Remaining external acceptance:** run the schema and real tenant-boundary/transaction tests in a dedicated Supabase/PostgreSQL test project; connect a real, approved Meta Ads application to verify OAuth and campaign insights; do browser-level iframe/offline/PWA tests. Do not call the connected service fully homologated without these. A production-connected launch will require deployment accounts, application registration, redirect URLs and secure credentials, but **no such user action is required to finish the current repository-only work**.
 
 ### Single consolidated PR — draft for external acceptance
-- Opened **[PR #4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4)** from `feat/precify-colombia-v2.1.0` to `main` as **DRAFT** after successful automated contract checks. This is the only v2.1.0 PR; not a merged or released version.
+- Opened **[PR #4](https://github.com/BrunoPavil18/Precify-Financy/pull/4)** from `feat/precify-financy-v2.1.0` to `main` as **DRAFT** after successful automated contract checks. This is the only v2.1.0 PR; not a merged or released version.
 - The PR description records completed modules and remaining real database/Meta/browser verification. It may be converted to ready only after unresolved acceptance conditions are addressed; no merge/release without the owner's explicit approval.
 - The GitHub temporary validation workflows were removed; the last source-affecting commit was validated successfully by Actions #41309016163, with later commits limited to documentation/CI cleanup.
 - No immediate action is required from the owner for repository work; provisioning a dedicated Supabase test project and a real Meta developer app will require an explicit setup decision before those external flows can be authenticated.
@@ -136,9 +136,9 @@ No user account, paid service, Meta credentials, Supabase deployment or Vezura c
 
 Official Supabase docs now prefer publishable (`sb_publishable_...`) and server-secret (`sb_secret_...`) keys while supporting legacy anon/service_role keys during migration. The Precify backend now accepts `SUPABASE_PUBLISHABLE_KEY` + `SUPABASE_SECRET_KEY` with fallback to `SUPABASE_ANON_KEY` + `SUPABASE_SERVICE_KEY`. The existing web `VITE_SUPABASE_ANON_KEY` parameter can contain a publishable key; **no secret is shipped to the frontend**. Updated the server env example, integration guide and API key scope regression test.
 
-**Final owner-authorized validation:** [GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309523249) — **SUCCESS**: frozen lockfile install, typecheck, AST lint, 61 core + 22 web + 7 service + 1 SDK = **91/91**, service syntax, Vite production build, ESM package check and no known moderate-or-higher vulnerabilities. Temporary workflow and signal removed immediately after success; no ongoing Actions automation configured.
+**Final owner-authorized validation:** [GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41309523249) — **SUCCESS**: frozen lockfile install, typecheck, AST lint, 61 core + 22 web + 7 service + 1 SDK = **91/91**, service syntax, Vite production build, ESM package check and no known moderate-or-higher vulnerabilities. Temporary workflow and signal removed immediately after success; no ongoing Actions automation configured.
 
-**Release boundary unchanged:** optional connected services need a test PostgreSQL/Supabase project, approved Meta app credentials and real browser/webhook acceptance; source/SQL contract tests do not prove database transactions or OAuth. The consolidated [draft PR #4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4) stays open for continued final verification. No `main` merge or v2.1.0 release.
+**Release boundary unchanged:** optional connected services need a test PostgreSQL/Supabase project, approved Meta app credentials and real browser/webhook acceptance; source/SQL contract tests do not prove database transactions or OAuth. The consolidated [draft PR #4](https://github.com/BrunoPavil18/Precify-Financy/pull/4) stays open for continued final verification. No `main` merge or v2.1.0 release.
 
 
 ### 2026-11-01 — real Supabase connection and live PostgreSQL verification
@@ -155,7 +155,7 @@ Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flo
 
 ## CP07 — Arquitetura de sincronização local-first aprovada em 2026-11-01
 
-**Branch:** `feat/precify-colombia-v2.1.0`, PR [#4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4), preservando `main`/v2.0.1; GitHub Actions autorizado pelo responsável nesta etapa (revoga as restrições históricas de não execução de CI para esta sessão).
+**Branch:** `feat/precify-financy-v2.1.0`, PR [#4](https://github.com/BrunoPavil18/Precify-Financy/pull/4), preservando `main`/v2.0.1; GitHub Actions autorizado pelo responsável nesta etapa (revoga as restrições históricas de não execução de CI para esta sessão).
 
 - Conector genérico site-owned via HTTPS e leitura por conta: identidade tenant, feed incremental por cursor opaco, páginas limitadas, replays idempotentes, tombstones e proteção contra cursor retrocedendo.
 - Adaptador de backend da própria loja (`integrations/site-owned-feed.mjs`) com callback de autenticação isolado por loja/organização; nenhum serviço central do Precify se torna obrigatório.
@@ -170,14 +170,14 @@ Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flo
 
 ### CI handoff and owner-authorized Actions — 2026-11-01
 
-- Consolidated candidate verification completed on GitHub Actions: [run 41314800134](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41314800134) for commit `6fa07229a9d16ad99cb03713faa6a061a4a31b13`: 106/106 tests (61 core, 22 web, 7 service, 16 integration), TS typecheck, AST lint, connected service syntax, Vite production build, ESM package check.
+- Consolidated candidate verification completed on GitHub Actions: [run 41314800134](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41314800134) for commit `6fa07229a9d16ad99cb03713faa6a061a4a31b13`: 106/106 tests (61 core, 22 web, 7 service, 16 integration), TS typecheck, AST lint, connected service syntax, Vite production build, ESM package check.
 - Temporary branch Actions workflow is removed after successful owner-authorized validation to avoid unnecessary ongoing CI consumption. Keep the evidence links. Later documentation-only changes do not alter tested application/runtime code.
 - Never describe this as browser/merchant production acceptance: real IndexedDB browser integration, Windows/PWA restart behavior, merchant-owned outbox implementation, HTTPS store auth, mobile behavior and Meta/provider credentials still require external validation.
 
 
 ## CP08 — Real Chromium browser acceptance and transactional fixes (2026-11-01)
 
-- Owner-authorized [Actions run 41317968648](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41317968648) **passed**: 108/108 automated tests, TypeScript, AST lint, service syntax, Vite production build, ESM package, and 9 additional real Chromium IndexedDB checks.
+- Owner-authorized [Actions run 41317968648](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41317968648) **passed**: 108/108 automated tests, TypeScript, AST lint, service syntax, Vite production build, ESM package, and 9 additional real Chromium IndexedDB checks.
 - Fixed a real browser defect: cache removal originally called `delete()` on a key-only cursor, causing `AbortError`. Corrected to writable IndexedDB cursor and verified cache revocation without affecting other stores.
 - Cross-tab stale-writer rejection now atomically compares the expected checkpoint in the same IndexedDB transaction as row writes and cursor update; the incremental controller supplies the expected cursor.
 - Manual synchronization uses the same tracked execution path as scheduled polling. Site handler distinguishes cursor expiration with HTTP 410 rather than silently discarding history.
@@ -189,6 +189,6 @@ Still pending: production-hosted Precify Node API and real Supabase Auth/JWT flo
 
 O Plano Mestre `docs/REDESIGN_MASTER_PLAN_V2_1_0.md` foi implementado no escopo de experiência local: tema Jet Black `#121212`, 19 rotas, Visão Geral com indicadores baseados em dados locais, COD/CAC/CPA/PUM expostos, UI ES/PT/EN, catálogo e relatórios pesquisáveis, microinterações normais por padrão e drawer mobile. Preservados motor financeiro e dados locais; Vezura não foi modificada.
 
-Aprovação automática: [Actions #41323103932](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932), HEAD `c5abb3e55d49fbf7b341b544b7245ddda5fd47ba`. 108 testes, build/TS/lint e Chromium real (19 rotas, mobile, salvar e recarregar produto). Evidências visuais em `precify-dark-ui`. O workflow temporário é removido após coleta das evidências para evitar consumo extra. [Relatório consolidado](REDESIGN_DELIVERY_V2_1_0.md).
+Aprovação automática: [Actions #41323103932](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41323103932), HEAD `c5abb3e55d49fbf7b341b544b7245ddda5fd47ba`. 108 testes, build/TS/lint e Chromium real (19 rotas, mobile, salvar e recarregar produto). Evidências visuais em `precify-dark-ui`. O workflow temporário é removido após coleta das evidências para evitar consumo extra. [Relatório consolidado](REDESIGN_DELIVERY_V2_1_0.md).
 
 PR #4 mantida em draft. Não houve release/merge/deploy de produção; integrações externas continuam dependentes de validação própria.

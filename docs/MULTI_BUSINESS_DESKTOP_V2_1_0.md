@@ -1,5 +1,5 @@
-# Precify Colombia 2.1 — candidata desktop multinégocio
-**Data:** 2026-11-02 · **Ramo:** `feat/precify-colombia-v2.1.0` · **PR #4 (draft)**
+# Precify Financy 2.1 — candidata desktop multinégocio
+**Data:** 2026-11-02 · **Ramo:** `feat/precify-financy-v2.1.0` · **PR #4 (draft)**
 
 ## Objetivos e resultado
 
@@ -47,7 +47,7 @@ O workflow `.github/workflows/precify-multi-business-candidate.yml` verifica mot
 
 ## Homologação automatizada final — Windows e navegador
 
-**GitHub Actions:** https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41380518692 — **SUCESSO**, commit de aplicação `befd4d396d664574a47e3e59a17d8021a7a252d6`.
+**GitHub Actions:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41380518692 — **SUCESSO**, commit de aplicação `befd4d396d664574a47e3e59a17d8021a7a252d6`.
 
 - Web/Chromium: 108 testes Node (61 core, 22 web, 7 serviço, 18 integração), typecheck, lint, build e navegador real. Confirma 19 módulos, tema Jet Black, criação e isolamento de 2 negócios, visão geral com 2 produtos, barra inferior e drawer mobile sem overflow a 390 px, persistência após reload e nenhuma exceção JavaScript.
 - Rust/Windows: `cargo test` (SQLite CAS, isolamento e entradas inválidas), executável Tauri Windows x64 compilado.

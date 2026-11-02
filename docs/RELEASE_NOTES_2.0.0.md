@@ -1,8 +1,8 @@
-# 🇨🇴 Precify Colombia v2.0.0 — Advanced Financial Intelligence
+# 🇨🇴 Precify Financy v2.0.0 — Advanced Financial Intelligence
 
 **Free, open-source pricing and profitability software for Colombian commerce.**
 
-Precify Colombia 2.0.0 expands the original COP pricing calculator into an advanced business simulation toolkit. It preserves the privacy-first, browser-local experience and every core capability introduced in v1, while adding COD delivery risk, advertising economics, Colombian unit-price comparisons, consumer price previews, portfolio profitability, PWA support, and safer editing workflows.
+Precify Financy 2.0.0 expands the original COP pricing calculator into an advanced business simulation toolkit. It preserves the privacy-first, browser-local experience and every core capability introduced in v1, while adding COD delivery risk, advertising economics, Colombian unit-price comparisons, consumer price previews, portfolio profitability, PWA support, and safer editing workflows.
 
 ## ✨ Everything from v1.0.0
 
@@ -57,7 +57,7 @@ Project contribution across different products and estimated monthly sales volum
 An application manifest, installable icon, versioned static-resource service worker, and opt-in update activation support use where the browser permits it. Local business data remain outside public asset caches. Offline availability depends on prior asset loading and browser capabilities.
 
 ### 9. Typed, reusable financial core
-`@precify-colombia/core` builds distributable ESM JavaScript and TypeScript declarations, with `pnpm verify:core` to validate the compiled exports. The package is **not published to npm** and there is no automatic WordPress, Vezura, Mastershop, checkout, or webhook integration.
+`@precify-financy/core` builds distributable ESM JavaScript and TypeScript declarations, with `pnpm verify:core` to validate the compiled exports. The package is **not published to npm** and there is no automatic WordPress, Vezura, Mastershop, checkout, or webhook integration.
 
 ### 10. UX, localization and documentation
 - Responsive mobile navigation and formatted COP/percentage/ROAS outputs.
@@ -87,8 +87,8 @@ No GitHub Actions execution was requested. Passing tests and a dependency audit 
 Requires Node.js >=20.19, pnpm 10.34.7 and Git.
 
 ```bash
-git clone https://github.com/BrunoPavil18/Precify-Colombia.git
-cd Precify-Colombia
+git clone https://github.com/BrunoPavil18/Precify-Financy.git
+cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
@@ -110,15 +110,15 @@ Windows PowerShell may require `pnpm.cmd`. Deploy `apps/web/dist/` to an HTTPS s
 
 ## 📚 Documentation
 
-- [Español — README](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/README.md)
-- [Português — README](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/README.pt-BR.md)
-- [English — README](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/README.en.md)
-- [Integration guide](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/docs/INTEGRATION_V2.md)
-- [Colombian regulatory references](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/docs/COLOMBIA_LEGAL_V2.md)
-- [Security policy](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/SECURITY.md) · [Changelog](https://github.com/BrunoPavil18/Precify-Colombia/blob/main/CHANGELOG.md)
+- [Español — README](https://github.com/BrunoPavil18/Precify-Financy/blob/main/README.md)
+- [Português — README](https://github.com/BrunoPavil18/Precify-Financy/blob/main/README.pt-BR.md)
+- [English — README](https://github.com/BrunoPavil18/Precify-Financy/blob/main/README.en.md)
+- [Integration guide](https://github.com/BrunoPavil18/Precify-Financy/blob/main/docs/INTEGRATION_V2.md)
+- [Colombian regulatory references](https://github.com/BrunoPavil18/Precify-Financy/blob/main/docs/COLOMBIA_LEGAL_V2.md)
+- [Security policy](https://github.com/BrunoPavil18/Precify-Financy/blob/main/SECURITY.md) · [Changelog](https://github.com/BrunoPavil18/Precify-Financy/blob/main/CHANGELOG.md)
 
 ## ⚖️ License
 
 **Apache License 2.0.** Independently developed, available to Colombian merchants and developers without requiring any particular commerce platform.
 
-**Precify Colombia v2.0.0 — Smarter pricing. Deeper insights. Your data, your control.** 🇨🇴
+**Precify Financy v2.0.0 — Smarter pricing. Deeper insights. Your data, your control.** 🇨🇴

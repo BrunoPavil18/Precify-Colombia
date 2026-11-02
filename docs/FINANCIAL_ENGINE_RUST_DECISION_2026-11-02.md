@@ -1,9 +1,9 @@
 # Decisão arquitetural — Motor financeiro TypeScript vs Rust
-**Data:** 2026-11-02 · **Status:** aprovado para candidata 2.1.0 · **Escopo:** Precify Colombia somente.
+**Data:** 2026-11-02 · **Status:** aprovado para candidata 2.1.0 · **Escopo:** Precify Financy somente.
 
 ## Resumo executivo
 
-**Não migrar o motor financeiro inteiro para Rust agora.** O React é apenas a interface; o cálculo reside no pacote TypeScript compartilhado `@precify-colombia/core`. A implementação atual trabalha com **BigInt e centavos inteiros**, não com `number` de ponto flutuante nos totais. Portanto Rust **não resolveria um defeito existente de precisão**.
+**Não migrar o motor financeiro inteiro para Rust agora.** O React é apenas a interface; o cálculo reside no pacote TypeScript compartilhado `@precify-financy/core`. A implementação atual trabalha com **BigInt e centavos inteiros**, não com `number` de ponto flutuante nos totais. Portanto Rust **não resolveria um defeito existente de precisão**.
 
 Manter o motor auditado em TypeScript e usar Rust nos componentes onde há ganho real imediato: janela Windows Tauri 2, banco SQLite nativo, acesso a recursos de sistema/arquivos, validação de snapshots e eventual processamento de grandes lotes. **Nenhuma fórmula monetária foi reescrita nesta entrega.**
 

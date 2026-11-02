@@ -1,9 +1,9 @@
-# Precify Colombia 2.1.0 — Entrega Consolidada do Redesign
+# Precify Financy 2.1.0 — Entrega Consolidada do Redesign
 **Data:** 2026-11-01  
-**Branch:** `feat/precify-colombia-v2.1.0`  
-**PR:** https://github.com/BrunoPavil18/Precify-Colombia/pull/4 (**draft**)  
+**Branch:** `feat/precify-financy-v2.1.0`  
+**PR:** https://github.com/BrunoPavil18/Precify-Financy/pull/4 (**draft**)  
 **Status:** interface e fluxos locais implementados, automaticamente testados; integração remota e release pública ainda não homologadas.  
-**Run final de código:** https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41323103932  
+**Run final de código:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41323103932  
 **Commit de código validado:** `c5abb3e55d49fbf7b341b544b7245ddda5fd47ba`
 
 ## Resultado efetivamente implementado
@@ -38,7 +38,7 @@
 - TypeScript, lint AST, verificação do serviço conectado, Vite build de produção, pacote ESM: **aprovados**.
 - Chromium real: fundo RGB (18,18,18), animação normal no estado padrão, 4 KPIs reais, **19 rotas navegáveis**, drawer mobile abrindo e fechando, **produto local salvo e preservado após recarga**, ausência de exceções JS.
 - Screenshots de páginas principais, COD, marketing, relatórios, backup, desktop e mobile no artefato de Actions **`precify-dark-ui`** (retenção inicial: 7 dias).
-- A verificação de persistência IndexedDB transacional por fonte e cursor também já foi comprovada antes, em https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41317968648.
+- A verificação de persistência IndexedDB transacional por fonte e cursor também já foi comprovada antes, em https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41317968648.
 
 ### Escopo e limitações honestas
 
@@ -55,7 +55,7 @@
 ## Como abrir para inspeção (sem instalar na produção)
 
 ```bash
-git switch feat/precify-colombia-v2.1.0
+git switch feat/precify-financy-v2.1.0
 git pull --ff-only
 pnpm install --frozen-lockfile
 pnpm dev

@@ -1,13 +1,13 @@
-# Plano Mestre — Redesign e Inteligência Operacional do Precify Colombia
+# Plano Mestre — Redesign e Inteligência Operacional do Precify Financy
 **Versão-alvo:** 2.1.0 (candidata, não publicada)  
 **Data:** 2026-11-01  
-**Repositório:** BrunoPavil18/Precify-Colombia  
+**Repositório:** BrunoPavil18/Precify-Financy  
 **Base de revisão:** PR #4, commit `f73c1166e4e15a28d6183466b96e1a78659de769`, código, capturas de nove páginas do usuário, vídeo tutorial fornecido e documentação pública do PrecifyCOD: https://precifycod.com/landing e https://precifycod.com/app-description.  
 **Natureza original:** especificação e auditoria. **Atualização de 2026-11-01:** o redesign de interface foi implementado e validado em Chromium; consultar [relatório de entrega](REDESIGN_DELIVERY_V2_1_0.md) para separar o que está implementado das evoluções futuras.
 
 ## 0. Decisões aprovadas / limites
 
-1. **Dark-first**, com identidade própria Precify Colombia: fundo **Jet Black `#121212`**, acentos verdes/menta/teal, inspiração em densidade, ergonomia e organização do painel administrativo Vezura, sem copiar componentes de código, branding ou estilos protegidos.
+1. **Dark-first**, com identidade própria Precify Financy: fundo **Jet Black `#121212`**, acentos verdes/menta/teal, inspiração em densidade, ergonomia e organização do painel administrativo Vezura, sem copiar componentes de código, branding ou estilos protegidos.
 2. Preservar operação **local-first/offline**, núcleo financeiro com dinheiro exato (inteiros/BigInt), formatos COP e ISO independentes, dados locais, backups, funcionalidades conectadas opt-in e integrações por conector genérico; não exigir conta para simular preço.
 3. **Nenhuma alteração na Vezura** (repo, produção, MySQL, Hostinger, tokens). A interface pode mostrar fontes e conectores genéricos, identificando claramente quando não estão ligados.
 4. **Sem redução global de animação como padrão.** Movimentos suaves e intencionais por default. A mídia `prefers-reduced-motion: reduce` atual só é ativada quando a plataforma solicita isso; a regra `*,*::before,*::after{animation:none!important;transition:none!important}` é excessivamente ampla e será substituída, durante a implementação, por acomodações específicas para quem escolheu acessibilidade. Não criar um `reduceMotion=true` automático, nem desligar transições no uso normal.
@@ -34,7 +34,7 @@
 ### Principais critérios extraídos do tutorial e das páginas do PrecifyCOD
 - O vídeo fornecido demonstra **painel inicial com KPIs**, **distribuição/indicadores de entregas**, **calculadora com custos detalhados, taxa de entrega/aprovação e métricas de anúncios no contexto do preço**, além de **visão das integrações**. Essas são referências de fluxo, não autorização de reprodução visual/código.
 - O site público descreve dashboard unificado, pedidos, ROAS/CPA, marketing, relatórios, histórico de preços, múltiplas lojas, Meta OAuth, API/webhooks e conector por plataforma. **Declarações comerciais do site não são prova de que seus serviços externos já funcionam** nem obrigação de replicar assinaturas/Kirvano.
-- O Precify Colombia é mais forte no **cálculo transparente/offline**, mas mais fraco na **descoberta dos módulos**, na apresentação de indicadores e na organização por tarefa.
+- O Precify Financy é mais forte no **cálculo transparente/offline**, mas mais fraco na **descoberta dos módulos**, na apresentação de indicadores e na organização por tarefa.
 
 ## 2. Inventário funcional: presente × parcialmente exposto × faltante
 
@@ -59,7 +59,7 @@
 | Dashboard central de visão geral | **Não existe como home** | Criar dashboard baseado em dados reais locais; diferenciar vazio/sem evidência | P0 |
 | Relatórios por data, fonte, produto e campanhas com comparações | Parcial/fragmentado | Consolidação com filtros visíveis; exportar e rastrear origem | P1 |
 | Histórico cruzado de alterações/decisões | Parcial por módulo | Timeline unificada sem misturar proveniências; filtros por produto | P2 |
-| Conectores nativos Shopify/Mastershop/Nuvemshop | Não implementados no Precify Colombia | Manter como futuros adaptadores opcionais, nenhum vínculo específico nesta conversa | Futuro |
+| Conectores nativos Shopify/Mastershop/Nuvemshop | Não implementados no Precify Financy | Manter como futuros adaptadores opcionais, nenhum vínculo específico nesta conversa | Futuro |
 | Google Ads/TikTok/Kirvano, assinaturas/pagamentos | Não implementado | Fora do recorte do redesign 2.1.0; avaliar separadamente | Futuro |
 
 ## 3. Nova arquitetura de informação / sidebar
@@ -232,4 +232,4 @@ Ajustar estados e pares de contraste com auditoria WCAG 2.2 AA; não usar apenas
 - [ ] PR #4 documentada; **nenhum merge/release/deploy** sem aceite explícito do responsável.
 
 ### Nota de escopo
-Este documento autoriza **o planejamento e design da evolução**, não autoriza deploy ou conexão comercial real. O objetivo é transformar a riqueza funcional já presente no Precify Colombia em uma experiência intuitiva e agradável para qualquer usuário — sem depender de uma plataforma específica.
+Este documento autoriza **o planejamento e design da evolução**, não autoriza deploy ou conexão comercial real. O objetivo é transformar a riqueza funcional já presente no Precify Financy em uma experiência intuitiva e agradável para qualquer usuário — sem depender de uma plataforma específica.
