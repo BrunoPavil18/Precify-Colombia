@@ -1,6 +1,6 @@
 /** IndexedDB: each site page and its cursor commit in one browser transaction. */
 import {getBusinessScope,MAIN_BUSINESS} from "./BusinessProfiles";
-const DB_NAME="precify-colombia-site-owned-sync-v1";
+const DB_NAME="precify-financy-site-owned-sync-v1";
 const scoped=(value:string,businessId=getBusinessScope())=>businessId===MAIN_BUSINESS?value:businessId+"::"+value;
 function openSyncDB():Promise<IDBDatabase>{
  return new Promise((resolve,reject)=>{

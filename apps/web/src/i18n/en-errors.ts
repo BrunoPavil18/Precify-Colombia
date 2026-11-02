@@ -27,7 +27,7 @@ export const enErrors: Record<string,string> = {
   "¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales.": "Replace ALL local products, profiles, scenarios, and history with this backup? Download a copy of your current data first.",
   "Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.": "Backup validated and restored. The entire dataset was replaced.",
   "Respaldo rechazado, sin modificaciones: ": "Backup rejected; no changes made: ",
-  "¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes.": "PERMANENTLY delete Precify Colombia data stored in this browser? Back up your data first.",
+  "¿Borrar DEFINITIVAMENTE los datos de Precify Financy almacenados en este navegador? Haz una copia de seguridad antes.": "PERMANENTLY delete Precify Financy data stored in this browser? Back up your data first.",
   "Datos locales borrados.": "Local data deleted.",
   "No se pudieron borrar los datos: ": "Could not delete data: ",
   "No existe almacenamiento original para descargar.": "No original stored data is available to download.",

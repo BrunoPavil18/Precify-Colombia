@@ -55,7 +55,7 @@ test("locale survives reload without modifying financial workspace schema",()=>{
  assert.ok(app.includes('useState<Locale>(readLocale)'));
  assert.ok(app.includes("saveLocale(lang)"));
  assert.ok(app.includes("document.documentElement.lang=locale"));
- assert.ok(i18n.includes('precify-colombia:locale'));
+ assert.ok(i18n.includes('precify-financy:locale'));
  assert.ok(i18n.includes('??"es-CO"'));
  assert.ok(!i18n.includes("JSON.stringify(workspace)"));
 });
@@ -64,7 +64,7 @@ test("input unit, currency and backup metadata remain Colombian and canonical",(
  assert.ok(app.includes('className="unit">COP'));
  assert.ok(app.includes('formatMoneySAMPLE_DO_NOT_USE')===false);
  assert.ok(app.includes('exportProductsCsv(workspace,{'));
- assert.ok(app.includes('precify-colombia-backup.json'));
+ assert.ok(app.includes('precify-financy-backup.json'));
 });
 test("destructive dialogs are localized and static dictionaries need no network",()=>{
  assert.ok(app.includes('askConfirmation(t("¿Borrar DEFINITIVAMENTE'));
