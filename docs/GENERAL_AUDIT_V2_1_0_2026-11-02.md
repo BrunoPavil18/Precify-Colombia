@@ -82,3 +82,18 @@ A `main` permanece intacta; este fechamento **não declara** a API da Vezura imp
 **Cobertura:** contratos estáticos adicionais para guia, ativação resiliente e limpeza; a jornada Chromium agora abre/fecha o guia, confere os três endpoints e produz uma captura adicional. O workflow Windows + browser é o gate integral da candidata. Testes automáticos não substituem Windows WebView2 no notebook do proprietário nem uma implantação de loja.
 
 **Limites remanescentes (não classificar como defeito corrigido):** Vezura sem endpoints de produção, sem homologação COD/Meta em produção, executável não assinado, `Cargo.lock` não versionado, ausência de hardware attestation, revogação incapaz de apagar dados já em cache offline, e testes independentes fiscais/jurídicos ainda externos. A área de contas legada segue recolhida por padrão e disponível **somente** para compatibilidade. Nenhuma alteração em `main`, no servidor da Vezura ou no Supabase foi executada nesta rodada.
+
+
+### Gate final desta segunda rodada — confirmado
+
+**[GitHub Actions #41518692636](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41518692636): SUCCESS**, usando o código do commit `49cba8046f961e13385823d375ad1c49610545f5`.
+
+- JS: **122/122 testes**, sem falhas (core 61, web 32, serviço 7, integrações 22); TypeScript, AST lint, build Vite, pacote ESM e contratos de integração aprovados.
+- Chromium real: **19 módulos**, guia dentro do app abre/fecha e mostra endpoints, seleção de negócios, tela móvel e persistência local; nenhuma exceção JS durante o smoke.
+- Rust/SQLite no runner Windows: **4/4 testes nativos**.
+- Pacotes Windows: compilação Tauri x64, ZIP portátil e instalador Inno aprovados; dois ZIPs verificaram integridade e o manifesto SHA-256 foi validado contra os próprios bytes.
+- [Artefato Windows final](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41518692636/artifacts/13177570965); [evidência visual Chromium](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41518692636/artifacts/13176441849).
+- ZIP `Precify-Financy-2.1.0-win64.zip`: `d0d4b8443298c28f607aaca7f222f3acd2f39b33e1e6a5b506dbb919a573a511`.
+- Instalador `Precify-Financy-2.1.0-setup.exe`: `c3e8842b222afe9f79d19eb7262bbe42cceafd477a54023fcdae135f4b3079a4`.
+
+**Critério de saída:** regressões automatizadas e distribuição Windows aprovadas. Falta teste manual do novo binário no Windows/WebView2 e backend real da Vezura, portanto a PR continua draft, sem merge nem lançamento de produção.
