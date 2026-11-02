@@ -17,11 +17,13 @@ Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tar
 
 Esta branch acrescenta precificação nativa em moedas ISO, cotações indicativas diárias com cache offline, catálogo internacional independente, funil COD, matriz CPA, importação CSV, dashboards e uma API REST opcional com organizações, permissões, webhooks assinados e Facebook Ads. Também oferece calculadora incorporável por iframe (`?embed=1`), utilizável na Vezura e em outros sites, **sem modificar o repositório da Vezura**. Os serviços conectados dependem de PostgreSQL/Supabase, credenciais da Meta e testes externos; não estão prontos para produção. [Checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integração](docs/CONNECTED_API_V2_1_0.md).
 
-## Sincronização local-first por loja (candidata 2.1.0)
+## Conexão local-first com lojas — protocolo v2 (candidata 2.1.0)
 
-O módulo **Conexões → Sincronização com lojas próprias** conecta um ou mais sites que disponibilizem o protocolo de alterações Precify v1. Cada loja **mantém os próprios pedidos e campanhas** e pode receber eventos enquanto o aplicativo está fechado. Depois da autenticação do usuário com token de leitura restrito, o Precify busca as alterações **ao abrir**, **a cada 60 segundos** (configurável: 30 s / 5 min / somente manual), **ao voltar à conexão** e pelo botão **Sincronizar agora**. Os relatórios COD lidos da loja são mantidos isolados por loja e conta no IndexedDB, apenas com consentimento, inclusive offline. Dados da loja não são transferidos automaticamente para o espaço local de lançamentos manuais.
+**Caminho recomendado:** em **Conexões → Sincronização com lojas próprias**, o administrador habilita a API Precify v2 no site da loja e gera um convite de uso único para **cada instalação**. Informe nome e URL HTTPS, adicione a loja, cole o convite no cartão e ative a instalação. Cada computador possui uma identidade Ed25519; não é necessário login central no Precify. A loja mantém os pedidos e campanhas mesmo quando os computadores estão desligados, e o app sincroniza quando estiver aberto, conectado e autorizado. **Não há serviço em segundo plano quando o aplicativo está fechado.**
 
-A arquitetura é **genérica**, não exclusiva da Vezura: a loja precisa implementar `GET /precify/v1/identity` e `GET /precify/v1/changes` autenticados. O adaptador server-side está em `integrations/site-owned-feed.mjs`. **A Vezura ainda não implementa esse protocolo; não há sincronização comercial real ou hospedagem implantada nesta entrega.** O token de leitura fica apenas na sessão aberta; após reiniciar o aplicativo, é necessário autenticar-se novamente antes da sincronização automática. O cache local foi validado em Chromium real, inclusive ao recarregar o navegador e ao revogar consentimento; a API da Vezura continua pendente. No estágio atual, o aplicativo é uma **PWA web instalável**, não um executável nativo Windows com serviço em segundo plano. [Contrato e exemplos](docs/SITE_OWNED_SYNC_V2_1_0.md).
+**Armazenamento:** no Windows, SQLite é o armazenamento principal de perfis e dados financeiros, inclusive cache transacional de eventos de loja. A chave criptográfica não exportável fica no WebCrypto/IndexedDB do WebView2. Na PWA, os dados continuam no armazenamento web/IndexedDB, com consentimento por loja. O protocolo bearer v1 é apenas compatibilidade com conexões antigas.
+
+**Pendência externa:** a Vezura ainda não implementou a API da loja, então não há pedidos reais sincronizados. Consulte [protocolo v2 e adaptadores MySQL/Postgres](docs/STORE_DEVICE_API_V2.md) e [plano de integração Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Atualização 2.0.1
 
@@ -113,7 +115,7 @@ Para importar dados de loja, converta o modelo da plataforma para o tipo `PriceI
 
 Leia [contrato de integração](docs/INTEGRATION_CONTRACT.md), [fórmulas](docs/FINANCIAL_FORMULAS.md), [arquitetura](docs/ARCHITECTURE.md), [segurança](docs/SECURITY_AUDIT.md) e [licença Apache 2.0](LICENSE).
 
-**Limitações:** somente COP; armazenamento local por navegador; sem login, backend, sincronização, integração comercial automática, checkout ou plugin WordPress. Resultados não substituem assessoria contábil/tributária. A licença de código não concede direitos sobre marcas de terceiros.
+**Limitações:** o Windows utiliza SQLite; a PWA mantém armazenamento web. Há preços COP e ISO indicativos, mas não existe ainda sincronização comercial real, checkout ou plugin WordPress oficial. Conexões com lojas dependem do servidor da loja. Resultados não substituem assessoria contábil/tributária. A licença de código não concede direitos sobre marcas de terceiros.
 
 ## Documentación técnica v2 / Technical v2 documentation
 
@@ -123,7 +125,7 @@ Leia [contrato de integração](docs/INTEGRATION_CONTRACT.md), [fórmulas](docs/
 
 ## Precify Desktop Tauri e negócios independentes (candidata 2.1.0)
 
-O núcleo financeiro **permanece em TypeScript/BigInt** para preservar equivalência com a PWA. O aplicativo Windows usa Rust para a janela nativa e snapshots SQLite por negócio; o armazenamento ativo da interface continua no navegador integrado até uma migração explícita. É possível criar negócios independentes e abrir a visão "Todos os negócios", sem inventar lucros nem somar moedas diferentes. [Análise técnica](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guia e limitações](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). A Vezura não foi alterada.
+O núcleo financeiro **permanece em TypeScript/BigInt** para preservar equivalência com a PWA. O aplicativo Windows usa Rust para a janela nativa e snapshots SQLite por negócio; SQLite já é a fonte principal no Windows; o armazenamento web é somente uma projeção de leitura. É possível criar negócios independentes e abrir a visão "Todos os negócios", sem inventar lucros nem somar moedas diferentes. [Análise técnica](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guia e limitações](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). A Vezura não foi alterada.
 
 
 ## Precify Financy — Windows SQLite e integração direta por instalação
@@ -134,4 +136,4 @@ A versão Windows usa o Tauri 2, motor financeiro TypeScript/BigInt e **SQLite c
 
 As lojas emitem convites de uso único para cada instalação: o computador gera uma chave Ed25519 privada não exportável pelo WebCrypto e lê a API v2 do próprio site por HTTPS, com assinatura, nonce, timestamp e revogação por dispositivo. O código do convite é consumido uma única vez. Veja [protocolo de lojas e exemplos MySQL/Postgres](docs/STORE_DEVICE_API_V2.md).
 
-**Pendências externas:** o servidor de cada loja precisa instalar a API, fornecer o feed durável de pedidos e oferecer um painel administrativo para emissão/revogação. Nenhuma alteração na Vezura nesta entrega. O nome do repositório GitHub ainda é `Precify-Colombia` por limitação do conector de administração; o proprietário deve alterá-lo em Settings → General → Repository name para `Precify-Financy` quando homologar, mantendo os redirecionamentos antigos.
+**Pendências externas:** o servidor de cada loja precisa instalar a API, fornecer o feed durável de pedidos e oferecer um painel administrativo para emissão/revogação. Nenhuma alteração na Vezura nesta entrega. O repositório GitHub foi renomeado para `BrunoPavil18/Precify-Financy`; a branch de desenvolvimento mantém temporariamente seu nome histórico para preservar a PR #4.

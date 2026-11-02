@@ -17,11 +17,13 @@ Se implementó un panel con base **Jet Black `#121212`**, navegación organizada
 
 Esta branch experimental añade precios nativos en monedas ISO, cotizaciones orientativas diarias con cache offline, catálogo internacional independiente, panel COD y CPA, importación de pedidos/anuncios CSV, dashboard y una API REST conectada opcional con organizaciones, roles, webhooks firmados y Facebook Ads. También permite integrar una calculadora sin cuentas mediante `?embed=1`, por ejemplo en Vezura, **sin modificar el repositorio de Vezura**. Las funciones conectadas requieren servidor PostgreSQL/Supabase, credenciales Meta y validación externa; aún NO se consideran listas para producción. [Checkpoints de ejecución](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Guía de integración](docs/CONNECTED_API_V2_1_0.md).
 
-## Sincronización local-first con tiendas independientes (candidata 2.1.0)
+## Conexión local-first con tiendas — protocolo v2 (candidata 2.1.0)
 
-El nuevo panel **Conexiones → Sincronización con tiendas propias** consume cambios de tiendas que implementen el protocolo Precify v1, sin requerir un servidor central de Precify. Cada tienda conserva sus pedidos y campañas, incluso mientras el ordenador está apagado. Precify descarga únicamente los cambios pendientes al autenticar la cuenta, cada minuto por defecto (30 segundos / 5 minutos / sólo manual) y con **Sincronizar ahora**. El historial se guarda localmente en IndexedDB, separado por tienda/usuario y sólo con consentimiento. Los informes COD se pueden consultar sin conexión.
+**Ruta recomendada:** en **Conexiones → Sincronización con tiendas propias**, el administrador habilita en su servidor la API Precify v2 y genera un código de invitación de un solo uso para cada instalación. Introduce el nombre y la URL HTTPS, añade la tienda, pega el código en su tarjeta y activa el dispositivo. Cada equipo usa su propia identidad Ed25519; no necesita cuenta central ni contraseña de Precify. Los datos de pedidos y campañas permanecen en el servidor de la tienda incluso cuando los equipos están desconectados. El cliente sincroniza al abrirse y mientras está conectado/autorizado; no hay servicio en segundo plano con la aplicación cerrada.
 
-**Importante:** aún se requiere implementar los endpoints autenticados del protocolo en cada tienda; la integración Vezura/Hostinger no ha sido implementada ni desplegada. La versión actual es una PWA instalable en el navegador, no un servicio nativo Windows. El token temporal de lectura no se conserva al reiniciar. [Contrato y adaptador de servidor](docs/SITE_OWNED_SYNC_V2_1_0.md).
+**Almacenamiento:** en Windows, el SQLite del aplicativo es la fuente de verdad para perfiles y datos financieros, e incluye la caché transaccional del feed de la tienda. La clave criptográfica no exportable permanece en el almacén WebCrypto del perfil WebView2. En la PWA se emplea el almacenamiento del navegador e IndexedDB, con consentimiento por tienda. La API bearer v1 solo se conserva para conexiones antiguas, no para las nuevas.
+
+**Importante:** Vezura todavía no ha implementado estos endpoints; no se han recibido pedidos reales ni desplegado el adaptador. [Protocolo v2, SQL MySQL/Postgres y revocación](docs/STORE_DEVICE_API_V2.md) · [Próximos pasos en Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Actualización 2.0.1
 
@@ -117,8 +119,8 @@ Use un adaptador específico que traduzca su modelo de producto a `PriceInput`, 
 
 - `packages/core`: motor financiero y serialización de backup, independientes de React.
 - `apps/web`: React + Vite, presentación accesible y almacenamiento local.
-- Solo COP, interfaz `es-CO` por defecto, `pt-BR` y `en` disponibles.
-- Sin backend, registro obligatorio, WordPress plugin, checkout, sincronización entre dispositivos ni conversión de divisas.
+- COP e ISO, interfaz `es-CO` por defecto, `pt-BR` y `en` disponibles.
+- Sin registro central obligatorio, checkout, sincronización comercial real o plugin WordPress oficial; la conexión por instalación requiere API de la tienda. Cotizaciones ISO son indicativas.
 - Resultados informativos, no asesoría financiera/tributaria. IVA y COD dependen de parámetros ingresados por el usuario.
 
 Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [seguridad](docs/SECURITY_AUDIT.md) y [licencia Apache 2.0](LICENSE). La licencia del código no concede derechos sobre marcas de terceros.
@@ -131,4 +133,4 @@ Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [segurid
 
 ## Precify Desktop Tauri y negocios independientes (candidata 2.1.0)
 
-El núcleo monetario **permanece en TypeScript/BigInt** para conservar la paridad de cálculo con la PWA. La app Windows usa Rust para ventana nativa y respaldos SQLite por negocio; el navegador sigue siendo el almacenamiento activo hasta una migración explícita. Puede crear negocios separados y abrir el panel "Todos los negocios" sin inventar beneficios ni sumar distintas divisas. [Análisis técnico](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guía y limitaciones](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). No hay cambios en Vezura.
+El núcleo monetario **permanece en TypeScript/BigInt** para conservar la paridad de cálculo con la PWA. La app Windows usa Rust para ventana nativa y respaldos SQLite por negocio; SQLite ya es el almacenamiento financiero principal en Windows; el almacenamiento web queda como proyección de lectura. Puede crear negocios separados y abrir el panel "Todos los negocios" sin inventar beneficios ni sumar distintas divisas. [Análisis técnico](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guía y limitaciones](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). No hay cambios en Vezura.

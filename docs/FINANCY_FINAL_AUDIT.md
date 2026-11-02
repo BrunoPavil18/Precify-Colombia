@@ -1,9 +1,9 @@
 # Precify Financy 2.1.0 — auditoria consolidada de código e entrega
 **Data:** 2 de novembro de 2026  
 **Branch:** `feat/precify-colombia-v2.1.0` (nome histórico da branch; manter enquanto PR #4 estiver aberta)  
-**PR:** https://github.com/BrunoPavil18/Precify-Colombia/pull/4 (draft, sem merge ou release)  
-**Build de código homologado automaticamente:** https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41395935905  
-**Auditoria de dependências:** https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41396477317
+**PR:** https://github.com/BrunoPavil18/Precify-Financy/pull/4 (draft, sem merge ou release)  
+**Build de código homologado automaticamente:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905  
+**Auditoria de dependências:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41396477317
 
 ## Decisões confirmadas
 
@@ -34,7 +34,7 @@
 - **3/3 testes Rust**: snapshots SQLite por perfil, CAS/revisão e cache de feed atômico com cursor, isolado por loja e imutabilidade de eventos.
 - **GitHub Actions Windows x64**: `precify-financy.exe` compilado, instalador Inno e ZIP portátil produzidos.
 - **Auditoria de dependências**: `pnpm audit --audit-level moderate` => **No known vulnerabilities found**. Isso não certifica ausência de vulnerabilidades futuras ou de lógica de aplicação.
-- **Artefato oficial**: `Precify-Financy-2.1-MultiBusiness-Tauri-Windows`, [GitHub Actions](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41395935905/artifacts/13119407755).
+- **Artefato oficial**: `Precify-Financy-2.1-MultiBusiness-Tauri-Windows`, [GitHub Actions](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905/artifacts/13119407755).
 - **SHA-256 do ZIP** `Precify-Financy-2.1.0-win64.zip`: `cb0f6b967261cd11be41c2a0a15509baa69e010c51e4000270492f3043f3ff3e`.
 - **SHA-256 do Inno** `Precify-Financy-2.1.0-setup.exe`: `f0e9d8fe863f60ce8885951238ace79e063f70b822c29df80bd5f74b76051d4f`.
 - Manifesto SHA256SUMS conferido byte a byte; ZIP externo e interno passaram em testes de integridade.
@@ -49,7 +49,7 @@ O protocolo é independente de uma loja; Vezura será apenas o primeiro adaptado
 
 ## Única intervenção administrativa externa ainda pendente
 
-O **nome público do repositório GitHub** ainda é `BrunoPavil18/Precify-Colombia`: o conector de GitHub disponível não expõe `PATCH /repos/{owner}/{repo}` (renomeação do repositório), por isso não foi renomeado. Alterar em **Settings → General → Repository name** para `Precify-Financy`, após concluir a PR, e então atualizar o `origin` do clone local. GitHub redireciona URLs antigas; **não renomear a branch atual com PR #4 aberta**, pois renomear a head de uma PR aberta pode encerrá-la. Links históricos/contratos legais foram mantidos para preservar rastreabilidade.
+O repositório foi **renomeado pelo proprietário** para `BrunoPavil18/Precify-Financy`. A branch `feat/precify-colombia-v2.1.0` preserva provisoriamente seu nome histórico enquanto a PR #4 estiver aberta; não renomear a head da PR durante revisão. Links antigos são redirecionados pelo GitHub.
 
 ## Critério de saída
 

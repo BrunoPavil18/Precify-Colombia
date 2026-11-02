@@ -17,11 +17,13 @@ Implemented a **Jet Black `#121212`** theme, task-first grouped navigation, new 
 
 This feature branch adds native ISO-currency pricing, dated daily FX references with offline caches, an independent international catalog, a COD funnel, CPA matrix, CSV imports, dashboards and an optional REST service with organizations, roles, signed webhooks and Facebook Ads. A stateless iframe calculator (`?embed=1`) can be embedded in Vezura or another website **without modifying Vezura's repository**. Connected capabilities require PostgreSQL/Supabase, Meta credentials and external integration testing; they are NOT production-ready. [Progress checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integration guide](docs/CONNECTED_API_V2_1_0.md).
 
-## Store-owned, local-first sync (2.1.0 candidate)
+## Store-owned, local-first integration — device protocol v2 (2.1.0 candidate)
 
-The new **Connections → Connect your own stores** panel reads updates from independently hosted stores that implement the Precify v1 change-feed protocol, without requiring a central Precify server. A store preserves its own order and campaign history while the computer is switched off. Precify pulls changes after account authentication, every minute by default (30 seconds / 5 minutes / manual only), and on **Sync now**. Consented site-specific records are cached in IndexedDB for offline COD reports, segregated by store and tenant.
+**Recommended path:** in **Connections → Connect your own stores**, a merchant administrator enables the Precify v2 API on the store backend and issues a separate single-use invitation code for **each installation**. Add the store's name and HTTPS URL, then paste its invitation into the store card and activate that device. Each installation has its own Ed25519 identity; no Precify-hosted user account is required. Store orders and campaigns remain on the merchant server while clients are offline. The app syncs when open and authorized; there is **no native background synchronization while the app is closed**.
 
-**Important:** each store must first implement the authenticated endpoints; no Vezura or Hostinger integration has been deployed by this branch. The current client is an installable web PWA, not a native Windows background service, and session-only read tokens must be provided again after restart. [Protocol and server adapter](docs/SITE_OWNED_SYNC_V2_1_0.md).
+**Storage:** on Windows, native SQLite is authoritative for business-scoped financial records and transactionally cached merchant events. Non-exportable device keys remain in the WebView2 WebCrypto store. The browser PWA instead uses web storage/IndexedDB with per-site consent. The legacy bearer-token v1 adapter is kept only for existing integrations.
+
+**External dependency:** Vezura has not yet implemented the v2 backend; no live store orders have been validated. [v2 protocol and MySQL/Postgres examples](docs/STORE_DEVICE_API_V2.md) · [Vezura integration requirements](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Version 2.0.1 update
 
@@ -113,7 +115,7 @@ To reuse external store data, map it to `PriceInput`, call `validateInput` and `
 
 See the [integration contract](docs/INTEGRATION_CONTRACT.md), [financial formulas](docs/FINANCIAL_FORMULAS.md), [architecture](docs/ARCHITECTURE.md), [security notes](docs/SECURITY_AUDIT.md), and [Apache 2.0 license](LICENSE).
 
-**Limits:** COP only; browser-local storage; no sign-in, backend, cross-device sync, automatic commerce integrations, checkout, or WordPress plugin. Results are illustrative, not accounting or tax advice. Source license rights do not grant third-party trademark rights.
+**Limits:** COP and indicative ISO pricing are available; Windows uses SQLite and the PWA uses browser storage. No live merchant order sync, background desktop service, checkout or official WordPress plugin has been deployed; each store needs its own v2 server adapter. Results are illustrative, not accounting or tax advice. Source license rights do not grant third-party trademark rights.
 
 ## Documentación técnica v2 / Technical v2 documentation
 
@@ -123,4 +125,4 @@ See the [integration contract](docs/INTEGRATION_CONTRACT.md), [financial formula
 
 ## Precify Tauri desktop and isolated businesses (2.1.0 candidate)
 
-The financial engine **remains TypeScript/BigInt** to preserve parity with the PWA. The Windows app uses Rust for its native window and per-business SQLite snapshots; embedded-browser storage remains the active frontend store until an explicitly approved migration. Separate businesses and an all-business overview are available without fabricated profits or cross-currency totals. [Decision](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Implementation and limits](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). Vezura has not been changed.
+The financial engine **remains TypeScript/BigInt** to preserve parity with the PWA. The Windows app uses Rust for its native window and per-business SQLite snapshots; native SQLite is now authoritative for Windows financial records; browser storage is a read projection. Separate businesses and an all-business overview are available without fabricated profits or cross-currency totals. [Decision](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Implementation and limits](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). Vezura has not been changed.
