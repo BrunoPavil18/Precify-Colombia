@@ -34,3 +34,11 @@ For development run `pnpm dev` in one terminal, then `cd apps/desktop; pnpm dlx 
 
 ## Release pipeline
 `scripts/package-desktop.ps1` produces the portable ZIP, optionally the Inno Setup installer, and SHA256 checksums. This reproduces MediaSuite's **distribution pattern**, without copying Qt, Python or unrelated MediaSuite code. Keep release/tag and main branch unchanged until owner acceptance.
+
+## Multi-business preview (2026-11-02)
+
+The v2.1.0 candidate now supports separate local business profiles, a multi-business overview and **native SQLite revisioned snapshots** via restricted Rust commands. The original browser workspace is kept under its historical storage keys; other businesses are namespaced. SQLite is a recoverable native mirror during this milestone, **not yet the sole authoritative store**. See [architecture and acceptance](../../docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md) and [financial engine decision](../../docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md).
+
+The ZIP is **installation-free**, but its profile data are stored in the current Windows account's WebView2/Tauri application-data directories, **not in the extracted ZIP folder**. Copy your exported backups to move to another PC. WebView2 Runtime must be available.
+
+The window title is now Precify Colombia. GitHub Actions creates the desktop candidate and checks the frontend and native SQLite tests. The main branch remains untouched.

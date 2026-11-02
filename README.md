@@ -126,3 +126,7 @@ Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [segurid
 - [Integration API v2](docs/INTEGRATION_V2.md)
 - [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
 - [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
+
+## Precify Desktop Tauri y negocios independientes (candidata 2.1.0)
+
+El núcleo monetario **permanece en TypeScript/BigInt** para conservar la paridad de cálculo con la PWA. La app Windows usa Rust para ventana nativa y respaldos SQLite por negocio; el navegador sigue siendo el almacenamiento activo hasta una migración explícita. Puede crear negocios separados y abrir el panel "Todos los negocios" sin inventar beneficios ni sumar distintas divisas. [Análisis técnico](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guía y limitaciones](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). No hay cambios en Vezura.

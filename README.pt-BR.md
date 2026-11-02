@@ -118,3 +118,7 @@ Leia [contrato de integração](docs/INTEGRATION_CONTRACT.md), [fórmulas](docs/
 - [Integration API v2](docs/INTEGRATION_V2.md)
 - [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
 - [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
+
+## Precify Desktop Tauri e negócios independentes (candidata 2.1.0)
+
+O núcleo financeiro **permanece em TypeScript/BigInt** para preservar equivalência com a PWA. O aplicativo Windows usa Rust para a janela nativa e snapshots SQLite por negócio; o armazenamento ativo da interface continua no navegador integrado até uma migração explícita. É possível criar negócios independentes e abrir a visão "Todos os negócios", sem inventar lucros nem somar moedas diferentes. [Análise técnica](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guia e limitações](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). A Vezura não foi alterada.

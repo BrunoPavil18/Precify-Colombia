@@ -37,3 +37,10 @@
 ## Evidência automática
 
 O workflow `.github/workflows/precify-multi-business-candidate.yml` verifica motor TS, dicionários, build, navegador real (isolamento, persistência, 19 rotas, mobile, animações) e testes Rust/compilação Tauri + geração de ZIP/Inno. **Aprovar somente se ambos os jobs estiverem verdes**, e conferir hashes dos artefatos. Esta seção será atualizada após o gate concluído.
+
+## Complemento de recuperação e portabilidade
+
+- O diretório dos negócios também possui snapshot SQLite separado sob `business_id=default`, `kind=business-directory`. A recuperação é acionada explicitamente pelo botão de banco de dados no seletor de negócios.
+- O ZIP é portátil **como executável**, mas seus dados persistentes não ficam dentro do diretório extraído: WebView2 e SQLite gravam no perfil de usuário do Windows. Migrar entre máquinas requer backup e restauração intencionais.
+- O Windows WebView2 não está embutido em modo fixed runtime neste pacote. Em máquinas sem o runtime, instalar offline antes de executar.
+- A visão financeira agregada é baseada em eventos locais declarados/importados, sem equivalência automática com extrato bancário nem deduplicação global certificada entre sites repetidos.

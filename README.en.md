@@ -118,3 +118,7 @@ See the [integration contract](docs/INTEGRATION_CONTRACT.md), [financial formula
 - [Integration API v2](docs/INTEGRATION_V2.md)
 - [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
 - [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
+
+## Precify Tauri desktop and isolated businesses (2.1.0 candidate)
+
+The financial engine **remains TypeScript/BigInt** to preserve parity with the PWA. The Windows app uses Rust for its native window and per-business SQLite snapshots; embedded-browser storage remains the active frontend store until an explicitly approved migration. Separate businesses and an all-business overview are available without fabricated profits or cross-currency totals. [Decision](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Implementation and limits](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). Vezura has not been changed.
