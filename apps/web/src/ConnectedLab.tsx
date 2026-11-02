@@ -1,6 +1,7 @@
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useContext,useEffect,useState} from "react";
 import {validateOrderEvent,validateAdCampaign,type OrderEvent,type AdCampaign} from "@precify-financy/core";
-import {useTranslator} from "./i18n";
+import {LocaleContext,useTranslator} from "./i18n";
+import {businessKey,getBusinessScope,useBusinesses} from "./BusinessProfiles";
 
 const API=(import.meta.env.VITE_PRECIFY_API_URL as string|undefined)?.replace(/\/$/,"")??"";
 const SB=(import.meta.env.VITE_SUPABASE_URL as string|undefined)?.replace(/\/$/,"")??"";
@@ -62,6 +63,9 @@ function savedOrgs(user:string):Org[]{
 }
 export function ConnectedLab(){
  const t=useTranslator();
+ const locale=useContext(LocaleContext);
+ const {current}=useBusinesses();
+ const [confirmLocalUpload,setConfirmLocalUpload]=useState(false);
  const [session,setSession]=useState<Session|null>(readSession);
  const [email,setEmail]=useState(""),[password,setPassword]=useState("");
  const [notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
@@ -133,10 +137,10 @@ export function ConnectedLab(){
   storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setCacheConsent(false);setConsentOrg(null);setNewKey("");setNewHook(null);
  }
  async function uploadLocal(){
-  if(!session||!selected)return;
+  if(!session||!selected||!confirmLocalUpload||!current)return;
   try{
    setBusy(true);
-   const raw=localStorage.getItem(LOCAL_OPERATIONS);
+   const raw=localStorage.getItem(businessKey(LOCAL_OPERATIONS,getBusinessScope()));
    if(!raw)throw new Error("No hay datos operativos locales para importar.");
    if(raw.length>2000000)throw new Error("El respaldo local es demasiado grande.");
    const data=JSON.parse(raw) as {version:number;events:OrderEvent[];campaigns:AdCampaign[]};
@@ -145,6 +149,7 @@ export function ConnectedLab(){
    await request(session,"/v1/orgs/"+selected+"/orders/import","POST",data.events);
    await request(session,"/v1/orgs/"+selected+"/campaigns/import","POST",data.campaigns);
    await report(selected,session);
+   setConfirmLocalUpload(false);
    setNotice(t("Importación explícita completada. Los datos locales permanecen intactos."));
   }catch(e){setNotice(String(e));}finally{setBusy(false);}
  }
@@ -231,7 +236,7 @@ export function ConnectedLab(){
   </div>:<>
    <div className="advanced-actions"><span>{session.user.email??session.user.id}</span><button className="secondary" onClick={logout}>{t("Cerrar sesión")}</button></div>
    <div className="advanced-grid">
-    <label className="field"><span>{t("Organización")}</span><select value={selected} onChange={e=>{const id=e.target.value;setSelected(id);setDashboard(null);setCacheConsent(false);setConsentOrg(null);if(id)void report(id,session);}}>
+    <label className="field"><span>{t("Organización")}</span><select value={selected} onChange={e=>{const id=e.target.value;setSelected(id);setConfirmLocalUpload(false);setDashboard(null);setCacheConsent(false);setConsentOrg(null);if(id)void report(id,session);}}>
      <option value="">{t("Selecciona una organización")}</option>{orgs.map(o=><option key={o.id} value={o.id}>{o.name+" · "+o.role}</option>)}
     </select></label>
     <label className="field"><span>{t("Nueva organización")}</span><input value={newOrg} onChange={e=>setNewOrg(e.target.value)}/></label>
@@ -247,9 +252,14 @@ export function ConnectedLab(){
       {dashboard.reconciliation.map(c=><div className="list-row" key={c.campaignId}><span>{c.campaignId} · {c.currency+" "+c.observedNetRevenue}</span><small>{t("Diferencia frente a la atribución")}: {c.discrepancy}</small></div>)}
       </>}
     </div>
+    <label className="field">
+     <input type="checkbox" checked={confirmLocalUpload} onChange={e=>setConfirmLocalUpload(e.target.checked)}/>
+     {locale==="pt-BR"?"Confirmo enviar os dados locais deste negócio para a organização remota selecionada:":locale==="en"?"I confirm uploading this local business's records to the selected remote organization:":"Confirmo enviar los registros locales de este negocio a la organización remota seleccionada:"}
+     {" "}<strong>{current?.name??""} → {orgs.find(o=>o.id===selected)?.name??selected}</strong>
+    </label>
     <div className="advanced-actions">
      <button className="secondary" disabled={busy} onClick={()=>{void report(selected,session);}}>{t("Actualizar informe")}</button>
-     <button className="secondary" disabled={busy||offline} onClick={()=>{void uploadLocal();}}>{t("Importar mis datos locales explícitamente")}</button>
+     <button className="secondary" disabled={busy||offline||!confirmLocalUpload||!current} onClick={()=>{void uploadLocal();}}>{t("Importar mis datos locales explícitamente")}</button>
      <button className="secondary" onClick={()=>{void exportRemote();}}>{t("Exportar mis datos conectados")}</button>
     </div>
     <div className="advanced-results">

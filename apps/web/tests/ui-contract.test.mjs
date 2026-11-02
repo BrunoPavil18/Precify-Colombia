@@ -128,3 +128,12 @@ test("native SQLite startup fails visibly without auto-resetting user data",()=>
  assert.ok(main.includes('role="alert"'));
  assert.ok(main.includes('Nenhum dado foi apagado ou substituído automaticamente.'));
 });
+
+test("optional cloud upload uses active business storage and requires explicit destination acknowledgment",()=>{
+ const connected=readFileSync(new URL("../src/ConnectedLab.tsx",import.meta.url),"utf8");
+ assert.ok(connected.includes("businessKey(LOCAL_OPERATIONS,getBusinessScope())"));
+ assert.ok(!connected.includes("localStorage.getItem(LOCAL_OPERATIONS)"));
+ assert.ok(connected.includes("if(!session||!selected||!confirmLocalUpload||!current)return"));
+ assert.ok(connected.includes("disabled={busy||offline||!confirmLocalUpload||!current}"));
+ assert.ok(connected.includes("setConfirmLocalUpload(false);setDashboard(null)"));
+});
