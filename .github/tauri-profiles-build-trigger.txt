@@ -4,3 +4,5 @@ Latest app source d725e043b016ecc630b2a2352c6232073165b850
 Release candidate - draft - no main merge/deployment.
 
 2026-11-02 full consolidated regression gate: in-app integration guide, pending Ed25519 identity recovery, connector cleanup, browser acceptance and UI tests.
+
+Final post-audit release candidate gate (2026-11-02): sync purge race fix, selectable documentation fallback, expanded regression tests, audit report.
