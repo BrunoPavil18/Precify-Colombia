@@ -132,13 +132,18 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      });
      const run=async(manual=false)=>{
       if(stopped||(!manual&&!navigator.onLine))return controller.getState();
-      const result=controller.run(manual);
-      running.current.set(site.id,result);
-      await result;
-      running.current.delete(site.id);
-      if(stopped)return result;
-      await loadSnapshot(scope,site.id);
-      return result;
+      const existing=running.current.get(site.id);
+      if(existing)return existing;
+      // Keep the entire fetch + report refresh in flight, so disabling/removing
+      // a connection waits for all reads before purging its local records.
+      const task=(async()=>{
+       const result=await controller.run(manual);
+       if(!stopped)await loadSnapshot(scope,site.id);
+       return result;
+      })();
+      running.current.set(site.id,task);
+      try{return await task;}
+      finally{if(running.current.get(site.id)===task)running.current.delete(site.id);}
      };
      controllers.current.set(site.id,{run});
      handler=()=>{void run().catch(e=>{if(!stopped)setNotice(String(e));});};
