@@ -177,7 +177,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     base.username||base.password||base.search||base.hash)throw Error(t.fail);
    const entry:Site={id:crypto.randomUUID(),name:trimmed,url:base.toString().replace(/\/$/,""),interval:60000,enabled:false,mode:"device-v2"};
    if(sites.length>=20||sites.some(s=>s.url===entry.url))throw Error(t.fail);
-   update([...sites,entry]);setName("");setUrl("");setNotice("");
+   await update([...sites,entry]);setName("");setUrl("");setNotice("");
   }catch(e){setNotice(String(e));}
  }
  const statusesText=(site:Site)=>{
@@ -188,6 +188,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  };
  return <section className="advanced-results website-sync-lab" style={{display:visible?undefined:"none"}}>
   <h3>{t.title}</h3><p className="muted">{t.description}</p>
+  <p className="muted">{locale==="pt-BR"?"Cada código só ativa um computador. Remover a conexão local não revoga o dispositivo no servidor; revogue-o também no painel da loja.":locale==="en"?"Each code can activate only one installation. Removing the local connection does not revoke the device on the store server; revoke it from the store's admin panel.":"Cada código solo activa una instalación. Eliminar la conexión local no revoca el dispositivo en el servidor; revócalo también en la administración de la tienda."}</p>
   <div className="advanced-grid">
    <label className="field"><span>{t.name}</span><input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label>
    <label className="field"><span>{t.url}</span><input type="url" placeholder="https://store.example" value={url} onChange={e=>setUrl(e.target.value)}/></label>

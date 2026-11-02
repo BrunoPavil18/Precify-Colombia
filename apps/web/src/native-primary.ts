@@ -1,7 +1,7 @@
 /**
  * Precify Financy 2.x Windows: SQLite is the authoritative on-device store.
  * localStorage is a disposable, synchronous UI read projection. It is NOT used to
- * seed the new Tauri app: prior Precify Colombia experimental data are ignored.
+ * seed the new Tauri app: prior experimental application data are ignored.
  *
  * Every native save must commit first and only then publish the UI projection.
  */

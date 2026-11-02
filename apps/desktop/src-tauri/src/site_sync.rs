@@ -1,4 +1,4 @@
-//! Transactional site-owned financial event cache, stored in native SQLite on Windows.
+//! Transactional site-owned event cache in the same SQLite file as financial snapshots.
 use rusqlite::{params,Connection,OptionalExtension,TransactionBehavior};
 use serde::{Deserialize,Serialize};
 use serde_json::Value;

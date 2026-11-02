@@ -38,3 +38,9 @@ O identificador e o segredo de instalação não são uma senha compartilhada; o
 Para lojas com MySQL 8, aplique `integrations/sql/precify-financy-device-v2.mysql.sql` no banco da própria loja e utilize `createMySQLDeviceStore(pool)` de `integrations/device-store-mysql.mjs`, fornecendo o pool mysql2 já usado pelo site. A transação de `redeem()` consome o convite e registra o dispositivo de maneira atômica; erros fazem ROLLBACK e um segundo consumo retorna HTTP 409. Os nonces possuem índice composto único.
 
 O SQL não cria usuários, senhas nem administradores do Precify. O site continua responsável por autorizar quem emite/renova/revoga dispositivos, e por disponibilizar o feed financeiro da loja. Esse adapter NÃO foi implantado na Vezura e deve ser testado no ambiente dela antes de uso real.
+
+## Segurança operacional da versão desktop
+
+Ao integrar uma loja, confirme a origem real da versão Windows/WebView2 (tipicamente `http://tauri.localhost`) e adicione-a explicitamente a `allowedOrigins`, junto às origens HTTPS da PWA autorizadas. Nunca configure `*` ou copie cegamente o header `Origin` recebido. O cliente Tauri e a PWA devem ser testados com os endpoints reais.
+
+Excluir uma conexão no Precify apenas apaga a identidade e o cache **locais**. A credencial pública precisa ser revogada no painel administrativo **do servidor da loja** para bloquear novos acessos. A operação de ativação já é de uso único e transacional; a implantação real ainda exige verificar CORS, concorrência, expiração, rate limiting, revogação e feed durável.
