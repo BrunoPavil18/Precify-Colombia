@@ -1,0 +1,64 @@
+name: Precify 2.1 multi-business Tauri consolidated candidate
+on:
+  push:
+    branches: ['feat/precify-colombia-v2.1.0']
+    paths: ['.github/tauri-profiles-build-trigger.txt']
+permissions:
+  contents: read
+jobs:
+  web-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.34.7 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:2.1.0
+      - run: node scripts/browser-redesign-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: precify-2-1-multibusiness-browser-evidence
+          path: artifacts/redesign/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+  native-windows:
+    runs-on: windows-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.34.7 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: x86_64-pc-windows-msvc }
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:2.1.0
+      - run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
+      - name: Compile Windows Tauri native executable
+        working-directory: apps/desktop
+        run: pnpm dlx @tauri-apps/cli@2.12.4 build --no-bundle
+      - name: Prepare Inno Setup
+        shell: pwsh
+        run: |
+          $compiler=Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          if (!(Test-Path $compiler)) { choco install innosetup --no-progress -y }
+      - name: Create ZIP and Inno installer
+        shell: pwsh
+        run: .\scripts\package-desktop.ps1 -RequireInstaller
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Precify-Colombia-2.1-MultiBusiness-Tauri-Windows
+          path: |
+            dist/desktop/*.exe
+            dist/desktop/*.zip
+            dist/desktop/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
