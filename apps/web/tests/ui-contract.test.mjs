@@ -82,3 +82,18 @@ test("empty advanced numeric fields normalize to zero on blur, not during typing
  assert.ok(lab.includes('onBlur={()=>{if(value.trim()===""){onChange("0");onDirty(true);}}}'));
  assert.ok(lab.includes('onChange(e.target.value);onDirty(true);'));
 });
+
+
+test("Windows site sync uses native SQLite in the same file as financial snapshots",()=>{
+ const store=readFileSync(new URL("../src/website-sync-db.ts",import.meta.url),"utf8");
+ for(const operation of ["site_sync_checkpoint","site_sync_apply","site_sync_rows","site_sync_purge"])
+  assert.ok(store.includes(operation),operation);
+ assert.ok(store.includes("supportsDesktopSQLite()"));
+ const fs=readFileSync(new URL("../../desktop/src-tauri/src/native_snapshots.rs",import.meta.url),"utf8");
+ const feed=readFileSync(new URL("../../desktop/src-tauri/src/site_sync.rs",import.meta.url),"utf8");
+ const same='join("precify-financy-local.db")';
+ assert.ok(fs.includes(same)&&feed.includes(same),"native records and feed must share one database file");
+ const primary=readFileSync(new URL("../src/native-primary.ts",import.meta.url),"utf8");
+ assert.ok(primary.includes('await bridge()("desktop_snapshot_put"'),"disk must commit before browser projection");
+ assert.ok(primary.indexOf('await bridge()("desktop_snapshot_put"') < primary.indexOf('localStorage.setItem(storeKey(businessId,kind),data);',primary.indexOf('await bridge()("desktop_snapshot_put"')));
+});
