@@ -156,3 +156,11 @@ test("connector effect registers asynchronous cleanup before device identity req
  assert.ok(src.includes("if(stopped)teardown();"));
  assert.ok(src.includes("const next=loadSites(businessId).map"));
 });
+
+test("disconnect waits for the whole in-flight sync including local report refresh",()=>{
+ const src=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ assert.ok(src.includes("if(existing)return existing;"));
+ assert.ok(src.includes("running.current.set(site.id,task)"));
+ assert.ok(src.includes("if(running.current.get(site.id)===task)running.current.delete(site.id)"));
+ assert.ok(src.includes("try{await running.current.get(site.id);}"));
+});
