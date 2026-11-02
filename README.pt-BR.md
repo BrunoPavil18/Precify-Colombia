@@ -13,7 +13,7 @@
 
 ## Redesign dark-first 2.1.0 — entrega consolidada (candidata)
 
-Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tarefas, nova **Visão Geral**, acesso direto a COD/CAC/CPA/PUM, catálogo pesquisável, relatórios com filtros, microanimações normais por padrão e menu mobile. Os cálculos e o funcionamento offline foram preservados. **113 testes automatizados** e aceitação real no Chromium (19 rotas, salvamento e recarga) aprovados. [Relatório da entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidência do CI](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905). A branch continua não publicada e não altera a Vezura.
+Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tarefas, nova **Visão Geral**, acesso direto a COD/CAC/CPA/PUM, catálogo pesquisável, relatórios com filtros, microanimações normais por padrão e menu mobile. Os cálculos e o funcionamento offline foram preservados. **118 testes automatizados** e aceitação real no Chromium (19 rotas, salvamento e recarga) aprovados. [Relatório da entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidência do CI](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119). A branch continua não publicada e não altera a Vezura.
 
 ## Desenvolvimento da 2.1.0 — ainda não homologada
 

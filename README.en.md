@@ -11,7 +11,7 @@
 
 ## 2.1.0 dark-first redesign — consolidated candidate
 
-Implemented a **Jet Black `#121212`** theme, task-first grouped navigation, new **Overview** dashboard, direct COD/CAC/CPA/PUM entry points, searchable catalog, report filters, smooth default microinteractions and a mobile navigation drawer. Existing financial formulas and offline behavior remain intact. **113 automated tests** and real Chromium UI acceptance (19 routes, save and reload) passed. [Delivery record](docs/REDESIGN_DELIVERY_V2_1_0.md) · [CI evidence](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905). This is still an unreleased draft; Vezura was not modified.
+Implemented a **Jet Black `#121212`** theme, task-first grouped navigation, new **Overview** dashboard, direct COD/CAC/CPA/PUM entry points, searchable catalog, report filters, smooth default microinteractions and a mobile navigation drawer. Existing financial formulas and offline behavior remain intact. **118 automated tests** and real Chromium UI acceptance (19 routes, save and reload) passed. [Delivery record](docs/REDESIGN_DELIVERY_V2_1_0.md) · [CI evidence](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119). This is still an unreleased draft; Vezura was not modified.
 
 ## Version 2.1.0 development — not production-certified
 
