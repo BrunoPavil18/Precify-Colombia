@@ -54,7 +54,7 @@ fn init_db(path: &Path) -> Result<Connection, String> {
     Ok(conn)
 }
 fn connection(app: tauri::AppHandle) -> Result<Connection, String> {
-    let path = app.path().app_data_dir().map_err(|e| e.to_string())?.join("precify-local.db");
+    let path = app.path().app_data_dir().map_err(|e| e.to_string())?.join("precify-financy-local.db");
     init_db(&path)
 }
 fn fetch(conn: &Connection, business_id: &str, kind: &str) -> Result<Option<Snapshot>, String> {

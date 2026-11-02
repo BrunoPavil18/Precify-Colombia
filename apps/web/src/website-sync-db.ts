@@ -1,5 +1,13 @@
 /** IndexedDB: each site page and its cursor commit in one browser transaction. */
 import {getBusinessScope,MAIN_BUSINESS} from "./BusinessProfiles";
+import {supportsDesktopSQLite} from "./desktop-snapshots";
+type NativeBridge={core?:{invoke?:(command:string,args?:Record<string,unknown>)=>Promise<unknown>}};
+const nativeCommand=async <T,>(name:string,args:Record<string,unknown>):Promise<T>=>{
+ const invoke=(window as Window&{__TAURI__?:NativeBridge}).__TAURI__?.core?.invoke;
+ if(!invoke)throw new Error("Native SQLite bridge unavailable");
+ return await invoke(name,args) as T;
+};
+
 const DB_NAME="precify-financy-site-owned-sync-v1";
 const scoped=(value:string,businessId=getBusinessScope())=>businessId===MAIN_BUSINESS?value:businessId+"::"+value;
 function openSyncDB():Promise<IDBDatabase>{
@@ -19,6 +27,7 @@ function openSyncDB():Promise<IDBDatabase>{
 const stableJSON=(value:unknown):string=>JSON.stringify(value,(_key,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 export type SyncChange={kind:"order"|"campaign";id:string;operation:"upsert"|"delete";value?:Record<string,unknown>};
 export async function readSiteCheckpoint(inputScope:string,businessId=getBusinessScope()):Promise<{cursor:string|null;at:number;count:number}|null>{
+ if(supportsDesktopSQLite())return nativeCommand("site_sync_checkpoint",{businessId,scope:inputScope});
  const scope=scoped(inputScope,businessId);
  const db=await openSyncDB();
  try{return await new Promise((resolve,reject)=>{
@@ -32,6 +41,10 @@ export async function readSiteCheckpoint(inputScope:string,businessId=getBusines
  });}finally{db.close();}
 }
 export async function applySitePage(inputScope:string,changes:SyncChange[],cursor:string|null,expectedCursor?:string|null,businessId=getBusinessScope()):Promise<void>{
+ if(supportsDesktopSQLite()){
+  await nativeCommand("site_sync_apply",{businessId,scope:inputScope,changes,cursor,expectedCursor:expectedCursor??null,checkExpected:expectedCursor!==undefined});
+  return;
+ }
  const scope=scoped(inputScope,businessId);
  const db=await openSyncDB();
  try{await new Promise<void>((resolve,reject)=>{
@@ -66,6 +79,10 @@ export async function applySitePage(inputScope:string,changes:SyncChange[],curso
  });}finally{db.close();}
 }
 export async function purgeSiteCache(sourceId:string,businessId=getBusinessScope()):Promise<void>{
+ if(supportsDesktopSQLite()){
+  await nativeCommand("site_sync_purge",{businessId,sourceId});
+  return;
+ }
  sourceId=scoped(sourceId,businessId);
  const db=await openSyncDB();
  try{await new Promise<void>((resolve,reject)=>{
@@ -84,6 +101,9 @@ export async function purgeSiteCache(sourceId:string,businessId=getBusinessScope
 }
 
 export async function readSiteRows(inputScope:string,maxRows=20000,businessId=getBusinessScope()):Promise<Array<{kind:"order"|"campaign";id:string;value:Record<string,unknown>}>>{
+ if(supportsDesktopSQLite()){
+  return nativeCommand("site_sync_rows",{businessId,scope:inputScope,maxRows});
+ }
  const scope=scoped(inputScope,businessId);
  const db=await openSyncDB();
  try{
