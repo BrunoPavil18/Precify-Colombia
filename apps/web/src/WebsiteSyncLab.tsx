@@ -57,9 +57,10 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  const [devices,setDevices]=useState<Record<string,DeviceIdentity>>({});
  const [codes,setCodes]=useState<Record<string,string>>({});
  const [activating,setActivating]=useState<Record<string,boolean>>({});
+ const [guideOpen,setGuideOpen]=useState(false);
  useEffect(()=>{
   let cancelled=false;
-  void Promise.all(sites.filter(s=>s.mode==="device-v2").map(async site=>[site.id,await readDevice(businessId,site.id)] as const))
+  void Promise.all(sites.filter(s=>s.mode==="device-v2").map(async site=>[site.id,await readDevice(businessId,site.id,site.url)] as const))
    .then(rows=>{if(!cancelled)setDevices(Object.fromEntries(rows.filter(([,v])=>v)) as Record<string,DeviceIdentity>);})
    .catch(e=>{if(!cancelled)setNotice(String(e));});
   return()=>{cancelled=true;};
@@ -99,7 +100,9 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
    const token=tokens[site.id];
    const device=devices[site.id];
    if(!site.enabled||!(site.mode==="device-v2"?device:token))continue;
-   let stopped=false,handler:()=>void=()=>{};
+   let stopped=false,handler:()=>void=()=>{},teardown:()=>void=()=>{};
+   // Register cleanup synchronously: async identity verification may finish after unmount.
+   tasks.push(()=>{stopped=true;teardown();controllers.current.delete(site.id);});
    const init=async()=>{
     try{
      const connector=site.mode==="device-v2"?createDeviceConnector({id:site.id,baseURL:site.url,identity:device!}):createSiteConnector({id:site.id,baseURL:site.url,getToken:()=>token??""});
@@ -108,7 +111,10 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      if(site.subject!==subject){
       setStats(previous=>{const next={...previous};delete next[site.id];return next;});
       setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
-      const next=sites.map(s=>s.id===site.id?{...s,subject}:s);await update(next);
+      const next=loadSites(businessId).map(s=>s.id===site.id?{...s,subject}:s);
+      if(!next.some(s=>s.id===site.id&&s.enabled))return;
+      await update(next);
+      if(stopped)return;
      }
      const scope=site.id+":"+subject;
      const controller=createSyncController({
@@ -135,20 +141,20 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       return result;
      };
      controllers.current.set(site.id,{run});
-     handler=()=>{void run();};
-     if(site.interval>0&&navigator.onLine)void run();
-     const interval=site.interval>0?window.setInterval(()=>{if(navigator.onLine&&!document.hidden)void run();},site.interval):undefined;
+     handler=()=>{void run().catch(e=>{if(!stopped)setNotice(String(e));});};
+     if(site.interval>0&&navigator.onLine)handler();
+     const interval=site.interval>0?window.setInterval(()=>{if(navigator.onLine&&!document.hidden)handler();},site.interval):undefined;
      if(site.interval>0)window.addEventListener("online",handler);
      const visibility=()=>{if(site.interval>0&&!document.hidden)handler();};
      if(site.interval>0)document.addEventListener("visibilitychange",visibility);
-     tasks.push(()=>{if(interval!==undefined)window.clearInterval(interval);
-      window.removeEventListener("online",handler);document.removeEventListener("visibilitychange",visibility);});
+     teardown=()=>{if(interval!==undefined)window.clearInterval(interval);
+      window.removeEventListener("online",handler);document.removeEventListener("visibilitychange",visibility);};
+     if(stopped)teardown();
     }catch(e){if(!stopped)setStatuses(previous=>({...previous,[site.id]:{
       phase:"error",lastError:String(e),lastSuccess:null,pulled:0
     }}));}
    };
    void init();
-   tasks.push(()=>{stopped=true;controllers.current.delete(site.id);});
   }
   return ()=>{for(const close of tasks)close();};
  },[sites.map(s=>s.id+"-"+s.url+"-"+s.enabled+"-"+s.interval+"-"+s.subject).join("|"),
@@ -197,7 +203,23 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     <li>{locale==="pt-BR"?"Cole o convite no cartão da loja, ative esta instalação e autorize a sincronização.":locale==="en"?"Paste the invitation into the store card, activate this installation and authorize synchronization.":"Pega la invitación en la tarjeta de la tienda, activa la instalación y autoriza la sincronización."}</li>
    </ol>
    <p className="muted">{locale==="pt-BR"?"Enquanto o site não implementar essa API, você pode cadastrar a loja, mas não ativá-la ou receber pedidos reais. Nenhuma conta central do Precify é necessária.":locale==="en"?"Until the site implements this API, you can add it but cannot activate or receive real orders. No central Precify account is needed.":"Hasta que el sitio implemente esta API, puedes registrarlo, pero no activarlo ni recibir pedidos reales. No necesitas una cuenta central de Precify."}</p>
-   <a href="https://github.com/BrunoPavil18/Precify-Financy/blob/feat/precify-colombia-v2.1.0/docs/STORE_DEVICE_API_V2.md" target="_blank" rel="noopener noreferrer">{locale==="pt-BR"?"Guia técnico para integrar seu site":locale==="en"?"Technical guide for your site's integration":"Guía técnica para integrar tu sitio"}</a>
+   <button type="button" className="secondary" aria-expanded={guideOpen} aria-controls="precify-site-integration-guide" onClick={()=>setGuideOpen(value=>!value)}>
+    {locale==="pt-BR"?"Guia técnico para integrar seu site":locale==="en"?"Technical guide for integrating your site":"Guía técnica para integrar tu sitio"} {guideOpen?"−":"+"}
+   </button>
+   {guideOpen&&<div id="precify-site-integration-guide" role="region" aria-label={locale==="pt-BR"?"Manual de integração da loja":locale==="en"?"Store integration manual":"Manual de integración de la tienda"} className="connection-technical-guide">
+    <h4>{locale==="pt-BR"?"Configuração no servidor da loja":locale==="en"?"Store backend setup":"Configuración en el servidor de la tienda"}</h4>
+    <p>{locale==="pt-BR"?"O convite não cria a API sozinho. Um desenvolvedor precisa instalar o adaptador no backend da loja, usando o banco de dados da própria loja. Não é necessário criar contas no Precify.":locale==="en"?"An invitation does not create an API automatically. A developer must integrate the adapter into the store backend, using the store's own database. No Precify accounts are required.":"Una invitación no crea la API automáticamente. Un desarrollador debe integrar el adaptador en el backend, usando la propia base de datos de la tienda. No se requieren cuentas de Precify."}</p>
+    <ol>
+     <li>{locale==="pt-BR"?"Escolha a migração SQL para MySQL 8 ou PostgreSQL em integrations/sql e aplique-a apenas no banco da loja, após backup.":locale==="en"?"Choose the MySQL 8 or PostgreSQL migration from integrations/sql and apply it only to the store database after taking a backup.":"Elige la migración para MySQL 8 o PostgreSQL de integrations/sql y aplícala únicamente a la base de la tienda después de un respaldo."}</li>
+     <li>{locale==="pt-BR"?"Implemente os adaptadores de dispositivos, convites de uso único e feed durável de pedidos. Exponha os três endpoints HTTPS abaixo.":locale==="en"?"Implement the device adapter, single-use invitations and a durable order feed. Expose the three HTTPS endpoints below.":"Implementa el adaptador de dispositivos, invitaciones de un solo uso y un feed duradero de pedidos. Expón los tres endpoints HTTPS siguientes."}</li>
+     <li>{locale==="pt-BR"?"No painel administrativo da loja, permita emitir convites temporários, listar dispositivos autorizados e revogar acessos. Nunca disponibilize a emissão de convites ao público.":locale==="en"?"In the store admin, allow issuing short-lived invitations, listing authorized devices and revoking access. Never expose invitation issuance publicly.":"En el panel administrativo, permite emitir invitaciones temporales, listar dispositivos autorizados y revocar accesos. Nunca permitas la emisión pública."}</li>
+     <li>{locale==="pt-BR"?"Ative uma instalação com cada convite. A loja deve rejeitar reutilização com HTTP 409 e verificar assinatura Ed25519, nonce, horário, escopo e revogação.":locale==="en"?"Activate one installation per invitation. The store must reject reuse with HTTP 409 and verify the Ed25519 signature, nonce, timestamp, scope and revocation.":"Activa una instalación por invitación. La tienda debe rechazar la reutilización con HTTP 409 y comprobar firma Ed25519, nonce, fecha, permisos y revocación."}</li>
+    </ol>
+    <p><strong>{locale==="pt-BR"?"Endpoints exigidos":locale==="en"?"Required endpoints":"Endpoints obligatorios"}</strong></p>
+    <pre>{`POST /precify/v2/activate\nGET  /precify/v2/identity\nGET  /precify/v2/changes`}</pre>
+    <p>{locale==="pt-BR"?"Obrigatório: HTTPS, CORS restrito, limite de tentativas, retenção de eventos, isolamento entre lojas e ausência de dados pessoais desnecessários. A sincronização só ocorre enquanto o Precify está aberto.":locale==="en"?"Required: HTTPS, restricted CORS, rate limiting, durable events, store isolation and no unnecessary personal data. Precify syncs only while open.":"Obligatorio: HTTPS, CORS restringido, límite de intentos, eventos duraderos, aislamiento por tienda y sin datos personales innecesarios. Precify sincroniza solo mientras está abierto."}</p>
+    <p><a href="https://github.com/BrunoPavil18/Precify-Financy/blob/feat/precify-colombia-v2.1.0/docs/STORE_DEVICE_API_V2.md" target="_blank" rel="noopener noreferrer">{locale==="pt-BR"?"Documentação completa e arquivos do adaptador (GitHub)":locale==="en"?"Full documentation and adapter files (GitHub)":"Documentación completa y archivos del adaptador (GitHub)"}</a></p>
+   </div>}
   </div>
   <div className="advanced-grid">
    <label className="field"><span>{t.name}</span><input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label>
