@@ -1,0 +1,4 @@
+Tauri 2 Windows x64 one-time pilot packaging
+Source HEAD: 658b2d55e72c3728b80e5beb294e897457f4b6e8
+Run: verification + native Rust compile + Inno Setup + portable ZIP
+No release, tag, merge, production deploy or Vezura changes.
