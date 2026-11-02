@@ -1,7 +1,7 @@
 name: Precify 2.1 multi-business Tauri consolidated candidate
 on:
   push:
-    branches: ['feat/precify-financy-v2.1.0']
+    branches: ['feat/precify-colombia-v2.1.0']
     paths: ['.github/tauri-profiles-build-trigger.txt']
 permissions:
   contents: read

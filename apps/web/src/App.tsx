@@ -549,7 +549,7 @@ export default function App(){
   try{
    const valid=decodeBackup(await file.text());
    if(!(await askConfirmation(t("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales."))))return;
-   persistWorkspace(valid,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+   await persistWorkspace(valid,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
    setNotice("Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.");setPage("productos");
   }catch(e){setNotice("Respaldo rechazado, sin modificaciones: "+String(e instanceof Error?e.message:e));}
   finally{if(uploadRef.current)uploadRef.current.value="";}
@@ -661,7 +661,7 @@ export default function App(){
         <div className="section-head"><div><span className="eyebrow">{t("EDICIÓN INDEPENDIENTE")}</span><h3>{t(selectedScenario.title.replace(/ \(copia\)$/,""))+(selectedScenario.title.endsWith(" (copia)")?t(" (copia)"):"")} · {scenarioProduct.input.name}</h3><p className="muted">{t("Los cambios solo afectan a este escenario cuando presionas Guardar escenario.")}</p></div>
          <div className="actions">
           <button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>
-          <button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("¿Descartar los cambios no guardados antes de duplicar?"))))return;commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
+          <button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("¿Descartar los cambios no guardados antes de duplicar?"))))return;await commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
           <button className="primary" onClick={saveScenario}>{t("Guardar escenario")}</button>
           <button className="danger-link" onClick={async ()=>{if(await askConfirmation(t("¿Eliminar este escenario?"))&&await commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
          </div></div>
@@ -733,7 +733,7 @@ export default function App(){
      <WebsiteSyncLab visible={page==="conectado"} />
      {advancedPages.includes(page)&&<AdvancedLab key={page} initialPane={page==="marketing"?"campaign":page==="pum"?"pum":page==="consumer"?"consumer":page==="portfolio"?"portfolio":"cod"} initialProductId={activeId??""} workspace={workspace} onDirty={setAdvancedDirty}
       onSave={async (record:AdvancedSimulationRecord)=>{const ok=await commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
-      onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
+      onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))await commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t(reportOrder==="margin"?"Ranking por margen":"Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
  origin:{manual:t("Ingreso manual"),estimado:t("Estimación"),confirmado:t("Declarado confirmado")}

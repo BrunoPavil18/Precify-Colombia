@@ -7,7 +7,7 @@
 #endif
 
 [Setup]
-AppId={{EAC2EC77-F692-45CC-A387-F61171A5D4B0}
+AppId={{8BCF3210-9C20-441C-89D2-1BA9C8F936A7}
 AppName=Precify Financy
 AppVersion={#AppVersion}
 AppVerName=Precify Financy {#AppVersion}

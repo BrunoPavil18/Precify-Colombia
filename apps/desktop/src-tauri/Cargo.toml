@@ -8,7 +8,7 @@ rust-version = "1.80"
 build = "build.rs"
 
 [lib]
-name = "precify_colombia_desktop"
+name = "precify_financy_desktop"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [[bin]]

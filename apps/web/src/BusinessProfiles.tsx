@@ -3,7 +3,7 @@ import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,computeCODFu
 import {UIIcon} from "./UIIcon";
 import {useTranslator} from "./i18n";
 import {readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
-import {nativeWrite,nativePrimary} from "./native-primary";
+import {nativeWrite} from "./native-primary";
 
 /**
  * Business-scoped workspaces. The original "default" business uses the exact
