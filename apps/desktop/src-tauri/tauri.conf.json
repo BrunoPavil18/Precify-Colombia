@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Precify Colombia",
+  "productName": "Precify Financy",
   "version": "2.1.0",
-  "identifier": "com.precifycolombia.desktop",
+  "identifier": "com.precifyfinancy.desktop",
   "build": {
     "devUrl": "http://127.0.0.1:5173",
     "frontendDist": "../../web/dist",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Precify Colombia",
+        "title": "Precify Financy",
         "width": 1380,
         "height": 850,
         "minWidth": 790,

@@ -10,7 +10,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@precify-colombia/core':
+      '@precify-financy/core':
         specifier: workspace:*
         version: link:../../packages/core
       react:

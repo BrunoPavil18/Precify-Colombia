@@ -1,7 +1,7 @@
 import { simulateCOD, simulateCampaign, pricePerMeasure, consumerPricePreview, simulatePortfolio, type PUMUnit } from "./advanced.js";
 import { FinancialInputError, parseDecimal } from "./money.js";
 import { analyze, validateInput, type PriceInput } from "./pricing.js";
-export const STORE_KEY = "precify-colombia:workspace:v1";
+export const STORE_KEY = "precify-financy:workspace:v1";
 export const MAX_BACKUP_BYTES = 2_000_000;
 export type RecordOrigin = "manual" | "estimado" | "confirmado";
 export type Product = { id: string; createdAt: string; updatedAt: string; input: PriceInput };
@@ -113,7 +113,7 @@ export function validateWorkspace(value:unknown):Workspace {
 }
 export function encodeBackup(data: Workspace):string {
  const validated=validateWorkspace(data);
- return JSON.stringify({format:"precify-colombia-backup",backupVersion:2,currency:"COP",locale:"es-CO",
+ return JSON.stringify({format:"precify-financy-backup",backupVersion:2,currency:"COP",locale:"es-CO",
   exportedAt:new Date().toISOString(),workspace:validated},null,2);
 }
 export function decodeBackup(text:string):Workspace {
@@ -122,7 +122,7 @@ export function decodeBackup(text:string):Workspace {
  let parsed:unknown;
  try{parsed=JSON.parse(text);}catch{throw new FinancialInputError("JSON malformado. No se reemplazaron datos.");}
  const root=obj(parsed,"Respaldo");
- if(root.format!=="precify-colombia-backup" || ![1,2].includes(Number(root.backupVersion)) || root.currency!=="COP" || root.locale!=="es-CO")
+ if(root.format!=="precify-financy-backup" || ![1,2].includes(Number(root.backupVersion)) || root.currency!=="COP" || root.locale!=="es-CO")
   throw new FinancialInputError("Metadatos de respaldo incompatibles.");
  safeDate(root.exportedAt,"Exportación");
  return validateWorkspace(root.workspace);
