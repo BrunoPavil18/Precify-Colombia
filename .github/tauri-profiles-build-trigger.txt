@@ -1,3 +1,4 @@
-Precify Financy v2.1.0 whole-product audit (2026-11-02)
-Validated candidate commit: cce6f3de9052811f98a2d250dca1d60221dce445
-Device-first connections, optional cloud, scoped storage notifications, SQLite startup recovery, Rust real disk persistence, Chromium 19-page regression, 117 JavaScript tests, Windows x64 Inno + portable ZIP.
+Precify Financy v2.1 final security and Windows artifact gate
+Latest app source d725e043b016ecc630b2a2352c6232073165b850
+118 JavaScript tests, 4 Rust SQLite tests, Chromium 19-page + v2 connections, business-scoped optional cloud upload with explicit remote destination confirmation, Windows x64 Inno + ZIP.
+Release candidate - draft - no main merge/deployment.
