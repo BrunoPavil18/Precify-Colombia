@@ -49,6 +49,7 @@ function loadSites():Site[]{
 function persistSites(sites:Site[]){const before=localStorage.getItem(siteSettingsKey());const content=JSON.stringify(sites);localStorage.setItem(siteSettingsKey(),content);mirrorNativeSnapshot("site-connectors",content,before);}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
 export function WebsiteSyncLab({visible}:{visible:boolean}){
+ const businessId=useRef(getBusinessScope()).current;
  const locale=useContext(LocaleContext) as Locale;
  const t=strings[locale];
  const [sites,setSites]=useState<Site[]>(loadSites),[tokens,setTokens]=useState<Record<string,string>>({});
@@ -56,9 +57,9 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  const [stats,setStats]=useState<Record<string,{at:number;count:number}>>({});
  const [summaries,setSummaries]=useState<Record<string,Array<{currency:string;orders:number;paid:number;projectedNet:string}>>>({});
  async function loadSnapshot(scope:string,id:string){
-  const checkpoint=await readSiteCheckpoint(scope);
+  const checkpoint=await readSiteCheckpoint(scope,businessId);
   if(checkpoint)setStats(previous=>({...previous,[id]:{at:checkpoint.at,count:checkpoint.count}}));
-  const records=await readSiteRows(scope);
+  const records=await readSiteRows(scope,20000,businessId);
   const byCurrency=new Map<string,OrderEvent[]>();
   for(const record of records){
    if(record.kind!=="order")continue;
@@ -100,14 +101,14 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      const scope=site.id+":"+subject;
      const controller=createSyncController({
       connector,scope,
-      store:{read:async key=>await readSiteCheckpoint(key),
+      store:{read:async key=>await readSiteCheckpoint(key,businessId),
        apply:async(key,changes,cursor,expectedCursor)=>{
         if(stopped||!loadSites().some(x=>x.id===site.id&&x.enabled))throw Error("Sync disabled");
         for(const change of changes)if(change.operation==="upsert"){
          if(change.kind==="order")validateOrderEvent(change.value as OrderEvent);
          else validateAdCampaign(change.value as AdCampaign);
         }
-        await applySitePage(key,changes,cursor,expectedCursor);
+        await applySitePage(key,changes,cursor,expectedCursor,businessId);
        }},
       onState:state=>{if(!stopped)setStatuses(previous=>({...previous,[site.id]:state}));}
      });
@@ -144,14 +145,14 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
   setTokens(previous=>{const next={...previous};delete next[site.id];return next;});
   update(sites.filter(s=>s.id!==site.id));
   try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
-  await purgeSiteCache(site.id);
+  await purgeSiteCache(site.id,businessId);
   setStats(previous=>{const next={...previous};delete next[site.id];return next;});
   setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
  }
  async function revoke(site:Site){
   update(sites.map(s=>s.id===site.id?{...s,enabled:false}:s));
   try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
-  await purgeSiteCache(site.id);
+  await purgeSiteCache(site.id,businessId);
   setStats(previous=>{const next={...previous};delete next[site.id];return next;});
   setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
  }

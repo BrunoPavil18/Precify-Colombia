@@ -1,7 +1,7 @@
 /** IndexedDB: each site page and its cursor commit in one browser transaction. */
 import {getBusinessScope,MAIN_BUSINESS} from "./BusinessProfiles";
 const DB_NAME="precify-colombia-site-owned-sync-v1";
-const scoped=(value:string)=>getBusinessScope()===MAIN_BUSINESS?value:getBusinessScope()+"::"+value;
+const scoped=(value:string,businessId=getBusinessScope())=>businessId===MAIN_BUSINESS?value:businessId+"::"+value;
 function openSyncDB():Promise<IDBDatabase>{
  return new Promise((resolve,reject)=>{
   if(typeof indexedDB==="undefined"){reject(new Error("IndexedDB no disponible"));return;}
@@ -18,8 +18,8 @@ function openSyncDB():Promise<IDBDatabase>{
 }
 const stableJSON=(value:unknown):string=>JSON.stringify(value,(_key,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 export type SyncChange={kind:"order"|"campaign";id:string;operation:"upsert"|"delete";value?:Record<string,unknown>};
-export async function readSiteCheckpoint(inputScope:string):Promise<{cursor:string|null;at:number;count:number}|null>{
- const scope=scoped(inputScope);
+export async function readSiteCheckpoint(inputScope:string,businessId=getBusinessScope()):Promise<{cursor:string|null;at:number;count:number}|null>{
+ const scope=scoped(inputScope,businessId);
  const db=await openSyncDB();
  try{return await new Promise((resolve,reject)=>{
   const tx=db.transaction(["checkpoints","rows"],"readonly");
@@ -31,8 +31,8 @@ export async function readSiteCheckpoint(inputScope:string):Promise<{cursor:stri
   tx.onabort=()=>reject(tx.error??new Error("Database read aborted"));
  });}finally{db.close();}
 }
-export async function applySitePage(inputScope:string,changes:SyncChange[],cursor:string|null,expectedCursor?:string|null):Promise<void>{
- const scope=scoped(inputScope);
+export async function applySitePage(inputScope:string,changes:SyncChange[],cursor:string|null,expectedCursor?:string|null,businessId=getBusinessScope()):Promise<void>{
+ const scope=scoped(inputScope,businessId);
  const db=await openSyncDB();
  try{await new Promise<void>((resolve,reject)=>{
   const tx=db.transaction(["checkpoints","rows"],"readwrite");
@@ -65,8 +65,8 @@ export async function applySitePage(inputScope:string,changes:SyncChange[],curso
   tx.onabort=()=>reject(tx.error??new Error("Site cache transaction aborted"));
  });}finally{db.close();}
 }
-export async function purgeSiteCache(sourceId:string):Promise<void>{
- sourceId=scoped(sourceId);
+export async function purgeSiteCache(sourceId:string,businessId=getBusinessScope()):Promise<void>{
+ sourceId=scoped(sourceId,businessId);
  const db=await openSyncDB();
  try{await new Promise<void>((resolve,reject)=>{
   const tx=db.transaction(["checkpoints","rows"],"readwrite");
@@ -83,8 +83,8 @@ export async function purgeSiteCache(sourceId:string):Promise<void>{
  });}finally{db.close();}
 }
 
-export async function readSiteRows(inputScope:string,maxRows=20000):Promise<Array<{kind:"order"|"campaign";id:string;value:Record<string,unknown>}>>{
- const scope=scoped(inputScope);
+export async function readSiteRows(inputScope:string,maxRows=20000,businessId=getBusinessScope()):Promise<Array<{kind:"order"|"campaign";id:string;value:Record<string,unknown>}>>{
+ const scope=scoped(inputScope,businessId);
  const db=await openSyncDB();
  try{
   const rows=await new Promise<Array<{kind:"order"|"campaign";id:string;value:Record<string,unknown>}>>((resolve,reject)=>{
