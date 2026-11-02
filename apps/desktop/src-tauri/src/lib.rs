@@ -2,6 +2,7 @@
 //! Never expose tokens, privileged filesystem commands or arbitrary URL fetching over IPC.
 use serde::Serialize;
 mod native_snapshots;
+mod site_sync;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -30,7 +31,7 @@ fn ipc_probe() -> tauri::ipc::Response {
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe, native_snapshots::desktop_snapshot_get, native_snapshots::desktop_snapshot_put, native_snapshots::desktop_snapshot_delete])
+        .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe, native_snapshots::desktop_snapshot_get, native_snapshots::desktop_snapshot_put, native_snapshots::desktop_snapshot_delete, site_sync::site_sync_checkpoint, site_sync::site_sync_apply, site_sync::site_sync_rows, site_sync::site_sync_purge])
         .run(tauri::generate_context!())
         .expect("failed to run Precify Financy desktop");
 }
