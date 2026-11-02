@@ -1,6 +1,7 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
 import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,type Workspace} from "@precify-colombia/core";
 import {UIIcon} from "./UIIcon";
+import {initializeNativeSnapshots} from "./desktop-snapshots";
 
 /**
  * Business-scoped workspaces. The original "default" business uses the exact
@@ -93,6 +94,7 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
  const current=directory.businesses.find(b=>b.id===selectedId)??null;
  const ctx={directory,selectedId,current,error,choose,create,rename};
  setBusinessScope(selectedId);
+ useEffect(()=>{void initializeNativeSnapshots().catch(e=>console.warn("Native SQLite bootstrap:",e));},[selectedId]);
  useEffect(()=>{
   if(error)return;
   const listener=(e:StorageEvent)=>{

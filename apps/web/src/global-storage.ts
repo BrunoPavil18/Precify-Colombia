@@ -1,6 +1,7 @@
 import {globalPrice,nonNegativeMinorAmount,type GlobalPriceInput} from "@precify-colombia/core";
 
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
+import {mirrorNativeSnapshot} from "./desktop-snapshots";
 export const storageGlobalKey=()=>businessKey(GLOBAL_PRODUCTS_KEY,getBusinessScope());
 export const GLOBAL_PRODUCTS_KEY="precify-colombia:global-pricing:v1";
 export type GlobalPriceHistory={salePrice:string;currency:string;at:string};
@@ -49,6 +50,7 @@ export function persistGlobalCatalog(next:GlobalSavedCatalog,previousRaw:string|
  if(localStorage.getItem(storageGlobalKey())!==previousRaw)
   throw new Error("Another browser tab modified the global catalog. Export a backup before reloading.");
  localStorage.setItem(storageGlobalKey(),content);
+ mirrorNativeSnapshot("global-pricing",content,previousRaw);
  return content;
 }
 export function decodeGlobalCatalogBackup(content:string):GlobalSavedCatalog {

@@ -6,6 +6,7 @@ import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
 import {useTranslator} from "./i18n";
 
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
+import {mirrorNativeSnapshot} from "./desktop-snapshots";
 const KEY="precify-colombia:operations:v1";
 const storageKey=()=>businessKey(KEY,getBusinessScope());
 type HistoryPrice={id:string;product:string;competitor:string;currency:string;price:string;observedAt:string;source:string};
@@ -86,7 +87,7 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
    if(localStorage.getItem(storageKey())!==baseline.current)throw new Error("Conflicto entre pestañas: recarga antes de editar.");
    const raw=JSON.stringify(next);
    if(raw.length>2000000)throw new Error("Almacenamiento local supera 2 MB. Exporta los datos antes de seguir.");
-   localStorage.setItem(storageKey(),raw);baseline.current=raw;setData(next);setNotice(t("Datos operativos guardados localmente."));return true;
+   localStorage.setItem(storageKey(),raw);mirrorNativeSnapshot("operations",raw,baseline.current);baseline.current=raw;setData(next);setNotice(t("Datos operativos guardados localmente."));return true;
   }catch(e){setLocked(true);setNotice(String(e));return false;}
  }
  async function readFile(file:File|undefined){

@@ -1,5 +1,6 @@
 import { STORE_KEY, MAX_BACKUP_BYTES, emptyWorkspace, validateWorkspace, type Workspace } from "@precify-colombia/core";
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
+import {mirrorNativeSnapshot} from "./desktop-snapshots";
 export const workspaceStorageKey=()=>businessKey(STORE_KEY,getBusinessScope());
 export type ReadResult={state:Workspace;locked:boolean;error:string|null};
 export function loadWorkspace():ReadResult {
@@ -24,8 +25,10 @@ export function persistWorkspace(state:Workspace,expected?:Workspace):void {
  }
 
  const data=JSON.stringify(validateWorkspace(state));
+ const before=localStorage.getItem(workspaceStorageKey());
  if(new TextEncoder().encode(data).length>MAX_BACKUP_BYTES)throw new Error("Límite local de 2 MB. Exporta un respaldo y reduce tu historial.");
  localStorage.setItem(workspaceStorageKey(),data);
+ mirrorNativeSnapshot("workspace",data,before);
 }
 export function downloadFile(content:string,fileName:string,type:string):void {
  const blob=new Blob([content],{type});

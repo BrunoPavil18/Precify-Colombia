@@ -6,6 +6,7 @@ import {createSiteConnector,createSyncController,type SyncStatus} from "../../..
 
 type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subject?:string};
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
+import {mirrorNativeSnapshot} from "./desktop-snapshots";
 const SETTINGS="precify-colombia:site-owned-connectors:v1";
 const siteSettingsKey=()=>businessKey(SETTINGS,getBusinessScope());
 const strings={
@@ -45,7 +46,7 @@ function loadSites():Site[]{
    [0,30000,60000,300000].includes(x.interval)&&typeof x.enabled==="boolean");
  }catch{return [];}
 }
-function persistSites(sites:Site[]){localStorage.setItem(siteSettingsKey(),JSON.stringify(sites));}
+function persistSites(sites:Site[]){const before=localStorage.getItem(siteSettingsKey());const content=JSON.stringify(sites);localStorage.setItem(siteSettingsKey(),content);mirrorNativeSnapshot("site-connectors",content,before);}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
 export function WebsiteSyncLab({visible}:{visible:boolean}){
  const locale=useContext(LocaleContext) as Locale;
