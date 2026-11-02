@@ -107,7 +107,7 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
    setPendingRestore(candidate);setNotice(t("Respaldo validado. Confirma la sustitución antes de continuar."));
   }catch(e){setPendingRestore(null);setNotice(String(e));}
  }
- function doImport(){
+ async function doImport(){
   try{
    if(!csv)throw new Error("Selecciona un archivo CSV.");
    if(importMode==="orders"){

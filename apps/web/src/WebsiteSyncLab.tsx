@@ -103,7 +103,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
    let stopped=false,handler:()=>void=()=>{};
    const init=async()=>{
     try{
-     const connector=site.mode==="device-v2"?createDeviceConnector({id:site.id,baseURL:site.url,identity:device}):createSiteConnector({id:site.id,baseURL:site.url,getToken:()=>token});
+     const connector=site.mode==="device-v2"?createDeviceConnector({id:site.id,baseURL:site.url,identity:device!}):createSiteConnector({id:site.id,baseURL:site.url,getToken:()=>token??""});
      const subject=await connector.identify();
      if(stopped)return;
      if(site.subject!==subject){
@@ -199,7 +199,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
    <div className="advanced-grid">
     {site.mode==="device-v2"?<div className="field">
      <span>{locale==="pt-BR"?"Convite de ativação único (gerado pela loja)":locale==="en"?"Single-use enrollment code":"Código de activación único"}</span>
-     {devices[site.id]?<p className="muted">{locale==="pt-BR"?"Instalação ativada":locale==="en"?"Device activated":"Dispositivo activado"} · {devices[site.id].deviceId.slice(0,8)}…</p>:<>
+     {devices[site.id]?<p className="muted">{locale==="pt-BR"?"Instalação ativada":locale==="en"?"Device activated":"Dispositivo activado"} · {devices[site.id]?.deviceId.slice(0,8)}…</p>:<>
       <input type="password" autoComplete="new-password" maxLength={256} value={codes[site.id]??""} onChange={e=>setCodes(p=>({...p,[site.id]:e.target.value}))}/>
       <button className="secondary" disabled={activating[site.id]||!(codes[site.id]??"").trim()} onClick={()=>{void (async()=>{
        setActivating(p=>({...p,[site.id]:true}));
