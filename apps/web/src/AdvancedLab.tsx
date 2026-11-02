@@ -1,6 +1,6 @@
 import {useMemo,useState} from "react";
 import {simulateCOD,simulateCampaign,pricePerMeasure,consumerPricePreview,simulatePortfolio,
- type Product,type Workspace,type AdvancedSimulationRecord,type CODSimulationInput,type CampaignInput,type PUMUnit} from "@precify-colombia/core";
+ type Product,type Workspace,type AdvancedSimulationRecord,type CODSimulationInput,type CampaignInput,type PUMUnit} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
 const controls=(type:"cod"|"campaign")=>type==="cod"

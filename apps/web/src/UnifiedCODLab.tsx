@@ -2,7 +2,7 @@ import {useMemo,useState} from "react";
 import {
  analyze,simulateCOD,suggestCODBreakEvenPrice,simulateCPASensitivity,
  parseDecimal,fromCents,type Product,type CODSimulationInput
-} from "@precify-colombia/core";
+} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
 const baseInputs={

@@ -2,12 +2,12 @@ import {UnifiedCODLab} from "./UnifiedCODLab";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
  reconcileCampaigns,advertisingIndicators,simulateCPASensitivity,exportOperationsCSV,validateOrderEvent,validateAdCampaign,
- currencyCatalog,minorAmount,type Product,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
+ currencyCatalog,minorAmount,type Product,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
 import {mirrorNativeSnapshot} from "./desktop-snapshots";
-const KEY="precify-colombia:operations:v1";
+const KEY="precify-financy:operations:v1";
 const storageKey=()=>businessKey(KEY,getBusinessScope());
 type HistoryPrice={id:string;product:string;competitor:string;currency:string;price:string;observedAt:string;source:string};
 type LocalOperations={version:1;events:OrderEvent[];campaigns:AdCampaign[];prices:HistoryPrice[]};

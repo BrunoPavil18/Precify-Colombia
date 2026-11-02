@@ -1,5 +1,5 @@
 import {useMemo,useState} from "react";
-import {currencyCatalog,globalPrice,globalSuggestedPrice,type GlobalPriceInput} from "@precify-colombia/core";
+import {currencyCatalog,globalPrice,globalSuggestedPrice,type GlobalPriceInput} from "@precify-financy/core";
 import {LocaleContext,translate,type Locale} from "./i18n";
 
 /** No account, storage, cookies or network calls; suitable for a third-party iframe.
@@ -35,7 +35,7 @@ export default function EmbedCalculator(){
  return <LocaleContext.Provider value={locale}>
   <main className="embed-calculator" style={{maxWidth:920,margin:"0 auto",padding:"20px",minHeight:320}}>
    <header style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
-    <h1 style={{fontSize:24,margin:0}}>Precify Colombia</h1>
+    <h1 style={{fontSize:24,margin:0}}>Precify Financy</h1>
     <label>{t("Idioma")} <select value={locale} onChange={e=>setLocale(e.target.value as Locale)}>
      <option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option>
     </select></label>
@@ -63,7 +63,7 @@ export default function EmbedCalculator(){
     <p className="muted">{t("Valores estimados. No son asesoría fiscal ni precios garantizados.")}</p>
    </section>
    <footer className="muted" style={{marginTop:16}}>
-    <a href="https://github.com/BrunoPavil18/Precify-Colombia" target="_blank" rel="noopener noreferrer">Precify Colombia · Apache-2.0</a>
+    <a href="https://github.com/BrunoPavil18/Precify-Financy" target="_blank" rel="noopener noreferrer">Precify Financy · Apache-2.0</a>
    </footer>
   </main>
  </LocaleContext.Provider>;

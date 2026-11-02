@@ -1,9 +1,9 @@
-import {globalPrice,nonNegativeMinorAmount,type GlobalPriceInput} from "@precify-colombia/core";
+import {globalPrice,nonNegativeMinorAmount,type GlobalPriceInput} from "@precify-financy/core";
 
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
 import {mirrorNativeSnapshot} from "./desktop-snapshots";
 export const storageGlobalKey=()=>businessKey(GLOBAL_PRODUCTS_KEY,getBusinessScope());
-export const GLOBAL_PRODUCTS_KEY="precify-colombia:global-pricing:v1";
+export const GLOBAL_PRODUCTS_KEY="precify-financy:global-pricing:v1";
 export type GlobalPriceHistory={salePrice:string;currency:string;at:string};
 export type GlobalSavedProduct={id:string;name:string;input:GlobalPriceInput;updatedAt:string;history?:GlobalPriceHistory[]};
 export type GlobalSavedCatalog={version:1;products:GlobalSavedProduct[]};

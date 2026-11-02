@@ -1,5 +1,5 @@
 import {getBusinessScope,businessKey,MAIN_BUSINESS} from "./BusinessProfiles";
-import {STORE_KEY,MAX_BACKUP_BYTES,validateWorkspace} from "@precify-colombia/core";
+import {STORE_KEY,MAX_BACKUP_BYTES,validateWorkspace} from "@precify-financy/core";
 
 type Kind="workspace"|"operations"|"global-pricing"|"site-connectors"|"business-directory";
 type Snapshot={revision:number;data:string};
@@ -33,9 +33,9 @@ export async function initializeNativeSnapshots():Promise<void>{
  if(!supportsDesktopSQLite())return;
  const {GLOBAL_PRODUCTS_KEY}=await import("./global-storage");
  const mappings:[Kind,string][]=[
-  ["workspace",STORE_KEY],["operations","precify-colombia:operations:v1"],
-  ["global-pricing",GLOBAL_PRODUCTS_KEY],["site-connectors","precify-colombia:site-owned-connectors:v1"],
-  ["business-directory","precify-colombia:business-directory:v1"]
+  ["workspace",STORE_KEY],["operations","precify-financy:operations:v1"],
+  ["global-pricing",GLOBAL_PRODUCTS_KEY],["site-connectors","precify-financy:site-owned-connectors:v1"],
+  ["business-directory","precify-financy:business-directory:v1"]
  ];
  const businessId=getBusinessScope();
  for(const [kind,key] of mappings){

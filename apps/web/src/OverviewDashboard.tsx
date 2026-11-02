@@ -1,5 +1,5 @@
 import {useMemo} from "react";
-import {analyze,computeCODFunnel,type Product,type Workspace,type OrderEvent} from "@precify-colombia/core";
+import {analyze,computeCODFunnel,type Product,type Workspace,type OrderEvent} from "@precify-financy/core";
 import {readOperations} from "./OperationsLab";
 import {useTranslator} from "./i18n";
 import {UIIcon} from "./UIIcon";

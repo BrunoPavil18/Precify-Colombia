@@ -1,5 +1,5 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
-import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,computeCODFunnel,validateOrderEvent,minorAmount,fromMinor,type OrderEvent,type Workspace} from "@precify-colombia/core";
+import {STORE_KEY,MAX_BACKUP_BYTES,emptyWorkspace,validateWorkspace,computeCODFunnel,validateOrderEvent,minorAmount,fromMinor,type OrderEvent,type Workspace} from "@precify-financy/core";
 import {UIIcon} from "./UIIcon";
 import {useTranslator} from "./i18n";
 import {initializeNativeSnapshots,mirrorNativeSnapshot,readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
@@ -9,8 +9,8 @@ import {initializeNativeSnapshots,mirrorNativeSnapshot,readNativeSnapshot,suppor
  * historical localStorage keys: existing data is neither copied nor overwritten.
  * No cross-business identifiers or records are merged implicitly.
  */
-const DIRECTORY="precify-colombia:business-directory:v1";
-const ACTIVE="precify-colombia:active-business:v1";
+const DIRECTORY="precify-financy:business-directory:v1";
+const ACTIVE="precify-financy:active-business:v1";
 export const MAIN_BUSINESS="default";
 export const ALL_BUSINESSES="all";
 export type Business={id:string;name:string;website:string;createdAt:string};
@@ -59,7 +59,7 @@ export function loadBusinessWorkspace(id:string):{state:Workspace;error:string|n
 }
 /** Read-only aggregate of imported order events, NEVER a reconciled bank balance. */
 function importedByBusiness(businessId:string):{currency:string;orders:number;paid:number;collected:string;costs:string;projectedNet:string}[]{
- const raw=localStorage.getItem(businessKey("precify-colombia:operations:v1",businessId));
+ const raw=localStorage.getItem(businessKey("precify-financy:operations:v1",businessId));
  if(!raw)return [];
  if(raw.length>2_000_000)throw Error("Operations store too large");
  const payload=JSON.parse(raw) as {version?:unknown;events?:unknown};

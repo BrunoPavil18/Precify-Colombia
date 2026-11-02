@@ -1,9 +1,9 @@
 import { GlobalPricingLab } from "./GlobalPricingLab";
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {FX_PROVIDER,convertCurrency,currencyCatalog,validateFXQuote,quoteAge,type FXQuote} from "@precify-colombia/core";
+import {FX_PROVIDER,convertCurrency,currencyCatalog,validateFXQuote,quoteAge,type FXQuote} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
-const KEY="precify-colombia:fx-quote:v1:";
+const KEY="precify-financy:fx-quote:v1:";
 const pairKey=(base:string,quote:string)=>KEY+base+":"+quote;
 function cached(base:string,quote:string):FXQuote|null{
  try{const raw=localStorage.getItem(pairKey(base,quote));return raw?validateFXQuote(JSON.parse(raw) as FXQuote):null;}

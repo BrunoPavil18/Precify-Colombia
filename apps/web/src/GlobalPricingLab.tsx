@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from "react";
 import {loadGlobalCatalog,persistGlobalCatalog,decodeGlobalCatalogBackup,downloadGlobalCatalog,type GlobalSavedCatalog} from "./global-storage";
-import {globalPrice,globalSuggestedPrice,currencyCatalog,type GlobalPriceInput} from "@precify-colombia/core";
+import {globalPrice,globalSuggestedPrice,currencyCatalog,type GlobalPriceInput} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
 const defaultInput:GlobalPriceInput={
@@ -29,7 +29,7 @@ export function GlobalPricingLab(){
  const [name,setName]=useState(""),[selectedId,setSelectedId]=useState("");
  const [pendingDelete,setPendingDelete]=useState(""),[pendingRestore,setPendingRestore]=useState<GlobalSavedCatalog|null>(null);
  useEffect(()=>{
-  const listener=(e:StorageEvent)=>{if(e.key==="precify-colombia:global-pricing:v1"){setLocked(true);setNotice("Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.");}};
+  const listener=(e:StorageEvent)=>{if(e.key==="precify-financy:global-pricing:v1"){setLocked(true);setNotice("Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.");}};
   window.addEventListener("storage",listener);return()=>window.removeEventListener("storage",listener);
  },[]);
  function commit(next:GlobalSavedCatalog):boolean{

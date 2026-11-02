@@ -1,6 +1,6 @@
 import {useContext,useEffect,useRef,useState} from "react";
 import {LocaleContext,type Locale} from "./i18n";
-import {computeCODFunnel,validateOrderEvent,validateAdCampaign,type OrderEvent,type AdCampaign} from "@precify-colombia/core";
+import {computeCODFunnel,validateOrderEvent,validateAdCampaign,type OrderEvent,type AdCampaign} from "@precify-financy/core";
 import {applySitePage,purgeSiteCache,readSiteCheckpoint,readSiteRows} from "./website-sync-db";
 import {createSiteConnector,createSyncController,type SyncStatus} from "../../../integrations/site-owned-sync.mjs";
 import {createDeviceConnector} from "../../../integrations/device-client.mjs";
@@ -9,7 +9,7 @@ import {readDevice,enrollDevice,deleteDevice,type DeviceIdentity} from "./device
 type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subject?:string;mode?:"device-v2"|"legacy-v1"};
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
 import {mirrorNativeSnapshot} from "./desktop-snapshots";
-const SETTINGS="precify-colombia:site-owned-connectors:v1";
+const SETTINGS="precify-financy:site-owned-connectors:v1";
 const siteSettingsKey=()=>businessKey(SETTINGS,getBusinessScope());
 const strings={
  "es-CO":{

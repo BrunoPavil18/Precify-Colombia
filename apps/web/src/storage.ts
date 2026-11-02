@@ -1,4 +1,4 @@
-import { STORE_KEY, MAX_BACKUP_BYTES, emptyWorkspace, validateWorkspace, type Workspace } from "@precify-colombia/core";
+import { STORE_KEY, MAX_BACKUP_BYTES, emptyWorkspace, validateWorkspace, type Workspace } from "@precify-financy/core";
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
 import {mirrorNativeSnapshot} from "./desktop-snapshots";
 export const workspaceStorageKey=()=>businessKey(STORE_KEY,getBusinessScope());

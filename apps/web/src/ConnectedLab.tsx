@@ -1,12 +1,12 @@
 import {useCallback,useEffect,useState} from "react";
-import {validateOrderEvent,validateAdCampaign,type OrderEvent,type AdCampaign} from "@precify-colombia/core";
+import {validateOrderEvent,validateAdCampaign,type OrderEvent,type AdCampaign} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
 const API=(import.meta.env.VITE_PRECIFY_API_URL as string|undefined)?.replace(/\/$/,"")??"";
 const SB=(import.meta.env.VITE_SUPABASE_URL as string|undefined)?.replace(/\/$/,"")??"";
 const ANON=import.meta.env.VITE_SUPABASE_ANON_KEY as string|undefined;
-const SESSION="precify-colombia:connected-session:v1";
-const LOCAL_OPERATIONS="precify-colombia:operations:v1";
+const SESSION="precify-financy:connected-session:v1";
+const LOCAL_OPERATIONS="precify-financy:operations:v1";
 type Session={access_token:string;refresh_token:string;expires_at:number;user:{id:string;email?:string}};
 type Org={id:string;name:string;role:string};
 type Dash={mode:string;funnel:Array<Record<string,string|number|null>>;reconciliation:Array<{
@@ -50,9 +50,9 @@ async function request<T>(session:Session,path:string,method:"GET"|"POST"|"DELET
  if(!res.ok)throw new Error(String(response.error??"Error remoto: "+res.status));
  return response as T;
 }
-function summaryKey(user:string,org:string){return "precify-colombia:connected-summary:v1:"+user+":"+org;}
+function summaryKey(user:string,org:string){return "precify-financy:connected-summary:v1:"+user+":"+org;}
 function savedOrgs(user:string):Org[]{
- const prefix="precify-colombia:connected-summary:v1:"+user+":";
+ const prefix="precify-financy:connected-summary:v1:"+user+":";
  try{
   return Object.keys(localStorage).filter(key=>key.startsWith(prefix))
    .map(key=>key.slice(prefix.length))
@@ -129,7 +129,7 @@ export function ConnectedLab(){
   }catch(e){setNotice(String(e));}finally{setBusy(false);}
  }
  function logout(){
-  if(session)try{for(const key of Object.keys(localStorage))if(key.startsWith("precify-colombia:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}catch{/* Storage may be unavailable */}
+  if(session)try{for(const key of Object.keys(localStorage))if(key.startsWith("precify-financy:connected-summary:v1:"+session.user.id+":"))localStorage.removeItem(key);}catch{/* Storage may be unavailable */}
   storeSession(null);setSession(null);setOrgs([]);setSelected("");setDashboard(null);setCacheConsent(false);setConsentOrg(null);setNewKey("");setNewHook(null);
  }
  async function uploadLocal(){
