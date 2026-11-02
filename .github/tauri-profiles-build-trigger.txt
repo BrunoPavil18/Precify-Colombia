@@ -1,2 +1,2 @@
-Precify Financy final naming and audit test
-Code commit: ba37cd77538e070f0cb751693a7e25804eef3d11
+Financy final CI candidate after SQLite primary, schema audit, MySQL adapter tests and dead-code removal.
+HEAD: c33cdcc4d9a7058995ec685519e4bacceebc367f
