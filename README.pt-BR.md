@@ -8,10 +8,12 @@
 
 **Auditoria final da candidata 2.1.0:** [Precify Financy — validação consolidada](docs/FINANCY_FINAL_AUDIT.md). Motor TS/BigInt, SQLite como armazenamento principal no Windows e acesso por instalação com chave Ed25519. A homologação com uma loja real ainda depende do servidor dela.
 
+[Auditoria geral da 2.1.0: achados e limitações](docs/GENERAL_AUDIT_V2_1_0_2026-11-02.md).
+
 
 ## Redesign dark-first 2.1.0 — entrega consolidada (candidata)
 
-Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tarefas, nova **Visão Geral**, acesso direto a COD/CAC/CPA/PUM, catálogo pesquisável, relatórios com filtros, microanimações normais por padrão e menu mobile. Os cálculos e o funcionamento offline foram preservados. **113 testes automatizados** e aceitação real no Chromium (19 rotas, salvamento e recarga) aprovados. [Relatório da entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidência do CI](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41395935905). A branch continua não publicada e não altera a Vezura.
+Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tarefas, nova **Visão Geral**, acesso direto a COD/CAC/CPA/PUM, catálogo pesquisável, relatórios com filtros, microanimações normais por padrão e menu mobile. Os cálculos e o funcionamento offline foram preservados. **113 testes automatizados** e aceitação real no Chromium (19 rotas, salvamento e recarga) aprovados. [Relatório da entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidência do CI](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905). A branch continua não publicada e não altera a Vezura.
 
 ## Desenvolvimento da 2.1.0 — ainda não homologada
 
@@ -48,7 +50,7 @@ Os dados ficam associados à origem do site (protocolo, domínio e porta) e ao p
 Requisitos: **Node.js >=20.19**, **pnpm 10.34.7** e Git.
 
 ```bash
-git clone https://github.com/BrunoPavil18/Precify-Colombia.git
+git clone https://github.com/BrunoPavil18/Precify-Financy.git
 cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate

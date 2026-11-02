@@ -15,6 +15,7 @@ A tela de **Fontes e conexões** não estava correta como ponto inicial do fluxo
 |---|---|---|---|
 | Média (UX) | Fontes e conexões | Conta central opcional aparecia antes do fluxo de loja aprovado e mostrava "modo não configurado" sem contexto | **Corrigido**: dispositivo v2 primeiro, conta antiga recolhida |
 | Média (documentação/segurança operacional) | Conector da loja | Texto descrevia token v1 em novas instalações que usam chave Ed25519 | **Corrigido**: novo texto ES/PT/EN e orientação de revogação no servidor |
+| Alta (isolamento) | Importação opcional para servidor remoto | Usava sempre a chave de operações do negócio principal, mesmo com outro perfil ativo; risco de enviar dados do negócio errado | **Corrigido**: chave do perfil ativo e confirmação explícita do par negócio local → organização remota, com teste novo |
 | Média (concorrência) | Operações multiempresa | Listener de alterações em outra aba comparava a chave global `KEY`, ignorando o sufixo de negócios secundários | **Corrigido**: usa `storageKey()` do negócio ativo; CAS nativo já existente permanece |
 | Média (resiliência) | Inicialização SQLite | Falha de leitura no bootstrap podia impedir que React exibisse qualquer interface de recuperação | **Corrigido**: tela de falha visível, sem apagar ou substituir dados, com detalhe e retry |
 | Baixa (precisão) | Salvar produto no navegador | Mensagem afirmava gravação em SQLite mesmo na PWA | **Corrigido**: diferencia armazenamento nativo e browser |
@@ -26,8 +27,8 @@ A tela de **Fontes e conexões** não estava correta como ponto inicial do fluxo
 
 ## Verificações automatizadas
 
-- **117/117 testes JavaScript**: 61 núcleo financeiro, 27 web, 7 serviço conectado e 22 integrações. Verificação de tipos, lint AST, build Vite e distribuição ESM do núcleo executados em `pnpm verify:2.1.0`.
-- **Chromium real — aprovado:** todos os 19 módulos, tema Jet Black, animação normal, separação entre negócios, criação/salvamento após recarga, rota de escolha de negócio em modo "Todos", menu e barra móvel, **nova jornada Fontes e conexões** (painel v2 primeiro, contas opcionais recolhidas/expansíveis), sem exceções JS. Execução: https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400054914
+- **118/118 testes JavaScript**: 61 núcleo financeiro, 28 web, 7 serviço conectado e 22 integrações. Verificação de tipos, lint AST, build Vite e distribuição ESM do núcleo executados em `pnpm verify:2.1.0`.
+- **Chromium real — aprovado:** todos os 19 módulos, tema Jet Black, animação normal, separação entre negócios, criação/salvamento após recarga, rota de escolha de negócio em modo "Todos", menu e barra móvel, **nova jornada Fontes e conexões** (painel v2 primeiro, contas opcionais recolhidas/expansíveis), sem exceções JS. Execução: https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400861130
 - **Rust/SQLite:** testes de snapshots/versões, cache transacional de feed, isolamento e persistência em arquivo real. Resultado do job Windows específico pode ser inspecionado no run https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41399635477.
 - **Dependências:** `pnpm audit --audit-level moderate` passou sem vulnerabilidades conhecidas na verificação de 02/11/2026: https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41396477317.
 - **Nota de rastreabilidade:** o primeiro job Chromium do run 41399635477 encontrou uma falha de **aspas no script de teste adicionado**, não uma falha do código financeiro. Isso foi corrigido e o Chromium passou no run separado 41400054914.
@@ -53,3 +54,7 @@ A tela de **Fontes e conexões** não estava correta como ponto inicial do fluxo
 ## Critério de saída
 
 **A candidata está pronta para validação final do executável Windows e desenvolvimento do adaptador real da Vezura; não está homologada como integração comercial em produção.** A tela de Fontes e conexões foi corrigida, mas ainda não aparecerá automaticamente na instalação antiga do usuário: é necessário abrir o **novo ZIP/instalador** após o build da branch.
+
+## Revalidação de segurança após o último hotfix
+
+Uma revisão da ação `uploadLocal()` em `apps/web/src/ConnectedLab.tsx` encontrou que a leitura ignorava o negócio ativo. Corrigimos para `businessKey(LOCAL_OPERATIONS,getBusinessScope())` e exigimos confirmação explícita do destino `perfil local → organização remota` antes de liberar o botão. A confirmação é revogada ao trocar a organização e após a importação. A interface de contas permanece opcional e recolhida. Os **118 testes JS**, build e Chromium foram aprovados em [Actions #41400861130](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400861130). O novo empacotamento Windows está no [gate final](https://github.com/BrunoPavil18/Precify-Financy/actions) (substituir pelo identificador real após confirmação).

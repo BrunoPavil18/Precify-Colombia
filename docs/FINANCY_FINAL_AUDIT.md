@@ -30,7 +30,7 @@
 
 ## Testes e distribuição reproduzíveis
 
-- **117/117 testes JavaScript**: core 61, web 23, serviço 7, integração 22. TypeScript, lint AST, build frontend, core ESM e testes de navegador Chromium (19 rotas, responsividade, persistência e perfis) aprovados.
+- **118/118 testes JavaScript**: core 61, web 23, serviço 7, integração 22. TypeScript, lint AST, build frontend, core ESM e testes de navegador Chromium (19 rotas, responsividade, persistência e perfis) aprovados.
 - **4/4 testes Rust**: snapshots SQLite por perfil, CAS/revisão e cache de feed atômico com cursor, isolado por loja e imutabilidade de eventos.
 - **GitHub Actions Windows x64**: `precify-financy.exe` compilado, instalador Inno e ZIP portátil produzidos.
 - **Auditoria de dependências**: `pnpm audit --audit-level moderate` => **No known vulnerabilities found**. Isso não certifica ausência de vulnerabilidades futuras ou de lógica de aplicação.
@@ -57,4 +57,8 @@ O repositório foi **renomeado pelo proprietário** para `BrunoPavil18/Precify-F
 
 ## Auditoria geral complementar — 02/11/2026
 
-A revisão completa dos fluxos de conexão, operações multiempresa, recuperação de SQLite, READMEs e integração Vezura foi registrada em [GENERAL_AUDIT_V2_1_0_2026-11-02.md](GENERAL_AUDIT_V2_1_0_2026-11-02.md). Os 117 testes JavaScript e o fluxo Chromium de 19 módulos, incluindo onboarding v2, foram aprovados em [Actions #41400054914](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400054914). O módulo antigo de contas permanece acessível apenas na área avançada opcional; v1 é compatibilidade e não o padrão para novos sites.
+A revisão completa dos fluxos de conexão, operações multiempresa, recuperação de SQLite, READMEs e integração Vezura foi registrada em [GENERAL_AUDIT_V2_1_0_2026-11-02.md](GENERAL_AUDIT_V2_1_0_2026-11-02.md). Os 118 testes JavaScript e o fluxo Chromium de 19 módulos, incluindo onboarding v2, foram aprovados em [Actions #41400054914](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400861130). O módulo antigo de contas permanece acessível apenas na área avançada opcional; v1 é compatibilidade e não o padrão para novos sites.
+
+### Complemento de isolamento no modo conectado opcional
+
+O upload para a API antiga utilizava equivocadamente a chave do negócio principal. A nova leitura utiliza o escopo de negócio ativo e só permite a importação após confirmação explícita de negócio local e organização remota. Regressão adicionada aos testes web. [Auditoria geral e limites](GENERAL_AUDIT_V2_1_0_2026-11-02.md).
