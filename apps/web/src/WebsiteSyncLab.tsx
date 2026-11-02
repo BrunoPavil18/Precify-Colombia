@@ -10,7 +10,6 @@ type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subj
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
 import {nativeWrite} from "./native-primary";
 const SETTINGS="precify-financy:site-owned-connectors:v1";
-const siteSettingsKey=()=>businessKey(SETTINGS,getBusinessScope());
 const strings={
  "es-CO":{
  title:"Sincronización con tiendas propias",description:"Cada tienda conserva sus datos en su propio servidor. Precify descarga cambios cuando está abierto y conectado.",
