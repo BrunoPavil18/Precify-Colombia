@@ -112,6 +112,21 @@ try{
  const summary=await evaluate('([...document.querySelectorAll(".business-portfolio .overview-stat strong")].map(x=>x.textContent.trim()))');
  if(summary[0]!=="2"||summary[1]!=="2")throw Error("Multi-business summary incorrect: "+JSON.stringify(summary));
  await shot("business-portfolio-desktop.png");
+ // Changing sections in all-business mode must not silently switch to "default".
+ await nav("Productos","Catálogo de productos");
+ const keptAll=await evaluate('document.querySelector("#business-select")?.value==="all" && !!document.querySelector(".business-route-picker") && !document.querySelector(".product-card")');
+ if(!keptAll)throw Error("All-business route silently changed the selected profile or exposed editing state");
+ const selectBusiness=await evaluate('(()=>{const button=[...document.querySelectorAll(".business-route-picker [data-business-id]")].find(el=>el.getAttribute("data-business-id")?.startsWith("b_"));if(!button)return false;button.click();return true})()');
+ if(!selectBusiness)throw Error("Explicit business target not offered");
+ await until(()=>evaluate('document.querySelector("#business-select")?.value.startsWith("b_") && document.querySelector(".page-heading h1")?.textContent.includes("Catálogo de productos")'));
+ const targetProducts=await evaluate('document.querySelectorAll(".product-card").length');
+ if(targetProducts!==1)throw Error("Explicit business route did not retain selected business data");
+ await evaluate('(()=>{const s=document.querySelector("#business-select");s.value="all";s.dispatchEvent(new Event("change",{bubbles:true}))})()');
+ await until(()=>evaluate('!!document.querySelector(".business-portfolio")'));
+ await nav("Informes","Informes y comparaciones");
+ if(!(await evaluate('document.querySelector("#business-select")?.value==="all" && !!document.querySelector(".business-route-picker")')))throw Error("Aggregate reports switched business silently");
+ await evaluate('document.querySelector(".business-route-back").click()');
+ await until(()=>evaluate('!!document.querySelector(".business-portfolio")'));
  await evaluate('(()=>{const s=document.querySelector("#business-select");s.value="default";s.dispatchEvent(new Event("change",{bubbles:true}))})()');
  await until(()=>evaluate('!!document.querySelector(".overview-page")'));
 

@@ -15,7 +15,7 @@ import {
 } from "@precify-colombia/core";
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
 import { downloadFile, loadWorkspace, persistWorkspace, workspaceStorageKey } from "./storage";
-import {useBusinesses,ALL_BUSINESSES,MAIN_BUSINESS,BusinessPortfolio,BusinessChooser} from "./BusinessProfiles";
+import {useBusinesses,ALL_BUSINESSES,BusinessPortfolio,BusinessChooser,BusinessRoutePicker} from "./BusinessProfiles";
 import {readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
 
 type Page="inicio"|"calculadora"|"productos"|"escenarios"|"metas"|"pum"|"consumer"|"portfolio"|"global"|"panel-cod"|"cod"|"marketing"|"cpa"|"operaciones"|"importar"|"informes"|"competidores"|"conectado"|"cambio"|"datos"|"avanzado";
@@ -271,6 +271,8 @@ function ProductEditor({value,onChange,onDirty}:{value:PriceInput;onChange:(next
   </section>
  </div>;
 }
+// Navigation handoff survives the intentional App remount when switching businesses.
+let requestedBusinessPage:Page|null=null;
 export default function App(){
  const {selectedId,choose}=useBusinesses();
  const allMode=selectedId===ALL_BUSINESSES;
@@ -301,7 +303,7 @@ export default function App(){
 
  const [dirtyMoney,setDirtyMoney]=useState<Set<string>>(()=>new Set());
  const markDirty=(key:string,dirty:boolean)=>setDirtyMoney(prev=>{const next=new Set(prev);if(dirty)next.add(key);else next.delete(key);return next;});
- const [page,setPage]=useState<Page>("inicio");
+ const [page,setPage]=useState<Page>(()=>{const next=requestedBusinessPage;requestedBusinessPage=null;return next??"inicio";});
  const [productSearch,setProductSearch]=useState("");
  const [productOrder,setProductOrder]=useState<"recent"|"name"|"price">("recent");
  const [reportSearch,setReportSearch]=useState("");
@@ -457,7 +459,8 @@ export default function App(){
    const selected=workspace.products.find(p=>p.id===goalProductId)??workspace.products.find(p=>p.id===activeId)??workspace.products[0];
    setGoalProductId(selected?.id??"");resetGoalDraft();
   }
-  if(allMode&&target!=="inicio"){choose(MAIN_BUSINESS);return;}
+  // An all-business selection must NEVER silently fall back to the first store.
+  // Show a scoped entry point until the user explicitly chooses the target business.
   setPage(target);setMobileNavOpen(false);
  }
  async function switchScenarioProduct(id:string){
@@ -608,6 +611,7 @@ export default function App(){
     <main id="main-content">
      {page!=="inicio"&&<div className="page-heading"><div><div className="eyebrow">{t("ESPACIO DE TRABAJO")} <span className="green-line"/> {t("DATOS LOCALES / OPCIONALES")}</div><h1>{t(pageTitles[page].title)}</h1><p>{t(pageTitles[page].description)}</p></div></div>}
      {page==="inicio"&&(allMode?<BusinessPortfolio onOpen={()=>setPage("inicio")}/>:<OverviewDashboard workspace={workspace} ranked={ranked} format={fmt} date={date} onNavigate={target=>{void navigate(target);}}/>)}
+     {allMode&&page!=="inicio"&&<BusinessRoutePicker title={t(pageTitles[page].title)} onBack={()=>setPage("inicio")} onSelect={businessId=>{requestedBusinessPage=page;choose(businessId);}}/>}
      {confirmation&&<div className="modal-backdrop" role="presentation">
       <section className="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="precify-confirm-title" aria-describedby="precify-confirm-body">
        <h2 id="precify-confirm-title">{t("Confirmar operación")}</h2>
@@ -621,6 +625,7 @@ export default function App(){
      {updateReady&&<div role="status" className="notice"><span>{t("Hay una actualización disponible para uso offline.")}</span><button className="primary" onClick={activateUpdate}>{t("Instalar actualización")}</button></div>}
      {notice&&<div role="status" aria-live="polite" className={"notice"+(locked?" notice-danger":"")}><span>{t(notice)}</span><button aria-label={t("Cerrar aviso")} onClick={()=>setNotice("")}>×</button></div>}
      {locked&&<div className="critical"><strong>{t("Protección de datos activa")}</strong><p>{t("La información local existente está dañada o inaccesible. Se bloquea el guardado para no sobrescribirla silenciosamente.")}</p><button onClick={rawBackup}>{t("Descargar datos originales sin validar")}</button> <button className="ghost" onClick={()=>setPage("datos")}>{t("Opciones de recuperación")}</button></div>}
+     {!allMode&&<>
      {page==="calculadora"&&<>
       <div className="action-strip"><div><span className="eyebrow">{t("SIMULACIÓN ACTIVA")}</span><strong>{t(activeId?"Editando producto guardado":"Nuevo producto · borrador")}</strong></div><div className="actions"><button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?"))))return;setDraft({...EMPTY_INPUT,name:t("Producto ejemplo")});setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);}}>{t("+ Nuevo")}</button>{(activeId||hasUnsavedDraft)&&<button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>}<button className="primary" onClick={saveProduct}>{t("Guardar producto")} <span aria-hidden="true">↗</span></button></div></div>
       <div className="context-actions"><button onClick={()=>{void navigate("cod");}}><UIIcon name="cod" size={17}/>{t("Simular riesgo COD")}</button><button onClick={()=>{void navigate("marketing");}}><UIIcon name="marketing" size={17}/>{t("Analizar marketing y CAC")}</button><button onClick={()=>{void navigate("escenarios");}}><UIIcon name="scenarios" size={17}/>{t("Comparar escenarios")}</button></div>
@@ -736,6 +741,7 @@ export default function App(){
        <div className="section-head profiles-head"><div><span className="eyebrow">{t("TRAZABILIDAD LOCAL")}</span><h2>{t("Historial de cambios")} ({workspace.history.length})</h2></div></div><div className="stack-list history">{workspace.history.slice().reverse().slice(0,50).map(h=><div className="list-row" key={h.id}><span>{t(h.action)} · {h.snapshot.name}</span><small>{date(h.at)}</small></div>)}{workspace.history.length>50&&<p className="muted">{t("Se muestran los 50 eventos más recientes. El respaldo JSON incluye todo el historial guardado.")}</p>}</div>
      </section>}
      {page==="datos"&&<div className="two-column"><section className="main-card"><span className="eyebrow">{t("CONTROL DE DATOS")}</span><h2>{t("Tu información, tu control.")}</h2><p>{t("Los cálculos y datos locales se procesan en este navegador. No necesitas crear una cuenta. Las conexiones a servicios externos son opcionales y requieren tu autorización.")}</p><div className="data-actions"><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-colombia-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Descargar copia de seguridad")}</button><button className="secondary" onClick={()=>uploadRef.current?.click()}>{t("Restaurar copia")}</button><input ref={uploadRef} type="file" accept=".json,application/json" className="sr-only" aria-label={t("Seleccionar respaldo JSON")} onChange={e=>{void importBackup(e.target.files?.[0]);}}/>{supportsDesktopSQLite()&&<button className="secondary" onClick={()=>{void restoreNativeWorkspace();}}>{t("Recuperar copia SQLite de este negocio")}</button>}<button className="danger" onClick={reset}>{t("Borrar todos los datos")}</button></div><p className="muted">{t("La restauración valida versión, moneda, tamaño, identificadores y costos; sustituye el conjunto completo solo después de tu confirmación. Conserva copias de seguridad fuera del navegador.")}</p></section><aside className="results-card"><span className="eyebrow">{t("ESTADO DEL ESPACIO")}</span><div className="storage-stat"><strong>{workspace.products.length}</strong><span>{t("Productos locales")}</span></div><div className="storage-stat"><strong>{workspace.scenarios.length}</strong><span>{t("Escenarios")}</span></div><div className="storage-stat"><strong>{workspace.history.length}</strong><span>{t("Eventos históricos")}</span></div><p className="muted">{t("Formato de respaldo: precify-colombia-backup v2 · COP · es-CO · máximo 2 MB.")}</p>{locked&&<button onClick={rawBackup}>{t("Descargar datos locales originales")}</button>}</aside></div>}
+     </>}
      <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Colombia 2.1.0 · En desarrollo · Apache-2.0")}</p></footer>
     </main>
    </div>

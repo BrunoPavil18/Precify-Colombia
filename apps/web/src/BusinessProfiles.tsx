@@ -190,6 +190,30 @@ export function BusinessPortfolio({onOpen}:{onOpen:()=>void}){
    <p className="muted">{t("No se suman valores monetarios de diferentes monedas ni se presentan márgenes simulados como ganancias reales.")}</p>
   </section>;
 }
+/** Read-only scope gate: no automatic fallback and no cross-business edits. */
+export function BusinessRoutePicker({title,onBack,onSelect}:{title:string;onBack:()=>void;onSelect:(businessId:string)=>void}){
+ const t=useTranslator();
+ const {directory}=useBusinesses();
+ return <section className="business-route-picker" aria-label={t("Seleccionar un negocio para continuar")}>
+  <div className="business-route-intro">
+   <span className="eyebrow">{t("TODOS LOS NEGOCIOS · ACCESO POR PERFIL")}</span>
+   <h2>{t("Seleccionar un negocio para continuar")}</h2>
+   <p>{t("La sección")} <strong>{title}</strong> {t("trabaja con los datos de un negocio a la vez. Selecciona cuál deseas abrir. No se cambia el perfil automáticamente.")}</p>
+  </div>
+  <div className="business-card-grid">
+   {directory.businesses.map(b=>{
+    const snapshot=loadBusinessWorkspace(b.id);
+    return <button type="button" data-business-id={b.id} key={b.id} className="business-card" onClick={()=>onSelect(b.id)}>
+     <UIIcon name="products" size={21}/>
+     <strong>{b.name}</strong><small>{b.website||t("Sin sitio web asociado")}</small>
+     {snapshot.locked?<span className="red">{t("Datos dañados · no sobrescritos")}</span>:<span>{snapshot.state.products.length} {t("productos")} · {snapshot.state.scenarios.length} {t("escenarios")}</span>}
+     <span className="business-open">{t("Abrir esta sección")} →</span>
+    </button>;
+   })}
+  </div>
+  <button type="button" className="secondary business-route-back" onClick={onBack}><UIIcon name="home" size={16}/>{t("Volver a todos los negocios")}</button>
+ </section>;
+}
 export function BusinessChooser({onChange}:{onChange:(id:string)=>void}){
  const t=useTranslator();
  const {directory,selectedId,choose,error,create,rename,current,recover}=useBusinesses();

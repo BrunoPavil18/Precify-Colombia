@@ -788,5 +788,11 @@ export const ptBR: Record<string,string> = {
   "Costos operativos informados": "Custos operacionais informados",
   "Resultado calculado de los eventos": "Resultado calculado dos eventos",
   "Algunos negocios tienen datos operativos inválidos y no fueron agregados.": "Alguns negócios possuem dados operacionais inválidos e não foram somados.",
-  "Recuperar perfiles SQLite": "Recuperar perfis SQLite"
+  "Recuperar perfiles SQLite": "Recuperar perfis SQLite",
+  "Seleccionar un negocio para continuar": "Selecione um negócio para continuar",
+  "TODOS LOS NEGOCIOS · ACCESO POR PERFIL": "TODOS OS NEGÓCIOS · ACESSO POR PERFIL",
+  "La sección": "A seção",
+  "trabaja con los datos de un negocio a la vez. Selecciona cuál deseas abrir. No se cambia el perfil automáticamente.": "trabalha com os dados de um negócio por vez. Escolha qual deseja abrir. O perfil não será alterado automaticamente.",
+  "Abrir esta sección": "Abrir esta seção",
+  "Volver a todos los negocios": "Voltar a todos os negócios"
 };

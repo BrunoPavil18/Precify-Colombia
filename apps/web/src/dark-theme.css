@@ -419,3 +419,13 @@ main>.main-card,main>.two-column,main>.advanced-results{animation:pc-reveal .25s
  .topbar-right .language-select select{padding:5px 3px}
  .business-add{width:29px}
 }
+
+/* 'All businesses' stays selected until a specific business is chosen explicitly. */
+.business-route-picker{display:grid;gap:24px;padding:5px 0 32px;max-width:1180px}
+.business-route-intro{display:grid;gap:10px;max-width:770px}
+.business-route-intro h2{font-size:clamp(23px,2.6vw,34px);letter-spacing:-.02em;margin:0;color:#e9fbf0}
+.business-route-intro p{color:#abc7b6;font-size:14px;line-height:1.6;margin:0}
+.business-route-intro strong{color:#b6f4cf}
+.business-route-back{display:inline-flex;align-items:center;gap:10px;justify-self:start;margin-top:6px}
+.business-route-picker .business-card:focus-visible{outline:2px solid #7ce8b5;outline-offset:3px}
+@media(max-width:720px){.business-route-picker{padding-bottom:80px}.business-route-intro{gap:9px}}
