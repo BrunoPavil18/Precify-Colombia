@@ -1,3 +1,3 @@
-Precify Financy candidate integration CI
-Core commit: ca578fc6ad0dade23e395139e9bfc75037157c8e
-Single-use store enrollment, SQLite native-primary and full branding audit.
+Precify Financy typecheck fixes
+Core SHA: 0856461e7749e83b3d858f9a40d6ab9e4aa4eb85
+Web + native packaging gate pass 2
