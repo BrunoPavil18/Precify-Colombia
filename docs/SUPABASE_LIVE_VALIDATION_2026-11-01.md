@@ -1,4 +1,4 @@
-# Precify Colombia 2.1.0 — Supabase live database verification
+# Precify Financy 2.1.0 — Supabase live database verification
 
 Date: **2026-11-01**. Status: **DATABASE SCHEMA & TRANSACTION SMOKE PASSED; application E2E pending**.
 
@@ -50,4 +50,4 @@ The follow-up fixes five `search_path` advisory warnings for all five security-i
 - Real signed webhooks, OAuth Meta permission approval and insights imports, browser-based accounts/teams, cross-browser session refresh, PWA, iframe and offline E2E.
 - Production privacy/authorization penetration review.
 
-Do not publish the connected service as fully homologated or merge the single draft [PR #4](https://github.com/BrunoPavil18/Precify-Colombia/pull/4) solely on this database evidence.
+Do not publish the connected service as fully homologated or merge the single draft [PR #4](https://github.com/BrunoPavil18/Precify-Financy/pull/4) solely on this database evidence.

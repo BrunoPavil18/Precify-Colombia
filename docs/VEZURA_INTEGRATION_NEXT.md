@@ -1,4 +1,4 @@
-# Vezura Store → Precify Colombia 2.1.0: integration gate
+# Vezura Store → Precify Financy 2.1.0: integration gate
 
 **State:** Planned. The generic Precify sync client, merchant-side adapter and Chromium IndexedDB check are implemented. Vezura has NOT been modified. Neither Hostinger nor merchant production requires changes until the proposed store-side implementation is reviewed and the relevant migrations are approved.
 
@@ -23,7 +23,7 @@ The Vezura backend already uses MySQL with order intents, order transitions and 
 
 ## What is already automatically verified on Precify
 
-- [108 automated tests and full build](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41317968648): 61 core + 22 web + 7 service + 18 integration.
+- [108 automated tests and full build](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41317968648): 61 core + 22 web + 7 service + 18 integration.
 - The same run completed **a real Chromium IndexedDB acceptance** with 9 checks for atomic cursor commit, stale writer rejection, immutability, concurrent transactions, tenant isolation, consent-revocation purge and persistence after a real reload.
 - Reproduction: compile \`apps/web/src/website-sync-db.ts\` to ES2022 JavaScript using the repository's TypeScript compiler, then execute \`node scripts/browser-sync-smoke.mjs <compiled-file>\` with Chrome/Chromium available.
 

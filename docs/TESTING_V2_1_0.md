@@ -1,4 +1,4 @@
-# Precify Colombia 2.1.0 — Consolidated acceptance guide
+# Precify Financy 2.1.0 — Consolidated acceptance guide
 
 **Status: NOT RUN / NOT HOMOLOGATED.** This document is a final-test specification, not evidence that the checks passed. No GitHub Actions should be used without explicit approval. The v2.0.1 `main` remains the stable release.
 
@@ -78,19 +78,19 @@ The top-level `test` now covers core, web, backend security and the server-side 
 
 ## Recorded GitHub Actions validation — 2026-11-01
 
-The owner authorized a temporary, feature-branch-specific GitHub Actions gate. [Run #41303902552](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41303902552) **passed**, including `pnpm install --frozen-lockfile --ignore-scripts`, `pnpm typecheck`, `pnpm lint` (existing AST lint implementation, not ESLint), `pnpm test` (61 core + 22 web + 2 service security + 1 server-side SDK = 86 total), `pnpm check:connected-api`, `pnpm build`, `pnpm verify:core` and `pnpm audit --audit-level moderate` with no known vulnerabilities reported.
+The owner authorized a temporary, feature-branch-specific GitHub Actions gate. [Run #41303902552](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41303902552) **passed**, including `pnpm install --frozen-lockfile --ignore-scripts`, `pnpm typecheck`, `pnpm lint` (existing AST lint implementation, not ESLint), `pnpm test` (61 core + 22 web + 2 service security + 1 server-side SDK = 86 total), `pnpm check:connected-api`, `pnpm build`, `pnpm verify:core` and `pnpm audit --audit-level moderate` with no known vulnerabilities reported.
 
 Four preceding Actions attempts failed and were repaired. All checks above are backed by the GitHub job logs, not assertions inferred from source. Automated success does **not** cover real browser E2E, offline/PWA upgrades, production hosting, real Meta consent/permission verification, Supabase tenant/isolation E2E, operational financial reconciliation against live merchant datasets or penetration testing. These remain blocking for production-connected launch. No release or merge is authorized by CI success alone.
 
 ## Latest verified CI pass — connected consistency (2026-11-01)
 
-[GitHub Actions #41309016163](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163) passed: frozen install, TypeScript, AST lint, **61 core + 22 web + 6 service + 1 integration SDK = 90/90 tests**, API syntax, Vite production build, ESM packaging, and dependency audit reporting no known vulnerabilities at the moderate threshold. An initial run [#41308887058](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41308887058) identified two regressions, fixed before the successful run.
+[GitHub Actions #41309016163](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41309016163) passed: frozen install, TypeScript, AST lint, **61 core + 22 web + 6 service + 1 integration SDK = 90/90 tests**, API syntax, Vite production build, ESM packaging, and dependency audit reporting no known vulnerabilities at the moderate threshold. An initial run [#41308887058](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41308887058) identified two regressions, fixed before the successful run.
 
 These new service tests verify source/SQL **contracts**, not PostgreSQL transaction execution. The temporary Actions workflow and its trigger have been removed. A test database is still needed to confirm atomic erasure and concurrent imports across organizations; real Meta Ads, webhook reception and browser PWA/iframe acceptance remain unexecuted.
 
 ## Final additional CI evidence — 2026-11-01
 
-[GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309523249) completed **successfully** with **91/91 tests** (61 core, 22 web, 7 service static/security tests, 1 server integration SDK), frozen install, typecheck, AST lint, Node service syntax, production build, ESM package verification and dependency audit with no known moderate-or-higher vulnerabilities. It includes the test for separation of Supabase publishable/secret keys and backward-compatible environment-variable aliases.
+[GitHub Actions #41309523249](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41309523249) completed **successfully** with **91/91 tests** (61 core, 22 web, 7 service static/security tests, 1 server integration SDK), frozen install, typecheck, AST lint, Node service syntax, production build, ESM package verification and dependency audit with no known moderate-or-higher vulnerabilities. It includes the test for separation of Supabase publishable/secret keys and backward-compatible environment-variable aliases.
 
 The 2026 Supabase key transition is documented but no real Supabase gateway handshake, service-role RLS isolation, SQL execution, Meta OAuth, signed live webhook, browser PWA/iframe E2E or external security review has been performed. The temporary workflow was removed. Automated success should not be described as end-to-end connected-service homologation.
 

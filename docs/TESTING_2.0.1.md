@@ -1,11 +1,11 @@
 # 2.0.1 — Verification and acceptance guide
 
-Run from the branch `fix/precify-colombia-v2.0.1` in PowerShell:
+Run from the branch `fix/precify-financy-v2.0.1` in PowerShell:
 
 ```powershell
 git fetch origin
-git switch fix/precify-colombia-v2.0.1
-git pull --ff-only origin fix/precify-colombia-v2.0.1
+git switch fix/precify-financy-v2.0.1
+git pull --ff-only origin fix/precify-financy-v2.0.1
 pnpm.cmd install --frozen-lockfile --ignore-scripts
 pnpm.cmd typecheck
 pnpm.cmd lint

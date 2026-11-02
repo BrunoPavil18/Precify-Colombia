@@ -1,4 +1,4 @@
-# Auditoría técnica — Precify Colombia 1.0.0
+# Auditoría técnica — Precify Financy 1.0.0
 
 **Estado:** PR consolidada en Draft; `main` preservada. No se ha hecho merge, tag, release, deployment ni ejecución de GitHub Actions.
 
@@ -122,7 +122,7 @@ El usuario entregó capturas y logs posteriores al selector de Metas:
 ## 10. Homologación de respaldo restaurado — evidencia y comparación de archivos
 
 El propietario informó que exportó respaldos con la interfaz en portugués e inglés, borró los datos locales y consiguió **restaurar satisfactoriamente el conjunto de datos**. Se compararon mediante Python los dos archivos JSON aportados:
-- Formato `precify-colombia-backup`, versión 1, moneda COP y metadata `locale: es-CO` en ambos.
+- Formato `precify-financy-backup`, versión 1, moneda COP y metadata `locale: es-CO` en ambos.
 - En ambos: **2 productos, 3 escenarios, 0 perfiles y 7 eventos de historial**.
 - El objeto `workspace` es **idéntico** en ambos archivos: se mantienen precios, ID, costos, configuraciones mensuales, escenarios y eventos.
 - La única diferencia de contenido es `exportedAt`: `2026-10-23T01:55:06.261Z` frente a `2026-10-23T01:55:23.510Z`; ello es esperado en exportaciones distintas.

@@ -1,4 +1,4 @@
-# Precify Colombia v2.0.1 — Financial Reliability and Colombian Compliance Clarifications
+# Precify Financy v2.0.1 — Financial Reliability and Colombian Compliance Clarifications
 
 **Release v2.0.1.** This patch refines the v2.0.0 financial simulation engine, retains COP-only operation and browser-local storage, and does not add accounts, commercial integrations, paid services or remote telemetry.
 
@@ -8,7 +8,7 @@
 - **PUM:** keeps the rounded mathematical result and adds separate, conditionally applicable two-decimal truncated presentation. Users can now select content and comparison units independently (g/kg, ml/L, cm/m), while legacy three-argument API callers retain their previous reference behavior.
 - **Portfolio:** exact weighted constant-mix break-even avoids errors introduced by rounding unit averages prematurely.
 - **Margin targets:** unchanged v1/v2 suggested-price contract; explicit denominator remains contribution / net product sale, not total revenue including freight.
-- **COP and privacy:** BigInt amounts, version 2 JSON backups, v1 import compatibility, and the existing `precify-colombia:workspace:v1` browser storage key remain intact.
+- **COP and privacy:** BigInt amounts, version 2 JSON backups, v1 import compatibility, and the existing `precify-financy:workspace:v1` browser storage key remain intact.
 - **PWA and UI:** versioned static cache revision and clearer ES/PT/EN labels.
 
 ## Colombian legal context
