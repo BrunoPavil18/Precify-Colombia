@@ -58,3 +58,14 @@ A tela de **Fontes e conexões** não estava correta como ponto inicial do fluxo
 ## Revalidação de segurança após o último hotfix
 
 Uma revisão da ação `uploadLocal()` em `apps/web/src/ConnectedLab.tsx` encontrou que a leitura ignorava o negócio ativo. Corrigimos para `businessKey(LOCAL_OPERATIONS,getBusinessScope())` e exigimos confirmação explícita do destino `perfil local → organização remota` antes de liberar o botão. A confirmação é revogada ao trocar a organização e após a importação. A interface de contas permanece opcional e recolhida. Os **118 testes JS**, build e Chromium foram aprovados em [Actions #41400861130](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400861130). O novo empacotamento Windows está no [gate final](https://github.com/BrunoPavil18/Precify-Financy/actions) (substituir pelo identificador real após confirmação).
+
+## Encerramento dos testes automáticos e dos pacotes
+
+O último código de aplicativo compilado foi o da execução [#41400964119](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119): **118 testes JS + 4 testes Rust, typecheck, build, Chromium com onboarding v2 e empacotamento Windows, todos aprovados**. Pacotes e checksums SHA-256 conferidos:
+
+| Arquivo | SHA-256 |
+|---|---|
+| `Precify-Financy-2.1.0-win64.zip` | `2ce0b266ffc3129a74f9ba4714fd3e6d5545f998fdc57c2d1ef44742a7784f0b` |
+| `Precify-Financy-2.1.0-setup.exe` | `11b238a743d8a0348a5bdf6f99ab5dd75cacc8f9c55aad75ed87cc0aff052556` |
+
+A `main` permanece intacta; este fechamento **não declara** a API da Vezura implementada nem aprovação fiscal/contábil independente.

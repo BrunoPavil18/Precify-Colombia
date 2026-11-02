@@ -2,7 +2,7 @@
 **Data:** 2 de novembro de 2026  
 **Branch:** `feat/precify-colombia-v2.1.0` (nome histórico da branch; manter enquanto PR #4 estiver aberta)  
 **PR:** https://github.com/BrunoPavil18/Precify-Financy/pull/4 (draft, sem merge ou release)  
-**Build de código homologado automaticamente:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905  
+**Build de código homologado automaticamente:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119  
 **Auditoria de dependências:** https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41396477317
 
 ## Decisões confirmadas
@@ -34,9 +34,9 @@
 - **4/4 testes Rust**: snapshots SQLite por perfil, CAS/revisão e cache de feed atômico com cursor, isolado por loja e imutabilidade de eventos.
 - **GitHub Actions Windows x64**: `precify-financy.exe` compilado, instalador Inno e ZIP portátil produzidos.
 - **Auditoria de dependências**: `pnpm audit --audit-level moderate` => **No known vulnerabilities found**. Isso não certifica ausência de vulnerabilidades futuras ou de lógica de aplicação.
-- **Artefato oficial**: `Precify-Financy-2.1-MultiBusiness-Tauri-Windows`, [GitHub Actions](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905/artifacts/13119407755).
-- **SHA-256 do ZIP** `Precify-Financy-2.1.0-win64.zip`: `cb0f6b967261cd11be41c2a0a15509baa69e010c51e4000270492f3043f3ff3e`.
-- **SHA-256 do Inno** `Precify-Financy-2.1.0-setup.exe`: `f0e9d8fe863f60ce8885951238ace79e063f70b822c29df80bd5f74b76051d4f`.
+- **Artefato oficial**: `Precify-Financy-2.1-MultiBusiness-Tauri-Windows`, [GitHub Actions](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119/artifacts/13121690775).
+- **SHA-256 do ZIP** `Precify-Financy-2.1.0-win64.zip`: `2ce0b266ffc3129a74f9ba4714fd3e6d5545f998fdc57c2d1ef44742a7784f0b`.
+- **SHA-256 do Inno** `Precify-Financy-2.1.0-setup.exe`: `11b238a743d8a0348a5bdf6f99ab5dd75cacc8f9c55aad75ed87cc0aff052556`.
 - Manifesto SHA256SUMS conferido byte a byte; ZIP externo e interno passaram em testes de integridade.
 
 ## Limites e o que depende da Vezura/loja real
@@ -62,3 +62,12 @@ A revisão completa dos fluxos de conexão, operações multiempresa, recuperaç
 ### Complemento de isolamento no modo conectado opcional
 
 O upload para a API antiga utilizava equivocadamente a chave do negócio principal. A nova leitura utiliza o escopo de negócio ativo e só permite a importação após confirmação explícita de negócio local e organização remota. Regressão adicionada aos testes web. [Auditoria geral e limites](GENERAL_AUDIT_V2_1_0_2026-11-02.md).
+
+### Resultado da compilação Windows pós-auditoria
+
+**[Actions #41400964119](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119) — SUCCESS**. O job Linux/Chromium e o job nativo Windows passaram na revisão final, que inclui a proteção contra importação de negócio errado. O artifact [Windows + Inno + manifest](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119/artifacts/13121690775) foi baixado e os ZIPs externos/internos passaram no teste de integridade. `SHA256SUMS.txt` conferido contra os bytes reais:
+
+- `Precify-Financy-2.1.0-win64.zip`: `2ce0b266ffc3129a74f9ba4714fd3e6d5545f998fdc57c2d1ef44742a7784f0b`.
+- `Precify-Financy-2.1.0-setup.exe`: `11b238a743d8a0348a5bdf6f99ab5dd75cacc8f9c55aad75ed87cc0aff052556`.
+
+Permanece candidata na PR #4, sem merge ou release estável, à espera exclusivamente de validação manual do novo executável e integração/homologação de backend de loja para dados comerciais reais.
