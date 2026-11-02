@@ -69,3 +69,16 @@ O último código de aplicativo compilado foi o da execução [#41400964119](htt
 | `Precify-Financy-2.1.0-setup.exe` | `11b238a743d8a0348a5bdf6f99ab5dd75cacc8f9c55aad75ed87cc0aff052556` |
 
 A `main` permanece intacta; este fechamento **não declara** a API da Vezura implementada nem aprovação fiscal/contábil independente.
+
+
+## Segunda rodada — falha do link do guia no Windows e robustez de conexão (02/11/2026)
+
+**Incidente reproduzível no desenho da interface:** o guia de integração era apenas um `<a target="_blank">` para documentação do GitHub. O destino é válido, mas o WebView2/Tauri pode não oferecer abertura externa nesse contexto; clicar aparentava não executar ação. A correção é um botão acessível que abre o guia **dentro do próprio Precify** (ES/PT/EN), com explicação da implantação da API, SQL MySQL/PostgreSQL, endpoints, segurança, emissão/revogação e link complementar. Há também URL selecionável para cópia caso a navegação externa continue bloqueada.
+
+**Robustez de dispositivos:** a identidade Ed25519 pendente é agora gravada em IndexedDB antes do POST de ativação. Se o servidor consumir o convite e a resposta ou o commit local falhar, o aplicativo tenta recuperar a mesma identidade pelo `GET /precify/v2/identity` assinado (inclusive depois de reabrir). Identidades pendentes não são tratadas como ativas. O cliente não recria outra chave para tentar reutilizar um convite já consumido; cada instalação continua exigindo convite único no backend da loja.
+
+**Ciclo de vida do sincronizador:** o cleanup é registrado *antes* da chamada assíncrona de identificação, evitando timers e listeners órfãos quando componentes são desmontados rapidamente. Depois da descoberta de `subject`, o update revalida a configuração persistida, prevenindo a substituição silenciosa de intervalo/consentimento alterados durante a requisição. A remoção aguarda a atualização do relatório local, além do feed, antes de expurgar os eventos.
+
+**Cobertura:** contratos estáticos adicionais para guia, ativação resiliente e limpeza; a jornada Chromium agora abre/fecha o guia, confere os três endpoints e produz uma captura adicional. O workflow Windows + browser é o gate integral da candidata. Testes automáticos não substituem Windows WebView2 no notebook do proprietário nem uma implantação de loja.
+
+**Limites remanescentes (não classificar como defeito corrigido):** Vezura sem endpoints de produção, sem homologação COD/Meta em produção, executável não assinado, `Cargo.lock` não versionado, ausência de hardware attestation, revogação incapaz de apagar dados já em cache offline, e testes independentes fiscais/jurídicos ainda externos. A área de contas legada segue recolhida por padrão e disponível **somente** para compatibilidade. Nenhuma alteração em `main`, no servidor da Vezura ou no Supabase foi executada nesta rodada.
