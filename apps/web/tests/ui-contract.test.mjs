@@ -137,3 +137,22 @@ test("optional cloud upload uses active business storage and requires explicit d
  assert.ok(connected.includes("disabled={busy||offline||!confirmLocalUpload||!current}"));
  assert.ok(connected.includes("setConfirmLocalUpload(false);setDashboard(null)"));
 });
+
+test("integration guide is in-app rather than relying on WebView2 external links",()=>{
+ const src=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ for(const token of ['setGuideOpen(value=>!value)','aria-expanded={guideOpen}','aria-controls="precify-site-integration-guide"','role="region"','POST /precify/v2/activate','GET  /precify/v2/changes'])
+  assert.ok(src.includes(token),token);
+});
+test("device activation is recoverable if invitation is consumed before the local confirmation",()=>{
+ const vault=readFileSync(new URL("../src/device-vault.ts",import.meta.url),"utf8");
+ for(const token of ["readStoredDevice", "if(!previous)await saveDevice(businessId,siteId,identity)", "createDeviceConnector", "const recovered=await readDevice", "store.put({scope:scope(businessId,siteId),identity})"])
+  assert.ok(vault.includes(token),token);
+ assert.ok(vault.indexOf('if(!previous)await saveDevice(businessId,siteId,identity)')<vault.indexOf('await activateDevice({baseURL,code,identity})'));
+});
+test("connector effect registers asynchronous cleanup before device identity requests resolve",()=>{
+ const src=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ assert.ok(src.includes("let stopped=false,handler:()=>void=()=>{},teardown:()=>void=()=>{}"));
+ assert.ok(src.indexOf("tasks.push(()=>{stopped=true;teardown()")<src.indexOf("const init=async()=>"));
+ assert.ok(src.includes("if(stopped)teardown();"));
+ assert.ok(src.includes("const next=loadSites(businessId).map"));
+});
