@@ -746,5 +746,8 @@ export const ptBR: Record<string,string> = {
   "Los cálculos y datos locales se procesan en este navegador. No necesitas crear una cuenta. Las conexiones a servicios externos son opcionales y requieren tu autorización.": "Os cálculos e os dados locais são processados neste navegador. Não é necessário criar uma conta. As conexões com serviços externos são opcionais e exigem sua autorização.",
   "Ranking por margen": "Ranking por margem",
   "Mayor contribución": "Maior contribuição",
-  "Mayor margen": "Maior margem"
+  "Mayor margen": "Maior margem",
+  "Más herramientas": "Mais ferramentas",
+  "Navegación rápida": "Navegação rápida",
+  "Inicio": "Início"
 };

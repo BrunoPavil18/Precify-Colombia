@@ -194,7 +194,7 @@ export const en: Record<string,string> = {
   "Agrega productos para compararlos.": "Add products to compare them.",
   "Productos ordenados por contribución unitaria": "Products ranked by unit contribution",
   "Producto": "Product",
-  "Precio": "Price",
+  "Precio": "Pricing",
   "Contribución": "Contribution",
   "Margen": "Margin",
   "Sensibilidad": "Sensitivity",
@@ -746,5 +746,8 @@ export const en: Record<string,string> = {
   "Los cálculos y datos locales se procesan en este navegador. No necesitas crear una cuenta. Las conexiones a servicios externos son opcionales y requieren tu autorización.": "Local calculations and data are processed in this browser. No account is required. Connections to external services are optional and require your authorization.",
   "Ranking por margen": "Ranking by margin",
   "Mayor contribución": "Highest contribution",
-  "Mayor margen": "Highest margin"
+  "Mayor margen": "Highest margin",
+  "Más herramientas": "More tools",
+  "Navegación rápida": "Quick navigation",
+  "Inicio": "Home"
 };
