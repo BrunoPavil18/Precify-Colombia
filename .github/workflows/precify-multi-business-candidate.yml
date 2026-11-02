@@ -1,4 +1,4 @@
-name: Precify 2.1 multi-business Tauri consolidated candidate
+name: Precify Financy 2.1 Windows + store security audit
 on:
   push:
     branches: ['feat/precify-colombia-v2.1.0']

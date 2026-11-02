@@ -122,3 +122,14 @@ Leia [contrato de integração](docs/INTEGRATION_CONTRACT.md), [fórmulas](docs/
 ## Precify Desktop Tauri e negócios independentes (candidata 2.1.0)
 
 O núcleo financeiro **permanece em TypeScript/BigInt** para preservar equivalência com a PWA. O aplicativo Windows usa Rust para a janela nativa e snapshots SQLite por negócio; o armazenamento ativo da interface continua no navegador integrado até uma migração explícita. É possível criar negócios independentes e abrir a visão "Todos os negócios", sem inventar lucros nem somar moedas diferentes. [Análise técnica](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guia e limitações](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). A Vezura não foi alterada.
+
+
+## Precify Financy — Windows SQLite e integração direta por instalação
+
+A versão Windows usa o Tauri 2, motor financeiro TypeScript/BigInt e **SQLite como armazenamento autoritativo** de perfis, catálogo COP, cenários, operações, preços ISO e configuração de lojas. O estado síncrono do React usa uma projeção descartável em localStorage, carregada do SQLite ao iniciar. Gravações financeiras confirmam primeiro o banco; falhas não resultam em mensagem falsa de sucesso. O site continua sendo a fonte oficial de pedidos/recebimentos importados.
+
+**Instalação limpa:** o identificador Tauri agora é `com.precifyfinancy.desktop` e o instalador Inno usa novo `AppId`. Isso evita sobrescrever a instalação antiga do Precify Colombia e não importa automaticamente produtos de desenvolvimento. A versão web continua usando seu armazenamento específico. O usuário pode exportar/importar JSON explicitamente, se desejar.
+
+As lojas emitem convites de uso único para cada instalação: o computador gera uma chave Ed25519 privada não exportável pelo WebCrypto e lê a API v2 do próprio site por HTTPS, com assinatura, nonce, timestamp e revogação por dispositivo. O código do convite é consumido uma única vez. Veja [protocolo de lojas e exemplos MySQL/Postgres](docs/STORE_DEVICE_API_V2.md).
+
+**Pendências externas:** o servidor de cada loja precisa instalar a API, fornecer o feed durável de pedidos e oferecer um painel administrativo para emissão/revogação. Nenhuma alteração na Vezura nesta entrega. O nome do repositório GitHub ainda é `Precify-Colombia` por limitação do conector de administração; o proprietário deve alterá-lo em Settings → General → Repository name para `Precify-Financy` quando homologar, mantendo os redirecionamentos antigos.

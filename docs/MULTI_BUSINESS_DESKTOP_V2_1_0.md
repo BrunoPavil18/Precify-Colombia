@@ -9,7 +9,7 @@
 4. **Migração não destrutiva:** o negócio original `default` permanece nas **chaves históricas exatas**. Novos negócios recebem sufixos de escopo. Não há cópia automática da base anterior, reset, deduplicação implícita nem remoção de dados locais antigos.
 5. **Visão geral todos os negócios:** total de perfis, produtos COP e cenários, cards por negócio e, quando houver operações importadas, painel **por moeda** com pedidos, pagos, recebimento líquido, custos operacionais declarados e resultado calculado. Não somamos moedas distintas e **não chamamos dados importados de lucro contábil ou saldo bancário**. Fontes com dados inválidos não são somadas. Dados de uma mesma fonte importados em dois perfis ainda podem gerar sobreposição: é necessário o dono evitar importar a mesma loja em duas contas; a deduplicação global robusta depende de IDs de loja externos.
 6. **Navegação mais simples:** itens especializados sob "Mais ferramentas", barra inferior mobile (Início, Preço, Produtos, COD, Conexões), menu lateral com botão fechar; valores adaptativos para 390/375 px.
-7. **Armazenamento SQLite no Windows:** snapshots de perfis e módulos no diretório de dados nativo, protegidos por revision/CAS. O frontend continua localStorage/IndexedDB até uma migração transacional futura. Recuperação do snapshot é **opt-in e confirmada**.
+7. **Armazenamento SQLite no Windows:** snapshots de perfis e módulos no diretório de dados nativo, protegidos por revision/CAS. Ao iniciar no Windows, o SQLite é carregado antes do React; gravações financeiras aguardam confirmação Rust. localStorage é projeção descartável de leitura. Credenciais criptográficas não exportáveis ficam no IndexedDB.
 8. **PWA permanece funcional** e compatível com o motor atual; compilação Windows em Inno Setup e ZIP portátil com hashes SHA-256.
 
 ## Riscos explícitos e não incluídos
@@ -55,3 +55,12 @@ O workflow `.github/workflows/precify-multi-business-candidate.yml` verifica mot
   - Setup: `d19240c2d54da9d04651f60210de50609370a53f204efbde04bf3cf5109b7210`.
   - ZIP: `18437c32a70b1c0f63bb43cf3509eebe90a9e24971326b8cbcedc6e2b6ca175f`.
 - **Ainda é necessário testar manualmente os perfis/SQLite no Windows**; o sucesso automático não substitui essa homologação. Sem publicação/merge/deploy; PR permanece draft.
+
+
+## Atualização arquitetural: Precify Financy nativo e instalação limpa
+
+A primeira candidata aqui documentada usava SQLite apenas como espelho. **A entrega Financy substitui esse modelo**: inicialização a partir do SQLite, `nativeWrite` com comparação da revisão e escrita no banco antes da projeção, `nativeRemove` com CAS. `PRAGMA journal_mode=WAL` e `PRAGMA synchronous=FULL` estão ativos. O perfil de dados é novo (`com.precifyfinancy.desktop`); dados de demonstração do Precify Colombia não são importados nem apagados automaticamente.
+
+Os dados internos de negócios, operação, preços ISO e configurações de conexão ficam no SQLite. O feed de eventos importados e chaves privadas de dispositivos ainda usam IndexedDB como cache e cofre de `CryptoKey`, respectivamente; esse é um componente técnico separado e não um segundo banco financeiro autoritativo para dados editáveis.
+
+A instalação tem uma API v2 assinada e convites por dispositivo, com testes de replay e revogação. Integração de loja real e homologação definitiva Vezura são atividades separadas. Revisão geral em `docs/FINANCY_FINAL_AUDIT.md`.

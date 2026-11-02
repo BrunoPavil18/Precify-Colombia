@@ -42,3 +42,10 @@ The v2.1.0 candidate now supports separate local business profiles, a multi-busi
 The ZIP is **installation-free**, but its profile data are stored in the current Windows account's WebView2/Tauri application-data directories, **not in the extracted ZIP folder**. Copy your exported backups to move to another PC. WebView2 Runtime must be available.
 
 The window title is now Precify Financy. GitHub Actions creates the desktop candidate and checks the frontend and native SQLite tests. The main branch remains untouched.
+
+
+## Arquitetura atual de Precify Financy
+
+O código anterior deste README registra o histórico do piloto Tauri. A versão atual usa **SQLite como fonte principal no Windows**, com inicialização nativa antes de montar React e confirmação de gravação por comando Rust. A projeção localStorage não é um backup nem tem precedência sobre o SQLite. O nome do binário mudou para `precify-financy.exe` e o identificador do app foi alterado intencionalmente. O pacote ZIP continua portátil como executável, mas o banco SQLite é persistido no perfil Windows do usuário.
+
+Credenciais de lojas usam código único e chaves não exportáveis no IndexedDB; não entram em snapshots JSON de dados financeiros. Na API, cada requisição precisa assinatura válida e não repetida.

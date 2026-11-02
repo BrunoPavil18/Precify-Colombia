@@ -9,14 +9,14 @@ $folder=Join-Path $out "Precify-Financy-$Version"
 New-Item -ItemType Directory -Force $folder | Out-Null
 Copy-Item -LiteralPath $binary -Destination (Join-Path $folder 'precify-financy.exe') -Force
 @'
-Precify Financy — Windows portable pilot
+Precify Financy — Windows portable
 
 Extract the ENTIRE ZIP and open precify-financy.exe.
 Windows 10/11 x64 and Microsoft WebView2 Runtime are required.
 The portable ZIP includes the Precify program and its web frontend,
 but not the separate Microsoft WebView2 Runtime.
 
-This is a pilot, not the v2.1.0 stable release.
+Candidate release. SQLite is the Windows source of truth; manual acceptance is required.
 Data are local to this application: export a backup from the browser before moving data.
 Do not delete the original backup until a restore is verified.
 No standalone Node.js server is required.
@@ -38,5 +38,5 @@ $installer=Join-Path $out "Precify-Financy-$Version-setup.exe"
 if (Test-Path -LiteralPath $installer) {$assets+= $installer}
 $hashes=@($assets | ForEach-Object {"$((Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant())  $(Split-Path -Leaf $_)"})
 $hashes | Set-Content -LiteralPath (Join-Path $out 'SHA256SUMS.txt') -Encoding ascii
-Write-Host "Precify pilot packages: $out"
+Write-Host "Precify Financy Windows packages: $out"
 Get-ChildItem -LiteralPath $out -File | Select-Object Name,Length

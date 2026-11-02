@@ -80,3 +80,7 @@ Store upserts must contain complete Precify `OrderEvent` or `AdCampaign` values 
 ### Verified browser acceptance
 
 [Actions run 41317968648](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41317968648) passed 108 unit/contract tests plus a real Chromium/IndexedDB smoke: atomic cache/cursor commits, immutable order ID conflict rollback, expected-cursor check during cross-tab races, tenant separation, selective consent cache deletion and persisted record availability after reloading the browser. The test identified and resolved an actual IndexedDB key-only-cursor deletion bug. Reusable developer test: `scripts/browser-sync-smoke.mjs`. **No Vezura or real merchant server endpoint has been deployed.**
+
+## Extensão de segurança — Precify Financy v2
+
+O protocolo v1 documentado acima é histórico/compatível. A interface do Financy adiciona novas lojas em modo **device-v2**, conforme `docs/STORE_DEVICE_API_V2.md`. O servidor da loja armazena chave pública por instalação; o convite é consumido atomicamente e os GETs requerem provas Ed25519 com nonce. Não copiar chaves administrativas nem banco de usuários para o Precify.
