@@ -1,4 +1,4 @@
--- Precify Colombia 2.1.0 connected-mode schema for a PostgreSQL/Supabase project.
+-- Precify Financy 2.1.0 connected-mode schema for a PostgreSQL/Supabase project.
 -- Run explicitly in the target database. Nothing here runs on app startup.
 -- No Vezura or existing local-browser data is touched.
 create extension if not exists pgcrypto;

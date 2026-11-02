@@ -1,5 +1,5 @@
 /**
- * Precify Colombia opt-in connected REST service.
+ * Precify Financy opt-in connected REST service.
  * Node 20+, no runtime npm dependencies. Hosted PostgreSQL/Supabase is configured
  * by the operator; there are no hard-coded credentials or automatic migrations.
  */

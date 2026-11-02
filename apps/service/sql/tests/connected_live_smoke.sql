@@ -1,4 +1,4 @@
--- Precify Colombia 2.1.0 — live PostgreSQL smoke test.
+-- Precify Financy 2.1.0 — live PostgreSQL smoke test.
 -- Run on a dedicated TEST project only; all synthetic changes are rolled back.
 -- Full application HTTP authentication and true two-session concurrency are out of scope.
 begin;
