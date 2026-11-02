@@ -13,7 +13,10 @@ export const MAIN_BUSINESS="default";
 export const ALL_BUSINESSES="all";
 export type Business={id:string;name:string;website:string;createdAt:string};
 export type BusinessDirectory={version:1;businesses:Business[]};
-const newId=()=>("b_"+crypto.randomUUID().replace(/-/g,"")).slice(0,34);
+const newId=()=>"b_"+crypto.randomUUID().replace(/-/g,"");
+let currentScope=MAIN_BUSINESS;
+export function setBusinessScope(id:string){currentScope=id===ALL_BUSINESSES?MAIN_BUSINESS:id;}
+export const getBusinessScope=()=>currentScope;
 const initial=():BusinessDirectory=>({version:1,businesses:[{id:MAIN_BUSINESS,name:"Negocio principal",website:"",createdAt:new Date().toISOString()}]});
 export function businessKey(base:string,id:string):string{
  if(id===MAIN_BUSINESS)return base;
@@ -80,7 +83,7 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
   if(directory.businesses.length>=40)throw Error("Too many businesses");
   const id=newId();
   update({version:1,businesses:[...directory.businesses,{id,name:name.trim(),website:website.trim(),createdAt:new Date().toISOString()}]});
-  choose(id);return id;
+  localStorage.setItem(ACTIVE,id);setSelectedId(id);return id;
  }
  function rename(id:string,name:string,website:string){
   const valid=directory.businesses.some(b=>b.id===id);
@@ -89,6 +92,7 @@ export function BusinessProvider({children}:{children:(key:string)=>React.ReactN
  }
  const current=directory.businesses.find(b=>b.id===selectedId)??null;
  const ctx={directory,selectedId,current,error,choose,create,rename};
+ setBusinessScope(selectedId);
  useEffect(()=>{
   if(error)return;
   const listener=(e:StorageEvent)=>{

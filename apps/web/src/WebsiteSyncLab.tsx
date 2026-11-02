@@ -5,7 +5,9 @@ import {applySitePage,purgeSiteCache,readSiteCheckpoint,readSiteRows} from "./we
 import {createSiteConnector,createSyncController,type SyncStatus} from "../../../integrations/site-owned-sync.mjs";
 
 type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subject?:string};
+import {businessKey,getBusinessScope} from "./BusinessProfiles";
 const SETTINGS="precify-colombia:site-owned-connectors:v1";
+const siteSettingsKey=()=>businessKey(SETTINGS,getBusinessScope());
 const strings={
  "es-CO":{
  title:"Sincronización con tiendas propias",description:"Cada tienda conserva sus datos en su propio servidor. Precify descarga cambios cuando está abierto y conectado.",
@@ -36,14 +38,14 @@ const strings={
  }
 } as const;
 function loadSites():Site[]{
- try{const raw=localStorage.getItem(SETTINGS);if(!raw)return [];
+ try{const raw=localStorage.getItem(siteSettingsKey());if(!raw)return [];
   const values=JSON.parse(raw) as Site[];
   if(!Array.isArray(values)||values.length>20)return [];
   return values.filter(x=>x&&/^[0-9a-f-]{36}$/i.test(x.id)&&typeof x.url==="string"&&typeof x.name==="string"&&
    [0,30000,60000,300000].includes(x.interval)&&typeof x.enabled==="boolean");
  }catch{return [];}
 }
-function persistSites(sites:Site[]){localStorage.setItem(SETTINGS,JSON.stringify(sites));}
+function persistSites(sites:Site[]){localStorage.setItem(siteSettingsKey(),JSON.stringify(sites));}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
 export function WebsiteSyncLab({visible}:{visible:boolean}){
  const locale=useContext(LocaleContext) as Locale;

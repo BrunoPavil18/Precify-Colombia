@@ -1,5 +1,7 @@
 import {globalPrice,nonNegativeMinorAmount,type GlobalPriceInput} from "@precify-colombia/core";
 
+import {businessKey,getBusinessScope} from "./BusinessProfiles";
+export const storageGlobalKey=()=>businessKey(GLOBAL_PRODUCTS_KEY,getBusinessScope());
 export const GLOBAL_PRODUCTS_KEY="precify-colombia:global-pricing:v1";
 export type GlobalPriceHistory={salePrice:string;currency:string;at:string};
 export type GlobalSavedProduct={id:string;name:string;input:GlobalPriceInput;updatedAt:string;history?:GlobalPriceHistory[]};
@@ -34,7 +36,7 @@ function validateCatalog(value:unknown):GlobalSavedCatalog {
 export function loadGlobalCatalog():{catalog:GlobalSavedCatalog;raw:string|null;error:string|null}{
  let raw:string|null=null;
  try{
-  raw=localStorage.getItem(GLOBAL_PRODUCTS_KEY);
+  raw=localStorage.getItem(storageGlobalKey());
   if(!raw)return {catalog:empty(),raw:null,error:null};
   if(raw.length>2_000_000)throw new Error("Global catalog backup exceeds 2 MB");
   return {catalog:validateCatalog(JSON.parse(raw)),raw,error:null};
@@ -44,9 +46,9 @@ export function persistGlobalCatalog(next:GlobalSavedCatalog,previousRaw:string|
  const safe=validateCatalog(next);
  const content=JSON.stringify(safe);
  if(content.length>2_000_000)throw new Error("Global catalog storage exceeds 2 MB");
- if(localStorage.getItem(GLOBAL_PRODUCTS_KEY)!==previousRaw)
+ if(localStorage.getItem(storageGlobalKey())!==previousRaw)
   throw new Error("Another browser tab modified the global catalog. Export a backup before reloading.");
- localStorage.setItem(GLOBAL_PRODUCTS_KEY,content);
+ localStorage.setItem(storageGlobalKey(),content);
  return content;
 }
 export function decodeGlobalCatalogBackup(content:string):GlobalSavedCatalog {

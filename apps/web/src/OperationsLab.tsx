@@ -5,7 +5,9 @@ import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
  currencyCatalog,minorAmount,type Product,type OrderEvent,type AdCampaign,type OrderCSVMapping,type CPASensitivityInput} from "@precify-colombia/core";
 import {useTranslator} from "./i18n";
 
+import {businessKey,getBusinessScope} from "./BusinessProfiles";
 const KEY="precify-colombia:operations:v1";
+const storageKey=()=>businessKey(KEY,getBusinessScope());
 type HistoryPrice={id:string;product:string;competitor:string;currency:string;price:string;observedAt:string;source:string};
 type LocalOperations={version:1;events:OrderEvent[];campaigns:AdCampaign[];prices:HistoryPrice[]};
 const empty=():LocalOperations=>({version:1,events:[],campaigns:[],prices:[]});
@@ -33,12 +35,12 @@ function validateLocalOps(candidate:unknown):LocalOperations{
 }
 export function readOperations():{value:LocalOperations;error:string|null;raw:string|null}{
  try{
-  const raw=localStorage.getItem(KEY);
+  const raw=localStorage.getItem(storageKey());
   if(!raw)return {value:empty(),error:null,raw:null};
   if(raw.length>2000000)throw new Error("El almacenamiento operacional supera el límite.");
   const value=validateLocalOps(JSON.parse(raw));
   return {value,error:null,raw};
- }catch(e){let raw:string|null=null;try{raw=localStorage.getItem(KEY);}catch{/* Storage may itself be unavailable */}return {value:empty(),raw,error:e instanceof Error?e.message:String(e)};}
+ }catch(e){let raw:string|null=null;try{raw=localStorage.getItem(storageKey());}catch{/* Storage may itself be unavailable */}return {value:empty(),raw,error:e instanceof Error?e.message:String(e)};}
 }
 const requiredFields=["id","orderId","status","occurredAt"] as const;
 const inputFields=["grossRevenue","productCost","shippingCost","reverseShippingCost","advertisingCost","otherCost","refundAmount","campaignId","currency"] as const;
@@ -81,10 +83,10 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
  function commit(next:LocalOperations):boolean{
   if(locked)return false;
   try{
-   if(localStorage.getItem(KEY)!==baseline.current)throw new Error("Conflicto entre pestañas: recarga antes de editar.");
+   if(localStorage.getItem(storageKey())!==baseline.current)throw new Error("Conflicto entre pestañas: recarga antes de editar.");
    const raw=JSON.stringify(next);
    if(raw.length>2000000)throw new Error("Almacenamiento local supera 2 MB. Exporta los datos antes de seguir.");
-   localStorage.setItem(KEY,raw);baseline.current=raw;setData(next);setNotice(t("Datos operativos guardados localmente."));return true;
+   localStorage.setItem(storageKey(),raw);baseline.current=raw;setData(next);setNotice(t("Datos operativos guardados localmente."));return true;
   }catch(e){setLocked(true);setNotice(String(e));return false;}
  }
  async function readFile(file:File|undefined){

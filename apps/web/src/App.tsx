@@ -14,7 +14,8 @@ import {
  type PriceInput, type PriceRounding, type Workspace, type Product, type SavedScenario, type AdvancedSimulationRecord
 } from "@precify-colombia/core";
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
-import { downloadFile, loadWorkspace, persistWorkspace } from "./storage";
+import { downloadFile, loadWorkspace, persistWorkspace, workspaceStorageKey } from "./storage";
+import {useBusinesses,ALL_BUSINESSES,MAIN_BUSINESS,BusinessPortfolio,BusinessChooser} from "./BusinessProfiles";
 
 type Page="inicio"|"calculadora"|"productos"|"escenarios"|"metas"|"pum"|"consumer"|"portfolio"|"global"|"panel-cod"|"cod"|"marketing"|"cpa"|"operaciones"|"importar"|"informes"|"competidores"|"conectado"|"cambio"|"datos"|"avanzado";
 type NavItem={id:Page;icon:string;label:string;description:string};
@@ -270,11 +271,13 @@ function ProductEditor({value,onChange,onDirty}:{value:PriceInput;onChange:(next
  </div>;
 }
 export default function App(){
+ const {selectedId,choose}=useBusinesses();
+ const allMode=selectedId===ALL_BUSINESSES;
  const initialized=useMemo(loadWorkspace,[]);
- const wasStored=useRef<boolean>(typeof localStorage!=="undefined"&&localStorage.getItem(STORE_KEY)!==null);
+ const wasStored=useRef<boolean>(typeof localStorage!=="undefined"&&localStorage.getItem(workspaceStorageKey())!==null);
  const [workspace,setWorkspace]=useState<Workspace>(initialized.state);
  const [locked,setLocked]=useState(initialized.locked);
- useEffect(()=>{const onStorage=(event:StorageEvent)=>{if(event.key===STORE_KEY){setLocked(true);setNotice("Conflicto entre pestañas: cambios externos detectados. Recarga la página para continuar, después de exportar tus datos.");}};window.addEventListener("storage",onStorage);return()=>window.removeEventListener("storage",onStorage);},[]);
+ useEffect(()=>{const onStorage=(event:StorageEvent)=>{if(event.key===workspaceStorageKey()){setLocked(true);setNotice("Conflicto entre pestañas: cambios externos detectados. Recarga la página para continuar, después de exportar tus datos.");}};window.addEventListener("storage",onStorage);return()=>window.removeEventListener("storage",onStorage);},[]);
  const [notice,setNotice]=useState(initialized.error??"");
  const [dirtyMoney,setDirtyMoney]=useState<Set<string>>(()=>new Set());
  const markDirty=(key:string,dirty:boolean)=>setDirtyMoney(prev=>{const next=new Set(prev);if(dirty)next.add(key);else next.delete(key);return next;});
@@ -434,6 +437,7 @@ export default function App(){
    const selected=workspace.products.find(p=>p.id===goalProductId)??workspace.products.find(p=>p.id===activeId)??workspace.products[0];
    setGoalProductId(selected?.id??"");resetGoalDraft();
   }
+  if(allMode&&target!=="inicio"){choose(MAIN_BUSINESS);return;}
   setPage(target);setMobileNavOpen(false);
  }
  async function switchScenarioProduct(id:string){
@@ -527,11 +531,11 @@ export default function App(){
  }
  async function reset(){
   if(!(await askConfirmation(t("¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes."))))return;
-  try{localStorage.removeItem(STORE_KEY);wasStored.current=false;setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
+  try{localStorage.removeItem(workspaceStorageKey());wasStored.current=false;setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
   catch(e){setNotice("No se pudieron borrar los datos: "+String(e));}
  }
  function rawBackup(){
-  const raw=localStorage.getItem(STORE_KEY);
+  const raw=localStorage.getItem(workspaceStorageKey());
   if(raw===null){setNotice("No existe almacenamiento original para descargar.");return;}
   downloadFile(raw,"precify-datos-locales-sin-validar.json","application/json");
  }
@@ -573,11 +577,11 @@ export default function App(){
    <div className="content-column">
     <header className="topbar">
      <div className="topbar-location"><button className="menu-toggle" aria-label={t("Abrir menú")} onClick={()=>setMobileNavOpen(v=>!v)} aria-expanded={mobileNavOpen}><UIIcon name="menu"/></button><div className="breadcrumb">PRECIFY <span>/</span> <strong>{t(titleOf(page))}</strong></div></div>
-     <div className="topbar-right"><span className="currency-pill">{["cambio","operaciones","global","panel-cod","conectado"].includes(page)?"ISO / COP":"COP"}</span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> {t("LOCAL")}</span>{desktopRuntime&&<span className="desktop-chip" title={desktopRuntime+" · IPC "+(binaryIpcReady?"ArrayBuffer OK":"indisponível")}>APP WINDOWS <span aria-hidden="true">●</span></span>}<span className="version-pill">v2.1</span></div>
+     <div className="topbar-right"><BusinessChooser onChange={()=>setPage("inicio")}/><span className="currency-pill">{["cambio","operaciones","global","panel-cod","conectado"].includes(page)?"ISO / COP":"COP"}</span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> {t("LOCAL")}</span>{desktopRuntime&&<span className="desktop-chip" title={desktopRuntime+" · IPC "+(binaryIpcReady?"ArrayBuffer OK":"indisponível")}>APP WINDOWS <span aria-hidden="true">●</span></span>}<span className="version-pill">v2.1</span></div>
     </header>
     <main id="main-content">
      {page!=="inicio"&&<div className="page-heading"><div><div className="eyebrow">{t("ESPACIO DE TRABAJO")} <span className="green-line"/> {t("DATOS LOCALES / OPCIONALES")}</div><h1>{t(pageTitles[page].title)}</h1><p>{t(pageTitles[page].description)}</p></div></div>}
-     {page==="inicio"&&<OverviewDashboard workspace={workspace} ranked={ranked} format={fmt} date={date} onNavigate={target=>{void navigate(target);}}/>}
+     {page==="inicio"&&(allMode?<BusinessPortfolio onOpen={()=>setPage("inicio")}/>:<OverviewDashboard workspace={workspace} ranked={ranked} format={fmt} date={date} onNavigate={target=>{void navigate(target);}}/>)}
      {confirmation&&<div className="modal-backdrop" role="presentation">
       <section className="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="precify-confirm-title" aria-describedby="precify-confirm-body">
        <h2 id="precify-confirm-title">{t("Confirmar operación")}</h2>

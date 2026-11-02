@@ -1,13 +1,14 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import {BusinessProvider} from "./BusinessProfiles";
 import EmbedCalculator from "./EmbedCalculator";
 import "./styles.css";
 import "./dark-theme.css";
 const root=document.getElementById("root");
 if(!root) throw new Error("Root element missing");
 const embedded=new URL(window.location.href).searchParams.get("embed")==="1";
-createRoot(root).render(<React.StrictMode>{embedded?<EmbedCalculator/>:<App/>}</React.StrictMode>);
+createRoot(root).render(<React.StrictMode>{embedded?<EmbedCalculator/>:<BusinessProvider>{id=><App key={id}/>}</BusinessProvider>}</React.StrictMode>);
 
 // Registration occurs only in production. Updates are not activated without a user choice.
 if(!embedded&&import.meta.env.PROD&&!("__TAURI_INTERNALS__" in window)&&"serviceWorker" in navigator){
