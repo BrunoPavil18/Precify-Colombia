@@ -32,3 +32,9 @@ A transação de ativação consome o convite por `UPDATE ... WHERE consumed_at 
 O backend da loja continua responsável pela tela administrativa de emissão/revogação, pelo feed de pedidos com outbox e pelo rate limiting. Agende expurgo de nonces expirados e **não reatribua IDs revogados**. Se o banco da loja não for PostgreSQL (por exemplo MySQL), traduza a migração e preserve a mesma atomicidade. Não configure silenciosamente uma segunda instância PostgreSQL na Vezura.
 
 O identificador e o segredo de instalação não são uma senha compartilhada; o código de convite é de uso único e a chave privada fica no computador. A verificação de assinatura deve ocorrer em cada acesso. O aplicativo não depende de cadastro de funcionário no serviço do Precify.
+
+## Integração com lojas que utilizam MySQL 8
+
+Para lojas com MySQL 8, aplique `integrations/sql/precify-financy-device-v2.mysql.sql` no banco da própria loja e utilize `createMySQLDeviceStore(pool)` de `integrations/device-store-mysql.mjs`, fornecendo o pool mysql2 já usado pelo site. A transação de `redeem()` consome o convite e registra o dispositivo de maneira atômica; erros fazem ROLLBACK e um segundo consumo retorna HTTP 409. Os nonces possuem índice composto único.
+
+O SQL não cria usuários, senhas nem administradores do Precify. O site continua responsável por autorizar quem emite/renova/revoga dispositivos, e por disponibilizar o feed financeiro da loja. Esse adapter NÃO foi implantado na Vezura e deve ser testado no ambiente dela antes de uso real.
