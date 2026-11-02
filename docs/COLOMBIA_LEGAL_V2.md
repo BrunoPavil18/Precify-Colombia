@@ -1,4 +1,4 @@
-# Precify Colombia v2 — notas jurídicas verificadas
+# Precify Financy v2 — notas jurídicas verificadas
 
 **Verificación:** 23/10/2026. **Alcance:** herramienta privada de apoyo económico, no comercio electrónico que publique ofertas directamente. **Aviso:** contenido informativo; no constituye asesoría legal, tributaria ni certificación de cumplimiento. Ninguna tarifa se impone automáticamente.
 

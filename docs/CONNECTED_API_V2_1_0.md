@@ -1,4 +1,4 @@
-# Precify Colombia 2.1.0 — Connected Service (work in progress)
+# Precify Financy 2.1.0 — Connected Service (work in progress)
 
 **Important:** this is an opt-in service under active development, not a publicly hosted or audited service. The free, offline calculator continues to work without any account, server or integration.
 
@@ -7,7 +7,7 @@
 1. Deploy a dedicated PostgreSQL/Supabase project (free/self-hosted options depend on your operator).
 2. Review and apply both versioned migrations in order: `apps/service/sql/001_connected_schema.sql`, then `apps/service/sql/002_security_hardening.sql`. Do not reapply already recorded migrations.
 3. Copy `apps/service/.env.example` into your deployment's secret manager. Generate a 32-byte random encryption key and provide its **64-character hex representation**. Set TLS origins and secrets. Never put the Supabase service-role key or Meta app secret in the frontend.
-4. Build the core before launching: `pnpm --filter @precify-colombia/core build`; then `node apps/service/server.mjs`.
+4. Build the core before launching: `pnpm --filter @precify-financy/core build`; then `node apps/service/server.mjs`.
 5. Deploy behind HTTPS. The service binds to 127.0.0.1 by default and can be reverse-proxied; set a fixed allowed web origin.
 6. For optional web login, set only the three `VITE_` variables for Supabase's PUBLIC anon key, URL and Precify API origin.
 
@@ -66,7 +66,7 @@ After hosting the Precify web build at `https://precify.example.com`, include a 
 
 ```html
 <iframe
-  title="Precify Colombia – Financial Calculator"
+  title="Precify Financy – Financial Calculator"
   src="https://precify.example.com/?embed=1"
   style="width:100%;min-height:820px;border:0"
   loading="lazy"
@@ -99,7 +99,7 @@ The v2.1.0 features are not yet deployed or independently penetration-tested. A 
 
 ### C. Source package
 
-`@precify-colombia/core` exports both the unchanged COP financial contract and separate international operations, FX and global-pricing functions. Compiling local source does **not** imply npm package publication.
+`@precify-financy/core` exports both the unchanged COP financial contract and separate international operations, FX and global-pricing functions. Compiling local source does **not** imply npm package publication.
 
 ## FX and limitations
 
@@ -123,7 +123,7 @@ Order and campaign imports share the advisory lock; same-ID campaign updates mus
 
 The React connected UI caches read-only financial summaries only with permission for the **selected organization**, avoids two refresh-token renewals per request and clears the previous organization's visible report on selection. Cache is optional; the legacy local COP workspace remains independent.
 
-[Successful CI after these changes (90 tests)](https://github.com/BrunoPavil18/Precify-Colombia/actions/runs/41309016163). No real Meta credentials, automatic deployment or GitHub Actions workflow remain configured.
+[Successful CI after these changes (90 tests)](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41309016163). No real Meta credentials, automatic deployment or GitHub Actions workflow remain configured.
 
 ## Supabase 2026 API key transition
 

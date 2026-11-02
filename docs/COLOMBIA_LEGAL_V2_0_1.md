@@ -1,4 +1,4 @@
-# Precify Colombia 2.0.1 — Colombia: normative scope and financial presentation
+# Precify Financy 2.0.1 — Colombia: normative scope and financial presentation
 
 **Verified on 2026-10-23.** Informational interpretation based on cited official publications, not a legal compliance certification, tax determination, or substitute for Colombian professional advice.
 

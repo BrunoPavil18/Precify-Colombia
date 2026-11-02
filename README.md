@@ -1,4 +1,4 @@
-# Precify Colombia 🇨🇴
+# Precify Financy 🇨🇴
 
 
 
@@ -31,13 +31,13 @@ La v2.0.1 estabiliza campañas (ROAS atribuido y proyectado separados), costos C
 Además de las funcionalidades de la v1, la v2 incorpora simuladores interactivos de **riesgo COD** (pedidos creados/enviados/entregados/pagados), **publicidad y CAC/ROAS**, **PUM** (kg, L, m y unidad), **vista previa del precio final al consumidor** (impuesto incluido/adicional/ninguno) y **cartera multiproducto** con costos fijos deducidos una sola vez. Las simulaciones se guardan por módulo y se respaldan mediante JSON v2, con importación compatible con backups v1. Incluye márgenes de distinta base, markup comercial, clasificación de contribución cero, porcentajes localizados, modales de confirmación accesibles y PWA con almacenamiento offline de recursos y actualizaciones consentidas. Las cifras tributarias/logísticas no son normas automáticas.
 
 
-Precify Colombia calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
+Precify Financy calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
 
 ## Privacidad: cada instalación comienza vacía
 
-Los productos, escenarios, perfiles y eventos se guardan en el **localStorage del navegador de cada usuario**, bajo la clave `precify-colombia:workspace:v1`. El repositorio y el build estático **no incluyen los datos que cargue el desarrollador en su propia computadora**. Si no hay datos locales, la aplicación inicia sin productos guardados. «Producto ejemplo» es solo un borrador demostrativo de la calculadora.
+Los productos, escenarios, perfiles y eventos se guardan en el **localStorage del navegador de cada usuario**, bajo la clave `precify-financy:workspace:v1`. El repositorio y el build estático **no incluyen los datos que cargue el desarrollador en su propia computadora**. Si no hay datos locales, la aplicación inicia sin productos guardados. «Producto ejemplo» es solo un borrador demostrativo de la calculadora.
 
-El almacenamiento está separado por origen (protocolo + dominio + puerto); usuarios distintos del mismo equipo y navegador/perfil podrían compartirlo. No es una base de datos multiusuario. Borrar datos del sitio o usar navegación privada puede eliminar los datos: **exporte respaldos periódicamente**. No se envían los datos a un backend de Precify Colombia.
+El almacenamiento está separado por origen (protocolo + dominio + puerto); usuarios distintos del mismo equipo y navegador/perfil podrían compartirlo. No es una base de datos multiusuario. Borrar datos del sitio o usar navegación privada puede eliminar los datos: **exporte respaldos periódicamente**. No se envían los datos a un backend de Precify Financy.
 
 ## Instalación para desarrollo
 
@@ -45,7 +45,7 @@ Requisitos: **Node.js >=20.19** y **pnpm 10.34.7**; Git para clonar.
 
 ```bash
 git clone https://github.com/BrunoPavil18/Precify-Colombia.git
-cd Precify-Colombia
+cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
@@ -84,7 +84,7 @@ Publique primero `apps/web/dist/` en un **origen HTTPS propio** (por ejemplo, `h
 ```html
 <iframe
   src="https://calculadora.ejemplo.com/"
-  title="Precify Colombia"
+  title="Precify Financy"
   loading="lazy"
   style="width:100%;height:850px;border:0"
 ></iframe>
@@ -94,10 +94,10 @@ En **WordPress**, utilice un bloque **HTML personalizado** si la política del s
 
 ### 2. Reutilizar cálculos en Node.js / TypeScript
 
-El workspace `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, `maxDiscountPercent` y tipos. En un monorepo pnpm puede declarar `"@precify-colombia/core": "workspace:*"`. Ejemplo *dentro de este repositorio*:
+El workspace `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, `maxDiscountPercent` y tipos. En un monorepo pnpm puede declarar `"@precify-financy/core": "workspace:*"`. Ejemplo *dentro de este repositorio*:
 
 ```ts
-import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-colombia/core";
+import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-financy/core";
 
 const input = { ...EMPTY_INPUT, acquisition: "37000.00", currentPrice: "99000.00" };
 const result = analyze(input);
@@ -105,7 +105,7 @@ console.log(result.contribution); // "49000.00" con los otros costos del ejemplo
 console.log(suggestPrice(input).price);
 ```
 
-**En v2.0.0**, el core genera ESM distribuible (`packages/core/dist/index.js`) y declaraciones de tipos (`dist/index.d.ts`) mediante `pnpm --filter @precify-colombia/core build`. Verifique los artefactos con `pnpm verify:core`. **No está publicado en npm**; puede empaquetarlo localmente y probarlo como dependencia, sin asumir instalación desde el registro público. Para WordPress/PHP se necesita un adaptador JavaScript o una API propia; no existe plugin oficial ni integración de pedidos.
+**En v2.0.0**, el core genera ESM distribuible (`packages/core/dist/index.js`) y declaraciones de tipos (`dist/index.d.ts`) mediante `pnpm --filter @precify-financy/core build`. Verifique los artefactos con `pnpm verify:core`. **No está publicado en npm**; puede empaquetarlo localmente y probarlo como dependencia, sin asumir instalación desde el registro público. Para WordPress/PHP se necesita un adaptador JavaScript o una API propia; no existe plugin oficial ni integración de pedidos.
 
 ### 3. Integración de datos
 

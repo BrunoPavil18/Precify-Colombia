@@ -1,4 +1,4 @@
-# Precify Colombia 🇨🇴
+# Precify Financy 🇨🇴
 
 
 
@@ -31,11 +31,11 @@ Version 2.0.1 stabilizes attributed versus projected campaign ROAS, stage-specif
 Version 2 retains the v1 features and adds interactive **COD risk simulation** (created, shipped, delivered, and paid orders), **advertising/CAC/ROAS**, **price per unit of measure** (kg, L, m, each), an **estimated consumer checkout total** (included or additional tax), and **multi-product portfolio profitability** with shared fixed expenses deducted only once. Saved simulations are grouped by module and exported through JSON backup v2; v1 backups remain importable. Explicit margin bases, commercial versus contribution markup, and zero-contribution viability checks improve clarity. Localized percentage entry, accessible confirmation dialogs, a PWA offline resource shell, and opt-in updates complete the interface changes. Taxes and logistics assumptions remain user-configurable and illustrative.
 
 
-Precify Colombia is an independent pricing and profitability application in **Colombian pesos (COP)**. It supports unit costs, shipping, advertising, percentage and fixed fees, cash-on-delivery (COD) reserves, discounts, target margins, suggested prices, break-even analysis, products, independent scenarios, reports, CSV export, and JSON backups. The interface supports Colombian Spanish, Brazilian Portuguese, and English.
+Precify Financy is an independent pricing and profitability application in **Colombian pesos (COP)**. It supports unit costs, shipping, advertising, percentage and fixed fees, cash-on-delivery (COD) reserves, discounts, target margins, suggested prices, break-even analysis, products, independent scenarios, reports, CSV export, and JSON backups. The interface supports Colombian Spanish, Brazilian Portuguese, and English.
 
 ## Where does user data live?
 
-**In each user's browser**, under the `localStorage` key `precify-colombia:workspace:v1`. Data entered by a developer on their own computer is **not committed to GitHub or embedded in the production bundle**. A new browser/site origin starts with an empty product catalog. “Sample product” is an unsaved calculator example, not seeded catalog data.
+**In each user's browser**, under the `localStorage` key `precify-financy:workspace:v1`. Data entered by a developer on their own computer is **not committed to GitHub or embedded in the production bundle**. A new browser/site origin starts with an empty product catalog. “Sample product” is an unsaved calculator example, not seeded catalog data.
 
 Browser storage is scoped to the site's origin (scheme + domain + port) and browser profile. People sharing the same profile/origin can share its data. This is **not a multiuser database or cross-device sync**. Clearing site data, using private browsing, or switching devices may erase data: export backups regularly from the **Data** screen. There is no required Precify backend receiving these records.
 
@@ -45,7 +45,7 @@ Prerequisites: **Node.js >=20.19**, **pnpm 10.34.7**, and Git.
 
 ```bash
 git clone https://github.com/BrunoPavil18/Precify-Colombia.git
-cd Precify-Colombia
+cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
@@ -84,7 +84,7 @@ Deploy `apps/web/dist/` to an HTTPS URL, such as `https://calculator.example.com
 ```html
 <iframe
   src="https://calculator.example.com/"
-  title="Precify Colombia"
+  title="Precify Financy"
   loading="lazy"
   style="width:100%;height:850px;border:0"
 ></iframe>
@@ -97,7 +97,7 @@ In **WordPress**, use a **Custom HTML** block if the site's iframe policy permit
 The React-independent `packages/core` workspace exports `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, and other typed functions:
 
 ```ts
-import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-colombia/core";
+import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-financy/core";
 
 const input = { ...EMPTY_INPUT, acquisition: "37000.00", currentPrice: "99000.00" };
 const result = analyze(input);
@@ -105,7 +105,7 @@ console.log(result.contribution); // "49000.00" given the other example costs
 console.log(suggestPrice(input).price);
 ```
 
-Within this pnpm monorepo, depend on `"@precify-colombia/core": "workspace:*"`. Version 2.0.0 builds portable ESM at `packages/core/dist/index.js` with TypeScript declarations at `dist/index.d.ts`. Run `pnpm --filter @precify-colombia/core build` and `pnpm verify:core` to verify the distributable output. **The core is not published to the public npm registry**. External applications must test a locally packaged build or incorporate Apache-2.0 source. There is no official WordPress plugin or HTTP API.
+Within this pnpm monorepo, depend on `"@precify-financy/core": "workspace:*"`. Version 2.0.0 builds portable ESM at `packages/core/dist/index.js` with TypeScript declarations at `dist/index.d.ts`. Run `pnpm --filter @precify-financy/core build` and `pnpm verify:core` to verify the distributable output. **The core is not published to the public npm registry**. External applications must test a locally packaged build or incorporate Apache-2.0 source. There is no official WordPress plugin or HTTP API.
 
 To reuse external store data, map it to `PriceInput`, call `validateInput` and `analyze`, and handle `FinancialInputError`. Never expose store credentials to browser users or automatically change live store prices without authorization.
 

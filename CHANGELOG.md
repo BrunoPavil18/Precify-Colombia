@@ -50,7 +50,7 @@
 - Multi-product portfolio simulator, weighted contribution and a single shared monthly fixed-cost deduction.
 - Saved advanced simulations grouped by module and version 2 JSON backup export, with v1 import support.
 - PWA manifest, installable icon, offline static-asset caching and consent-driven service worker updates.
-- Compiled ESM `@precify-colombia/core` entry point and TypeScript declarations; `pnpm verify:core` checks built artifacts.
+- Compiled ESM `@precify-financy/core` entry point and TypeScript declarations; `pnpm verify:core` checks built artifacts.
 - A dedicated TypeScript AST source-policy lint step in addition to typechecking.
 
 ### Improved

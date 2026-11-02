@@ -1,4 +1,4 @@
-# Precify Colombia 🇨🇴
+# Precify Financy 🇨🇴
 
 
 
@@ -35,7 +35,7 @@ Aplicação independente de precificação em **pesos colombianos (COP)**, com c
 
 ## Onde ficam os dados?
 
-**No navegador de cada pessoa**, usando `localStorage` e a chave `precify-colombia:workspace:v1`. Os seus dados de teste **não vão para o GitHub e não entram no build distribuído**. Em um navegador/origem sem dados, o catálogo começa vazio. O nome “Produto de exemplo” é só um rascunho inicial, não um produto cadastrado.
+**No navegador de cada pessoa**, usando `localStorage` e a chave `precify-financy:workspace:v1`. Os seus dados de teste **não vão para o GitHub e não entram no build distribuído**. Em um navegador/origem sem dados, o catálogo começa vazio. O nome “Produto de exemplo” é só um rascunho inicial, não um produto cadastrado.
 
 Os dados ficam associados à origem do site (protocolo, domínio e porta) e ao perfil do navegador. Quem compartilhar o mesmo perfil e origem pode acessar os mesmos dados; isso **não é armazenamento multiusuário** nem sincronização. Limpar dados do navegador, mudar de dispositivo ou usar aba anônima pode resultar em perda de informações. Use **Dados → Baixar backup** regularmente. O aplicativo não envia os dados para um backend próprio.
 
@@ -45,7 +45,7 @@ Requisitos: **Node.js >=20.19**, **pnpm 10.34.7** e Git.
 
 ```bash
 git clone https://github.com/BrunoPavil18/Precify-Colombia.git
-cd Precify-Colombia
+cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
@@ -84,7 +84,7 @@ Hospede a pasta `apps/web/dist/` em `https://calculadora.exemplo.com/` e insira 
 ```html
 <iframe
   src="https://calculadora.exemplo.com/"
-  title="Precify Colombia"
+  title="Precify Financy"
   loading="lazy"
   style="width:100%;height:850px;border:0"
 ></iframe>
@@ -97,7 +97,7 @@ No WordPress, cole em um bloco **HTML personalizado** quando permitido, ou adici
 O pacote `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice` e outras funções, sem React:
 
 ```ts
-import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-colombia/core";
+import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-financy/core";
 
 const produto = { ...EMPTY_INPUT, acquisition: "37000.00", currentPrice: "99000.00" };
 const resultado = analyze(produto);
@@ -105,7 +105,7 @@ console.log(resultado.contribution); // "49000.00" com os demais custos de exemp
 console.log(suggestPrice(produto).price);
 ```
 
-Dentro deste monorepo pnpm, use `"@precify-colombia/core": "workspace:*"`. Na v2.0.0, o core compila ESM em `packages/core/dist/index.js` e tipos em `dist/index.d.ts`. Execute `pnpm --filter @precify-colombia/core build` e `pnpm verify:core`. **O pacote não está publicado no npm**; a integração externa exige empacotamento/teste local ou incorporação da fonte sob Apache 2.0. Não existe plugin WordPress ou API HTTP oficial.
+Dentro deste monorepo pnpm, use `"@precify-financy/core": "workspace:*"`. Na v2.0.0, o core compila ESM em `packages/core/dist/index.js` e tipos em `dist/index.d.ts`. Execute `pnpm --filter @precify-financy/core build` e `pnpm verify:core`. **O pacote não está publicado no npm**; a integração externa exige empacotamento/teste local ou incorporação da fonte sob Apache 2.0. Não existe plugin WordPress ou API HTTP oficial.
 
 Para importar dados de loja, converta o modelo da plataforma para o tipo `PriceInput`, valide com `validateInput` e execute `analyze`. Nunca exponha credenciais ao cliente nem altere preços de lojas sem autorização.
 
