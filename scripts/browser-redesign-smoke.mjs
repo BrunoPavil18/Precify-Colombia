@@ -122,9 +122,13 @@ try{
  await wait(350);
  const visible=await evaluate('getComputedStyle(document.querySelector(".menu-toggle")).display!=="none"');
  if(!visible)throw Error("Mobile menu trigger hidden");
+ const mobileMetrics=await evaluate('({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,bottom:getComputedStyle(document.querySelector(".mobile-bottom-nav")).display})');
+ if(mobileMetrics.bottom==="none"||mobileMetrics.scroll>mobileMetrics.width+2)throw Error("Mobile overflow or missing quick bar: "+JSON.stringify(mobileMetrics));
+
  await evaluate('document.querySelector(".menu-toggle").click()');
  await wait(300);
  if(!(await evaluate('document.querySelector(".sidebar").classList.contains("mobile-open")')))throw Error("Mobile sidebar did not open");
+ if(await evaluate('getComputedStyle(document.querySelector(".mobile-close")).display==="none"'))throw Error("Mobile close control missing");
  await shot("overview-mobile.png");
  await nav("Calculadora","Calculadora de precios");
  await wait(350);
