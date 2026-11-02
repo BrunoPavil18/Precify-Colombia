@@ -1,7 +1,7 @@
 name: Precify 2.1 multi-business Tauri consolidated candidate
 on:
   push:
-    branches: ['feat/precify-colombia-v2.1.0']
+    branches: ['feat/precify-financy-v2.1.0']
     paths: ['.github/tauri-profiles-build-trigger.txt']
 permissions:
   contents: read
@@ -55,7 +55,7 @@ jobs:
         run: .\scripts\package-desktop.ps1 -RequireInstaller
       - uses: actions/upload-artifact@v4
         with:
-          name: Precify-Colombia-2.1-MultiBusiness-Tauri-Windows
+          name: Precify-Financy-2.1-MultiBusiness-Tauri-Windows
           path: |
             dist/desktop/*.exe
             dist/desktop/*.zip

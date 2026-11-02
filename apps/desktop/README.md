@@ -1,4 +1,4 @@
-# Precify Colombia desktop pilot (Tauri 2)
+# Precify Financy desktop pilot (Tauri 2)
 
 **This is an experimental Windows shell, NOT the v2.1.0 public release.** The shared React/TypeScript application and exact money engine remain intact; Node is a build-time dependency only. The installed program launches its own WebView2 window instead of Chrome. Network calls use HTTPS, and site-owned connectors still require their server endpoints and credentials.
 
@@ -8,15 +8,15 @@ From the repository root:
 
 ```powershell
 pnpm install --frozen-lockfile
-pnpm --filter @precify-colombia/core build
-pnpm --filter @precify-colombia/web build
+pnpm --filter @precify-financy/core build
+pnpm --filter @precify-financy/web build
 cd apps/desktop
 pnpm dlx @tauri-apps/cli@2.12.4 build --no-bundle
 cd ../..
 .\scripts\package-desktop.ps1
 ```
 
-For development run `pnpm dev` in one terminal, then `cd apps/desktop; pnpm dlx @tauri-apps/cli@2.12.4 dev` in another. The native build should output `apps/desktop/src-tauri/target/release/precify-colombia.exe`; artifacts are generated under `dist/desktop/`.
+For development run `pnpm dev` in one terminal, then `cd apps/desktop; pnpm dlx @tauri-apps/cli@2.12.4 dev` in another. The native build should output `apps/desktop/src-tauri/target/release/precify-financy.exe`; artifacts are generated under `dist/desktop/`.
 
 ## What the pilot proves
 - A native Windows process/window: the topbar displays **APP WINDOWS** only after a real Tauri command returns the platform and version.
@@ -41,4 +41,4 @@ The v2.1.0 candidate now supports separate local business profiles, a multi-busi
 
 The ZIP is **installation-free**, but its profile data are stored in the current Windows account's WebView2/Tauri application-data directories, **not in the extracted ZIP folder**. Copy your exported backups to move to another PC. WebView2 Runtime must be available.
 
-The window title is now Precify Colombia. GitHub Actions creates the desktop candidate and checks the frontend and native SQLite tests. The main branch remains untouched.
+The window title is now Precify Financy. GitHub Actions creates the desktop candidate and checks the frontend and native SQLite tests. The main branch remains untouched.

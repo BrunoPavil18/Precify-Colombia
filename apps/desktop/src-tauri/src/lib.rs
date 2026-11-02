@@ -32,5 +32,5 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![desktop_runtime, ipc_probe, native_snapshots::desktop_snapshot_get, native_snapshots::desktop_snapshot_put])
         .run(tauri::generate_context!())
-        .expect("failed to run Precify Colombia desktop");
+        .expect("failed to run Precify Financy desktop");
 }

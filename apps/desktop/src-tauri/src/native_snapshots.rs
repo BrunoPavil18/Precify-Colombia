@@ -40,7 +40,7 @@ fn init_db(path: &Path) -> Result<Connection, String> {
     conn.busy_timeout(std::time::Duration::from_secs(5))
         .map_err(|e| e.to_string())?;
     conn.execute_batch(
-        "PRAGMA journal_mode = WAL;
+        "PRAGMA journal_mode = WAL; PRAGMA synchronous = FULL;
          PRAGMA foreign_keys = ON;
          CREATE TABLE IF NOT EXISTS snapshots (
            business_id TEXT NOT NULL,

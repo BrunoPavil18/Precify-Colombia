@@ -1,4 +1,4 @@
-/** Real Chromium visual smoke for the compiled Precify Colombia UI. Node 22+. */
+/** Real Chromium visual smoke for the compiled Precify Financy UI. Node 22+. */
 import http from "node:http";
 import {existsSync,readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,statSync} from "node:fs";
 import {join,resolve,extname,sep} from "node:path";
