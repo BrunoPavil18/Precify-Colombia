@@ -568,7 +568,13 @@ export default function App(){
     <div className="sidebar-nav-scroll">
      <nav aria-label={t("Navegación principal")}>{navSections.map((group,i)=><details key={group.name} className="nav-group" open={group.items.some(item=>item.id===page)||i<2?true:undefined}>
       <summary className="nav-group-title">{t(group.name)} <UIIcon name="chevron" size={15}/></summary>
-      <div className="nav-items">{group.items.map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>{void navigate(item.id);}}><span className="nav-icon"><UIIcon name={item.icon}/></span><span>{t(item.label)}<small>{t(item.description)}</small></span></button>)}</div>
+      <div className="nav-items">
+       {group.items.slice(0,group.name==="PRECIFICACIÓN"?4:group.name==="OPERACIONES COD"?3:group.items.length).map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>{void navigate(item.id);}}><span className="nav-icon"><UIIcon name={item.icon}/></span><span>{t(item.label)}<small>{t(item.description)}</small></span></button>)}
+       {(group.name==="PRECIFICACIÓN"||group.name==="OPERACIONES COD")&&<details className="nav-subgroup" open={group.items.slice(group.name==="PRECIFICACIÓN"?4:3).some(item=>item.id===page)?true:undefined}>
+        <summary>{t("Más herramientas")}</summary>
+        {group.items.slice(group.name==="PRECIFICACIÓN"?4:3).map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>{void navigate(item.id);}}><span className="nav-icon"><UIIcon name={item.icon}/></span><span>{t(item.label)}<small>{t(item.description)}</small></span></button>)}
+       </details>}
+      </div>
      </details>)}</nav>
     </div>
     <div className="sidebar-bottom"><span className="privacy-dot"/><span>{t(page==="conectado"?"Cuenta conectada opcional":"Sin cuenta · 100% local")}</span><small>{t("Open source · Apache 2.0")}</small></div>
@@ -713,5 +719,14 @@ export default function App(){
      <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Colombia 2.1.0 · En desarrollo · Apache-2.0")}</p></footer>
     </main>
    </div>
+   <nav className="mobile-bottom-nav" aria-label={t("Navegación rápida")}>
+     {([
+      ["inicio","home","Inicio"],
+      ["calculadora","calculator","Precio"],
+      ["productos","products","Productos"],
+      ["panel-cod","orders","COD"],
+      ["conectado","connected","Conexiones"]
+     ] as const).map(([target,icon,label])=><button key={target} className={page===target?"active":""} onClick={()=>{void navigate(target);}}><UIIcon name={icon}/>{t(label)}</button>)}
+   </nav>
  </div></LocaleContext.Provider>;
 }
