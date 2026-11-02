@@ -114,3 +114,17 @@ test("operational cross-tab conflict watches the selected business-specific key"
  assert.ok(ops.includes("if(e.key===storageKey())"));
  assert.ok(!ops.includes("if(e.key===KEY)"));
 });
+
+test("connection hub uses defined SVG icons and browser storage feedback is accurate",()=>{
+ const app=readFileSync(new URL("../src/App.tsx",import.meta.url),"utf8");
+ assert.ok(app.includes('name="chevron" size={18}'));
+ assert.ok(!app.includes('"chevron-up"')&&!app.includes('"chevron-down"'));
+ assert.ok(app.includes('nativePrimary()?"Datos confirmados en SQLite local.":"Datos guardados en este navegador."'));
+});
+test("native SQLite startup fails visibly without auto-resetting user data",()=>{
+ const main=readFileSync(new URL("../src/main.tsx",import.meta.url),"utf8");
+ assert.ok(main.includes('await bootstrapNativePrimary()'));
+ assert.ok(main.includes('catch(error)'));
+ assert.ok(main.includes('role="alert"'));
+ assert.ok(main.includes('Nenhum dado foi apagado ou substituído automaticamente.'));
+});

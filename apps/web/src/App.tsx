@@ -16,7 +16,7 @@ import {
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
 import { downloadFile, loadWorkspace, persistWorkspace, workspaceStorageKey } from "./storage";
 import {useBusinesses,ALL_BUSINESSES,BusinessPortfolio,BusinessChooser,BusinessRoutePicker} from "./BusinessProfiles";
-import {nativeRemove} from "./native-primary";
+import {nativeRemove,nativePrimary} from "./native-primary";
 import {getBusinessScope} from "./BusinessProfiles";
 
 type Page="inicio"|"calculadora"|"productos"|"escenarios"|"metas"|"pum"|"consumer"|"portfolio"|"global"|"panel-cod"|"cod"|"marketing"|"cpa"|"operaciones"|"importar"|"informes"|"competidores"|"conectado"|"cambio"|"datos"|"avanzado";
@@ -458,7 +458,7 @@ export default function App(){
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
    const next=validateWorkspace({...change(workspace),updatedAt:new Date().toISOString()});
-   await persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice("Datos confirmados en SQLite local.");return true;
+   await persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice(nativePrimary()?"Datos confirmados en SQLite local.":"Datos guardados en este navegador.");return true;
   }catch(e){setNotice("No se pudieron guardar los cambios: "+(e instanceof Error?e.message:String(e)));return false;}
  }
  const result=useMemo(()=>{
@@ -716,7 +716,7 @@ export default function App(){
       <button type="button" className="secondary optional-cloud-toggle" aria-expanded={showAdvancedConnected} aria-controls="optional-cloud-details" onClick={()=>setShowAdvancedConnected(value=>!value)}>
        <UIIcon name="settings" size={18}/>
        {locale==="pt-BR"?"Contas e organizações (opcional, avançado)":locale==="en"?"Accounts and organizations (optional, advanced)":"Cuentas y organizaciones (opcional, avanzado)"}
-       <UIIcon name={showAdvancedConnected?"chevron-up":"chevron-down"} size={18}/>
+       <UIIcon name="chevron" size={18} style={{transform:showAdvancedConnected?"rotate(180deg)":undefined}}/>
       </button>
       <p className="muted">{locale==="pt-BR"?"Este módulo antigo utiliza um servidor conectado separado. Não é necessário para conectar uma loja usando convites de instalação.":locale==="en"?"This older module uses a separate connected account server. It is not required to connect a store using device invitation codes.":"Este módulo anterior utiliza un servidor de cuentas separado. No hace falta para conectar una tienda con códigos de invitación por instalación."}</p>
       <div id="optional-cloud-details">{showAdvancedConnected&&<ConnectedLab/>}</div>
