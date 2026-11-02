@@ -224,6 +224,9 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     <pre>{`POST /precify/v2/activate\nGET  /precify/v2/identity\nGET  /precify/v2/changes`}</pre>
     <p>{locale==="pt-BR"?"Obrigatório: HTTPS, CORS restrito, limite de tentativas, retenção de eventos, isolamento entre lojas e ausência de dados pessoais desnecessários. A sincronização só ocorre enquanto o Precify está aberto.":locale==="en"?"Required: HTTPS, restricted CORS, rate limiting, durable events, store isolation and no unnecessary personal data. Precify syncs only while open.":"Obligatorio: HTTPS, CORS restringido, límite de intentos, eventos duraderos, aislamiento por tienda y sin datos personales innecesarios. Precify sincroniza solo mientras está abierto."}</p>
     <p><a href="https://github.com/BrunoPavil18/Precify-Financy/blob/feat/precify-colombia-v2.1.0/docs/STORE_DEVICE_API_V2.md" target="_blank" rel="noopener noreferrer">{locale==="pt-BR"?"Documentação completa e arquivos do adaptador (GitHub)":locale==="en"?"Full documentation and adapter files (GitHub)":"Documentación completa y archivos del adaptador (GitHub)"}</a></p>
+    <label className="field"><span>{locale==="pt-BR"?"Se o link externo não abrir no Windows, copie este endereço:":locale==="en"?"If the external link does not open on Windows, copy this URL:":"Si el enlace externo no abre en Windows, copia esta dirección:"}</span>
+     <input type="text" readOnly onFocus={e=>e.target.select()} aria-label={locale==="pt-BR"?"Endereço para copiar do guia técnico":locale==="en"?"Copyable technical manual URL":"Dirección del manual para copiar"} value="https://github.com/BrunoPavil18/Precify-Financy/blob/feat/precify-colombia-v2.1.0/docs/STORE_DEVICE_API_V2.md"/>
+    </label>
    </div>}
   </div>
   <div className="advanced-grid">
