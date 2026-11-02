@@ -1,7 +1,7 @@
 import {globalPrice,nonNegativeMinorAmount,type GlobalPriceInput} from "@precify-financy/core";
 
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
-import {mirrorNativeSnapshot} from "./desktop-snapshots";
+import {nativeWrite} from "./native-primary";
 export const storageGlobalKey=()=>businessKey(GLOBAL_PRODUCTS_KEY,getBusinessScope());
 export const GLOBAL_PRODUCTS_KEY="precify-financy:global-pricing:v1";
 export type GlobalPriceHistory={salePrice:string;currency:string;at:string};
@@ -43,14 +43,13 @@ export function loadGlobalCatalog():{catalog:GlobalSavedCatalog;raw:string|null;
   return {catalog:validateCatalog(JSON.parse(raw)),raw,error:null};
  }catch(e){return {catalog:empty(),raw,error:e instanceof Error?e.message:String(e)};}
 }
-export function persistGlobalCatalog(next:GlobalSavedCatalog,previousRaw:string|null):string {
+export async function persistGlobalCatalog(next:GlobalSavedCatalog,previousRaw:string|null):Promise<string> {
  const safe=validateCatalog(next);
  const content=JSON.stringify(safe);
  if(content.length>2_000_000)throw new Error("Global catalog storage exceeds 2 MB");
  if(localStorage.getItem(storageGlobalKey())!==previousRaw)
   throw new Error("Another browser tab modified the global catalog. Export a backup before reloading.");
- localStorage.setItem(storageGlobalKey(),content);
- mirrorNativeSnapshot("global-pricing",content,previousRaw);
+ await nativeWrite("global-pricing",getBusinessScope(),content,previousRaw);
  return content;
 }
 export function decodeGlobalCatalogBackup(content:string):GlobalSavedCatalog {

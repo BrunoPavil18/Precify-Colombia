@@ -32,14 +32,14 @@ export function GlobalPricingLab(){
   const listener=(e:StorageEvent)=>{if(e.key==="precify-financy:global-pricing:v1"){setLocked(true);setNotice("Otro navegador o pestaña modificó el catálogo de monedas. Exporta tus datos y recarga.");}};
   window.addEventListener("storage",listener);return()=>window.removeEventListener("storage",listener);
  },[]);
- function commit(next:GlobalSavedCatalog):boolean{
+ async function commit(next:GlobalSavedCatalog):Promise<boolean>{
   if(locked)return false;
   try{
-   const raw=persistGlobalCatalog(next,baseline.current);
+   const raw=await persistGlobalCatalog(next,baseline.current);
    baseline.current=raw;setCatalog(next);setNotice(t("Catálogo internacional guardado en este navegador."));return true;
   }catch(e){setLocked(true);setNotice(String(e));return false;}
  }
- function saveProduct(){
+ async function saveProduct(){
   try{
    globalPrice(input);
    if(!name.trim())throw new Error("Introduce un nombre para guardar el precio.");
@@ -51,7 +51,7 @@ export function GlobalPricingLab(){
     :previousHistory;
    const row={id,name:name.trim(),input:{...input},updatedAt,history};
    const next={version:1 as const,products:[...catalog.products.filter(x=>x.id!==id),row]};
-   if(commit(next))setSelectedId(id);
+   if(await commit(next))setSelectedId(id);
   }catch(e){setNotice(String(e));}
  }
  async function stageRestore(file:File|undefined){
@@ -86,14 +86,14 @@ export function GlobalPricingLab(){
   </div>
   {pendingDelete&&<div className="advanced-results">
    <p role="alert">{t("Se eliminará este precio guardado del catálogo internacional, no tus productos COP.")}</p>
-   <button className="danger" disabled={locked} onClick={()=>{const ok=commit({version:1,products:catalog.products.filter(row=>row.id!==pendingDelete)});if(ok){setPendingDelete("");setSelectedId("");}}}>{t("Confirmar eliminación")}</button>
+   <button className="danger" disabled={locked} onClick={()=>{void (async()=>{const ok=await commit({version:1,products:catalog.products.filter(row=>row.id!==pendingDelete)});if(ok){setPendingDelete("");setSelectedId("");}})();}}>{t("Confirmar eliminación")}</button>
    <button className="secondary" onClick={()=>setPendingDelete("")}>{t("Cancelar")}</button>
   </div>}
   {initial.raw&&locked&&<button className="secondary" onClick={()=>{const url=URL.createObjectURL(new Blob([initial.raw!],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="precify-global-raw-recovery.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}}>{t("Descargar datos originales dañados")}</button>}
   <label className="field"><span>{t("Restaurar respaldo de precios internacionales (JSON)")}</span><input type="file" accept=".json,application/json" onChange={e=>{void stageRestore(e.target.files?.[0]);}}/></label>
   {pendingRestore&&<div className="advanced-results">
    <p role="alert">{t("La restauración sustituirá el catálogo internacional, sin modificar los productos COP originales.")}</p>
-   <button className="primary" disabled={locked} onClick={()=>{if(commit(pendingRestore)){setPendingRestore(null);setSelectedId("");}}}>{t("Confirmar restauración")}</button>
+   <button className="primary" disabled={locked} onClick={()=>{void (async()=>{if(await commit(pendingRestore)){setPendingRestore(null);setSelectedId("");}})();}}>{t("Confirmar restauración")}</button>
    <button className="secondary" onClick={()=>setPendingRestore(null)}>{t("Cancelar")}</button>
   </div>}
   <div className="advanced-grid">

@@ -6,7 +6,7 @@ import {computeCODFunnel,importOrdersCSV,importCampaignsCSV,parseCSV,
 import {useTranslator} from "./i18n";
 
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
-import {mirrorNativeSnapshot} from "./desktop-snapshots";
+import {nativeWrite} from "./native-primary";
 const KEY="precify-financy:operations:v1";
 const storageKey=()=>businessKey(KEY,getBusinessScope());
 type HistoryPrice={id:string;product:string;competitor:string;currency:string;price:string;observedAt:string;source:string};
@@ -81,13 +81,13 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
   const onChange=(e:StorageEvent)=>{if(e.key===KEY){setLocked(true);setNotice("Se detectaron cambios en otra pestaña. Exporta una copia y recarga antes de modificar.");}};
   window.addEventListener("storage",onChange);return()=>window.removeEventListener("storage",onChange);
  },[]);
- function commit(next:LocalOperations):boolean{
+ async function commit(next:LocalOperations):Promise<boolean>{
   if(locked)return false;
   try{
    if(localStorage.getItem(storageKey())!==baseline.current)throw new Error("Conflicto entre pestañas: recarga antes de editar.");
    const raw=JSON.stringify(next);
    if(raw.length>2000000)throw new Error("Almacenamiento local supera 2 MB. Exporta los datos antes de seguir.");
-   localStorage.setItem(storageKey(),raw);mirrorNativeSnapshot("operations",raw,baseline.current);baseline.current=raw;setData(next);setNotice(t("Datos operativos guardados localmente."));return true;
+   await nativeWrite("operations",getBusinessScope(),raw,baseline.current);baseline.current=raw;setData(next);setNotice(t("Datos operativos guardados localmente."));return true;
   }catch(e){setLocked(true);setNotice(String(e));return false;}
  }
  async function readFile(file:File|undefined){
@@ -112,10 +112,10 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
    if(!csv)throw new Error("Selecciona un archivo CSV.");
    if(importMode==="orders"){
     const imported=importOrdersCSV(csv,mapping);
-    commit({...data,events:mergeRows(data.events,imported)});
+    await commit({...data,events:mergeRows(data.events,imported)});
    }else{
     const imported=importCampaignsCSV(csv);
-    commit({...data,campaigns:mergeRows(data.campaigns,imported)});
+    await commit({...data,campaigns:mergeRows(data.campaigns,imported)});
    }
    setCSV("");setHeaders([]);
   }catch(e){setNotice(String(e));}
@@ -144,7 +144,7 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
   try{return {values:simulateCPASensitivity(cpa,["30","40","50","60","70","80","90","100"],["10000","20000","30000","40000"])};}
   catch(e){return {error:String(e)};}
  },[cpa]);
- function addBenchmark(){
+ async function addBenchmark(){
   try{
    if(!benchmark.product.trim()||!benchmark.competitor.trim())throw new Error("Producto y competidor obligatorios.");
    minorAmount(benchmark.price,benchmark.currency);
@@ -207,7 +207,7 @@ export function OperationsLab({products,initialTab="unified"}:{products:Product[
     <input type="file" accept=".json,application/json" onChange={e=>{void stageBackup(e.target.files?.[0]);}}/></label>
    {pendingRestore&&<div className="advanced-results">
     <p role="alert">{t("La restauración sustituirá todos los registros operativos locales actuales, no los productos originales.")}</p>
-    <button className="primary" disabled={locked} onClick={()=>{if(commit(pendingRestore))setPendingRestore(null);}}>{t("Confirmar restauración")}</button>
+    <button className="primary" disabled={locked} onClick={()=>{void (async()=>{if(await commit(pendingRestore))setPendingRestore(null);})();}}>{t("Confirmar restauración")}</button>
     <button className="secondary" onClick={()=>setPendingRestore(null)}>{t("Cancelar")}</button>
    </div>}
   </div>}
