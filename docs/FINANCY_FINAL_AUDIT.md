@@ -30,8 +30,8 @@
 
 ## Testes e distribuição reproduzíveis
 
-- **113/113 testes JavaScript**: core 61, web 23, serviço 7, integração 22. TypeScript, lint AST, build frontend, core ESM e testes de navegador Chromium (19 rotas, responsividade, persistência e perfis) aprovados.
-- **3/3 testes Rust**: snapshots SQLite por perfil, CAS/revisão e cache de feed atômico com cursor, isolado por loja e imutabilidade de eventos.
+- **117/117 testes JavaScript**: core 61, web 23, serviço 7, integração 22. TypeScript, lint AST, build frontend, core ESM e testes de navegador Chromium (19 rotas, responsividade, persistência e perfis) aprovados.
+- **4/4 testes Rust**: snapshots SQLite por perfil, CAS/revisão e cache de feed atômico com cursor, isolado por loja e imutabilidade de eventos.
 - **GitHub Actions Windows x64**: `precify-financy.exe` compilado, instalador Inno e ZIP portátil produzidos.
 - **Auditoria de dependências**: `pnpm audit --audit-level moderate` => **No known vulnerabilities found**. Isso não certifica ausência de vulnerabilidades futuras ou de lógica de aplicação.
 - **Artefato oficial**: `Precify-Financy-2.1-MultiBusiness-Tauri-Windows`, [GitHub Actions](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41395935905/artifacts/13119407755).
@@ -54,3 +54,7 @@ O repositório foi **renomeado pelo proprietário** para `BrunoPavil18/Precify-F
 ## Critério de saída
 
 **Engenharia local e de protocolo: candidata validada automaticamente**. Faltam aceitação/integração real da API da loja (incluindo pedidos, credenciais e revogação), homologação definitiva na Vezura e os procedimentos administrativos de nome/release. Não declarar 100% de produção antes disso.
+
+## Auditoria geral complementar — 02/11/2026
+
+A revisão completa dos fluxos de conexão, operações multiempresa, recuperação de SQLite, READMEs e integração Vezura foi registrada em [GENERAL_AUDIT_V2_1_0_2026-11-02.md](GENERAL_AUDIT_V2_1_0_2026-11-02.md). Os 117 testes JavaScript e o fluxo Chromium de 19 módulos, incluindo onboarding v2, foram aprovados em [Actions #41400054914](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400054914). O módulo antigo de contas permanece acessível apenas na área avançada opcional; v1 é compatibilidade e não o padrão para novos sites.
