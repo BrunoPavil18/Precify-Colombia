@@ -52,7 +52,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod"
    return {data:simulatePortfolio(workspace.products.map(p=>({product:p.input,monthlyUnits:quantities[p.id]??"0"})),fixed)};
   }catch(e){return {error:e instanceof Error?e.message:String(e)};}
  },[pane,product,cod,campaign,measure,preview,workspace.products,quantities,fixed]);
- function snapshot(){
+ async function snapshot(){
   const inputs:Record<string,string>=pane==="cod"?{...cod}:pane==="campaign"?{...campaign}
    :pane==="pum"?{...measure}
    :pane==="consumer"?{...preview}
