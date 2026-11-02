@@ -1,3 +1,2 @@
-Precify Financy typecheck fixes
-Core SHA: 0856461e7749e83b3d858f9a40d6ab9e4aa4eb85
-Web + native packaging gate pass 2
+Precify Financy final naming and audit test
+Code commit: ba37cd77538e070f0cb751693a7e25804eef3d11
