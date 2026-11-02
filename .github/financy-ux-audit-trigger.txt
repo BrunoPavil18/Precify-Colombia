@@ -1,1 +1,3 @@
-Precify Financy UX Chromium audit at 090579ef0749acc811f443d61c61d77698418155
+Precify Financy 2.1 supplementary security review
+Source: 25636731c2f659ea5d3ee64b6ab8469866b1b7d3
+Optional cloud import now scoped to selected local business and explicitly confirmed against remote organization; 118 JS tests, browser flows, complete Vite build.
