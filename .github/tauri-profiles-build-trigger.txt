@@ -1,2 +1,4 @@
-Financy final CI candidate after SQLite primary, schema audit, MySQL adapter tests and dead-code removal.
-HEAD: c33cdcc4d9a7058995ec685519e4bacceebc367f
+Precify Financy 2.1 final integrity gate
+Source commit: 90574d1120a1412d9caca8e02e6a28366e63da31
+Validate: 109+ TypeScript tests, Chromium PWA, SQLite shared native Windows database, Rust native sync, Inno installer and portable ZIP, Ed25519 single-use device enrollment, MySQL/Postgres store adapters.
+No deployment or main-branch mutation.
