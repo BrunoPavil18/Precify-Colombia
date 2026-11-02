@@ -40,15 +40,15 @@ const strings={
  fail:"Could not save connector.",needsConsent:"Authorize local storage before syncing."
  }
 } as const;
-function loadSites():Site[]{
- try{const raw=localStorage.getItem(siteSettingsKey());if(!raw)return [];
+function loadSites(businessId=getBusinessScope()):Site[]{
+ try{const raw=localStorage.getItem(businessKey(SETTINGS,businessId));if(!raw)return [];
   const values=JSON.parse(raw) as Site[];
   if(!Array.isArray(values)||values.length>20)return [];
   return values.filter(x=>x&&/^[0-9a-f-]{36}$/i.test(x.id)&&typeof x.url==="string"&&typeof x.name==="string"&&
    [0,30000,60000,300000].includes(x.interval)&&typeof x.enabled==="boolean");
  }catch{return [];}
 }
-async function persistSites(sites:Site[]){const before=localStorage.getItem(siteSettingsKey());const content=JSON.stringify(sites);await nativeWrite("site-connectors",getBusinessScope(),content,before);}
+async function persistSites(sites:Site[],businessId:string){const before=localStorage.getItem(businessKey(SETTINGS,businessId));const content=JSON.stringify(sites);await nativeWrite("site-connectors",businessId,content,before);}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
 export function WebsiteSyncLab({visible}:{visible:boolean}){
  const businessId=useRef(getBusinessScope()).current;
@@ -88,7 +88,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  const [name,setName]=useState(""),[url,setUrl]=useState("");
  const controllers=useRef(new Map<string,Controller>());
  const running=useRef(new Map<string,Promise<SyncStatus>>());
- async function update(next:Site[]){try{await persistSites(next);setSites(next);}catch(e){setNotice(String(e));throw e;}}
+ async function update(next:Site[]){try{await persistSites(next,businessId);setSites(next);}catch(e){setNotice(String(e));throw e;}}
  useEffect(()=>{
   for(const site of sites){if(!site.subject)continue;
    void loadSnapshot(site.id+":"+site.subject,site.id).catch(e=>setNotice(String(e)));
@@ -116,7 +116,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       connector,scope,
       store:{read:async key=>await readSiteCheckpoint(key,businessId),
        apply:async(key,changes,cursor,expectedCursor)=>{
-        if(stopped||!loadSites().some(x=>x.id===site.id&&x.enabled))throw Error("Sync disabled");
+        if(stopped||!loadSites(businessId).some(x=>x.id===site.id&&x.enabled))throw Error("Sync disabled");
         for(const change of changes)if(change.operation==="upsert"){
          if(change.kind==="order")validateOrderEvent(change.value as OrderEvent);
          else validateAdCampaign(change.value as AdCampaign);
