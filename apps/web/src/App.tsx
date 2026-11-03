@@ -748,7 +748,7 @@ export default function App(){
       <div id="optional-cloud-details">{showAdvancedConnected&&<ConnectedLab/>}</div>
      </section>}
      {advancedPages.includes(page)&&<AdvancedLab key={page} initialPane={page==="marketing"?"campaign":page==="pum"?"pum":page==="consumer"?"consumer":page==="portfolio"?"portfolio":"cod"} initialProductId={activeId??""} workspace={workspace} onDirty={setAdvancedDirty}
-      onSave={async (record:AdvancedSimulationRecord)=>{const ok=await commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
+      onSave={async (record:AdvancedSimulationRecord)=>{const ok=await commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice(nativePrimary()?"Datos confirmados en SQLite local.":"Simulación guardada en este navegador.");}return ok;}}
       onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))await commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
      {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t(reportOrder==="margin"?"Ranking por margen":"Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
