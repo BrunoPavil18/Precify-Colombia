@@ -16,3 +16,5 @@ Final post-audit release candidate gate (2026-11-02): sync purge race fix, selec
 2026-11-03 catalog integration complete regression gate: published-store API, SQLite mirror, safe consent, draft with missing-cost gate, audited connectors.
 
 2026-11-03 FINAL Precify/Vezura published catalog regression gate: typed connector, isolated SQLite mirror, product UX and verified-only financial summaries.
+
+2026-11-03 regression after i18n and verified-only financial contract corrections. Full Windows x64, Chromium and JS tests.
