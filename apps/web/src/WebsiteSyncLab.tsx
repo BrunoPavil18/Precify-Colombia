@@ -90,6 +90,7 @@ export function WebsiteSyncLab({visible,onDraft}:{visible:boolean;onDraft?:(prod
    const financialComplete=events.length>0&&events.every(event=>(event as OrderEvent&{financialCompleteness?:string}).financialCompleteness==="verified");
    return {currency,orders:result.orders,paid:result.paid,financialComplete,projectedNet:financialComplete?result.projectedNet:null};
   })}));
+  window.dispatchEvent(new Event("precify:site-feed-updated"));
  }
  const [notice,setNotice]=useState("");
  const [name,setName]=useState(""),[url,setUrl]=useState("");
