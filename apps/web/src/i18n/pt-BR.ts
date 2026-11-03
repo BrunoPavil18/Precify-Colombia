@@ -794,6 +794,6 @@ export const ptBR: Record<string,string> = {
   "La sección": "A seção",
   "trabaja con los datos de un negocio a la vez. Selecciona cuál deseas abrir. No se cambia el perfil automáticamente.": "trabalha com os dados de um negócio por vez. Escolha qual deseja abrir. O perfil não será alterado automaticamente.",
   "Abrir esta sección": "Abrir esta seção",
-  "Volver a todos los negocios": "Voltar a todos os negócios"
+  "Volver a todos los negocios": "Voltar a todos os negócios",
   "Hay cambios sin guardar. ¿Descartarlos para abrir un producto de la tienda?": "Há alterações não salvas. Descartá-las para abrir um produto da loja?",
 };
