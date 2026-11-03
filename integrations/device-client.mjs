@@ -36,5 +36,7 @@ export function createDeviceConnector({id,baseURL,identity,fetchImpl=fetch}){
   return JSON.parse(body);
  };
  return {id,async identify(){const r=await request("identity");if(typeof r.subject!=="string"||!r.subject||r.deviceId!==identity.deviceId)throw Error("Invalid identity");return r.subject;},
- async pull(cursor,limit=100){if(!Number.isInteger(limit)||limit<1||limit>250)throw Error("Invalid limit");const q=new URLSearchParams({limit:String(limit)});if(cursor!==null)q.set("cursor",cursor);return validateChangePage(await request("changes",q.toString()));}};
+ async pull(cursor,limit=100){if(!Number.isInteger(limit)||limit<1||limit>250)throw Error("Invalid limit");const q=new URLSearchParams({limit:String(limit)});if(cursor!==null)q.set("cursor",cursor);return validateChangePage(await request("changes",q.toString()));},
+ async catalogPage(page=1){if(!Number.isSafeInteger(page)||page<1||page>500)throw Error("Invalid catalog page");
+  return request("catalog",new URLSearchParams({page:String(page)}).toString());}};
 }
