@@ -6,3 +6,9 @@ Release candidate - draft - no main merge/deployment.
 2026-11-02 full consolidated regression gate: in-app integration guide, pending Ed25519 identity recovery, connector cleanup, browser acceptance and UI tests.
 
 Final post-audit release candidate gate (2026-11-02): sync purge race fix, selectable documentation fallback, expanded regression tests, audit report.
+
+2026-11-02 Precify/Vezura API-v2 consolidated Windows acceptance build:
+- Vezura store backend merged via PR #118; installation requires migration 025 and explicit env enable.
+- Precify hides projected financial profit for operational-only events whose costs are not reconciled.
+- Single final Windows Tauri x64 installer/ZIP and existing official gate (not additional random tests).
+- Precify PR #4 stays draft; no auto-merge or customer data sync until operator approval.
