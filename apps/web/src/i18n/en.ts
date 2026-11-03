@@ -795,5 +795,5 @@ export const en: Record<string,string> = {
   "trabaja con los datos de un negocio a la vez. Selecciona cuál deseas abrir. No se cambia el perfil automáticamente.": "works with one business at a time. Choose which business to open. The selected profile will never change automatically.",
   "Abrir esta sección": "Open this section",
   "Volver a todos los negocios": "Back to all businesses",
-  "Hay cambios sin guardar. ¿Descartarlos para abrir un producto de la tienda?": "There are unsaved changes. Discard them to open a store product?",
+  "Hay cambios sin guardar. ¿Descartarlos para abrir un producto de la tienda?": "There are unsaved changes. Discard them to open a store product?"
 };
