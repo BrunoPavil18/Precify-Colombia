@@ -1,5 +1,8 @@
 # Precify Financy
 
+> **2.1 Vezura catalog candidate:** published products sync into a separate read-only local mirror; see [architecture and QA](docs/VEZURA_CATALOG_MIRROR_V2_1_0.md). Requires store PR #119 rollout and Windows acceptance.
+
+
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
@@ -23,7 +26,7 @@ This feature branch adds native ISO-currency pricing, dated daily FX references 
 
 **Storage:** on Windows, native SQLite is authoritative for business-scoped financial records and transactionally cached merchant events. Non-exportable device keys remain in the WebView2 WebCrypto store. The browser PWA instead uses web storage/IndexedDB with per-site consent. The legacy bearer-token v1 adapter is kept only for existing integrations.
 
-**External dependency:** Vezura has not yet implemented the v2 backend; no live store orders have been validated. [v2 protocol and MySQL/Postgres examples](docs/STORE_DEVICE_API_V2.md) · [Vezura integration requirements](docs/VEZURA_INTEGRATION_NEXT.md).
+**Current state:** Vezura's Device API v2 backend is merged in its codebase (PR #118). Published catalog support is proposed in PR #119 and requires merge/deploy; live order synchronization still requires production acceptance. [v2 protocol and MySQL/Postgres examples](docs/STORE_DEVICE_API_V2.md) · [Vezura integration requirements](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Version 2.0.1 update
 
