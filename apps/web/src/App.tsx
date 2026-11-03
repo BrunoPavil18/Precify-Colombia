@@ -1,5 +1,7 @@
 import { ConnectedLab } from "./ConnectedLab";
 import { WebsiteSyncLab } from "./WebsiteSyncLab";
+import {StoreCatalogPanel} from "./StoreCatalogPanel";
+import type {StoreProduct} from "./store-catalog";
 import { OperationsLab } from "./OperationsLab";
 import { CurrencyLab } from "./CurrencyLab";
 import { GlobalPricingLab } from "./GlobalPricingLab";
@@ -311,6 +313,7 @@ export default function App(){
   return()=>{live=false;};
  },[]);
  const [draft,setDraft]=useState<PriceInput>(()=>({...EMPTY_INPUT,name:translate(readLocale(),"Producto ejemplo")}));
+ const [storeDraftPending,setStoreDraftPending]=useState(false);
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
  const [scenarioProductId,setScenarioProductId]=useState("");
@@ -471,6 +474,7 @@ export default function App(){
   }catch(e){return {breakdown:null,suggestion:null,limit:null,error:String(e instanceof Error?e.message:e)};}
  },[draft]);
  async function saveProduct(){
+  if(storeDraftPending){setNotice(locale==="pt-BR"?"Confirme os custos antes de salvar a simulação.":locale==="en"?"Review costs before saving.":"Revisa los costos antes de guardar.");return;}
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Corrige los campos: "+String(e));return;}
   const now=new Date().toISOString(),id=activeId??makeId();
@@ -480,9 +484,22 @@ export default function App(){
    return {...w,products:exists?w.products.map(row=>row.id===id?p:row):[...w.products,p],
     history:[...w.history,{id:makeId(),productId:id,at:now,action:exists?"Actualización":"Creación",snapshot:{...draft}}].slice(-3000)};
   });
-  if(ok){setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
+  if(ok){setStoreDraftPending(false);setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
  }
- async function openProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?"))))return;setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ async function openProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?"))))return;setDirtyMoney(new Set());setStoreDraftPending(false);setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ async function openStoreProductDraft(product:StoreProduct){
+  if(product.currency!=="COP"){setNotice("Este catálogo solo inicia borradores COP; usa precios internacionales para otras monedas.");return;}
+  if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para abrir un producto de la tienda?"))))return;
+  // No supplier/fulfillment cost is provided by the public storefront.
+  const zero="0.00";
+  const fromStore:PriceInput={...EMPTY_INPUT,name:product.name.slice(0,120),origin:"estimado",
+   currentPrice:product.price,acquisition:zero,packaging:zero,shippingCost:zero,
+   fixedFee:zero,advertising:zero,returnsReserve:zero,codReserve:zero,
+   shippingCharged:zero,monthlyUnits:"0"};
+  setDraft(fromStore);setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);
+  setStoreDraftPending(true);setEditorRevision(n=>n+1);setPage("calculadora");
+  setNotice(locale==="pt-BR"?"Rascunho criado. Informe custos reais: zero é desconhecido, não custo verificado.":locale==="en"?"Draft ready. Enter actual costs: zero means unknown, not verified.":"Borrador creado. Informa costos reales: cero significa desconocido, no verificado.");
+ }
  async function duplicateProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos antes de duplicar?"))))return;setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  async function deleteProduct(p:Product){
   if(!(await askConfirmation(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos."))))return;
@@ -611,6 +628,12 @@ export default function App(){
      {locked&&<div className="critical"><strong>{t("Protección de datos activa")}</strong><p>{t("La información local existente está dañada o inaccesible. Se bloquea el guardado para no sobrescribirla silenciosamente.")}</p><button onClick={rawBackup}>{t("Descargar datos originales sin validar")}</button> <button className="ghost" onClick={()=>setPage("datos")}>{t("Opciones de recuperación")}</button></div>}
      {!allMode&&<>
      {page==="calculadora"&&<>
+      {storeDraftPending&&<section className="main-card" role="note">
+       <strong>{locale==="pt-BR"?"Custos da loja ainda não verificados":locale==="en"?"Store costs not yet verified":"Costos de la tienda aún sin verificar"}</strong>
+       <p>{locale==="pt-BR"?"Nome e preço vieram da loja. Os demais custos estão zerados como dados não informados — margens exibidas são ilustrativas. Revise antes de salvar.":locale==="en"?"Name and price came from the store. Missing costs are zero placeholders, so displayed margins are illustrative. Review before saving.":"Nombre y precio provienen de la tienda. Los costos faltantes son ceros provisionales; los márgenes son ilustrativos. Revísalos antes de guardar."}</p>
+       <label className="consent-row"><input type="checkbox" checked={!storeDraftPending} onChange={e=>{if(e.target.checked)setStoreDraftPending(false);}}/>
+        <span>{locale==="pt-BR"?"Revisei os custos e assumo os valores informados nesta simulação":locale==="en"?"I reviewed these costs and accept the simulation values":"Revisé los costos y acepto los valores de simulación"}</span></label>
+      </section>}
       <div className="action-strip"><div><span className="eyebrow">{t("SIMULACIÓN ACTIVA")}</span><strong>{t(activeId?"Editando producto guardado":"Nuevo producto · borrador")}</strong></div><div className="actions"><button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?"))))return;setDraft({...EMPTY_INPUT,name:t("Producto ejemplo")});setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);}}>{t("+ Nuevo")}</button>{(activeId||hasUnsavedDraft)&&<button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>}<button className="primary" onClick={saveProduct}>{t("Guardar producto")} <span aria-hidden="true">↗</span></button></div></div>
       <div className="context-actions"><button onClick={()=>{void navigate("cod");}}><UIIcon name="cod" size={17}/>{t("Simular riesgo COD")}</button><button onClick={()=>{void navigate("marketing");}}><UIIcon name="marketing" size={17}/>{t("Analizar marketing y CAC")}</button><button onClick={()=>{void navigate("escenarios");}}><UIIcon name="scenarios" size={17}/>{t("Comparar escenarios")}</button></div>
       <div className="two-column"><div><ProductEditor key={"product-"+activeId+"-"+editorRevision} value={draft} onChange={setDraft} onDirty={markDirty}/></div><div className="results-column"><div className="results-card"><div className="results-label"><span>{t("RESULTADOS EN TIEMPO REAL")}</span><span className="live-dot">●</span></div>{result.error?<div role="alert" className="error-box"><strong>{t("Revisa los datos")}</strong><p>{t(result.error)}</p></div>:result.breakdown&&result.suggestion&&<>
@@ -629,6 +652,7 @@ export default function App(){
       <div className="section-head profiles-head"><div><span className="eyebrow">{t("PERFILES REUTILIZABLES")}</span><h2>{t("Plantillas de costos")}</h2></div><button className="secondary" onClick={saveProfile}>{t("Guardar configuración actual")}</button></div>
       {workspace.profiles.length===0?<p className="muted">{t("No hay perfiles todavía. Guarda una configuración para reutilizar tasas y costos.")}</p>:<div className="stack-list">{workspace.profiles.map(p=><div key={p.id} className="list-row"><span>{p.name}</span><div><button onClick={()=>restoreProfile(p.id)}>{t("Aplicar")}</button><button className="danger-link" onClick={()=>commit(w=>({...w,profiles:w.profiles.filter(x=>x.id!==p.id)}))}>{t("Eliminar")}</button></div></div>)}</div>}
      </section>}
+     {page==="productos"&&<StoreCatalogPanel businessId={getBusinessScope()} onDraft={p=>{void openStoreProductDraft(p);}}/>}
      {page==="escenarios"&&<section className="main-card">
       <div className="section-head"><div><span className="eyebrow">{t("ANÁLISIS DE RIESGO")}</span><h2>{t("Compara posibles resultados")}</h2></div><button className="primary" disabled={!scenarioProduct} onClick={createScenarios}>{t("+ Crear escenarios faltantes")}</button></div>
       <div className="scenario-intro">
@@ -711,7 +735,7 @@ export default function App(){
      {page==="cambio"&&<CurrencyLab/>}
      {page==="global"&&<GlobalPricingLab/>}
      {operationPages.includes(page)&&<OperationsLab key={page} products={workspace.products} initialTab={page==="panel-cod"?"dashboard":page==="cpa"?"matrix":page==="importar"?"import":page==="competidores"?"prices":"unified"}/>}
-     <WebsiteSyncLab visible={page==="conectado"} />
+     <WebsiteSyncLab visible={page==="conectado"} onDraft={p=>{void openStoreProductDraft(p);}} />
      {page==="conectado"&&<section className="optional-cloud-connections" aria-label={locale==="pt-BR"?"Serviços de conta avançados":locale==="en"?"Advanced account services":"Servicios de cuenta avanzados"}>
       <button type="button" className="secondary optional-cloud-toggle" aria-expanded={showAdvancedConnected} aria-controls="optional-cloud-details" onClick={()=>setShowAdvancedConnected(value=>!value)}>
        <UIIcon name="settings" size={18}/>
