@@ -9,6 +9,9 @@ import {readDevice,enrollDevice,deleteDevice,type DeviceIdentity} from "./device
 type Site={id:string;name:string;url:string;enabled:boolean;interval:number;subject?:string;mode?:"device-v2"|"legacy-v1"};
 import {businessKey,getBusinessScope} from "./BusinessProfiles";
 import {nativeWrite} from "./native-primary";
+import {fetchPublishedCatalog} from "../../../integrations/store-catalog.mjs";
+import {readStoreCatalog,saveStoreCatalog,clearStoreCatalog,type StoreProduct,type StoreCatalogState} from "./store-catalog";
+import {StoreCatalogPanel} from "./StoreCatalogPanel";
 const SETTINGS="precify-financy:site-owned-connectors:v1";
 const strings={
  "es-CO":{
@@ -49,7 +52,7 @@ function loadSites(businessId=getBusinessScope()):Site[]{
 }
 async function persistSites(sites:Site[],businessId:string){const before=localStorage.getItem(businessKey(SETTINGS,businessId));const content=JSON.stringify(sites);await nativeWrite("site-connectors",businessId,content,before);}
 type Controller={run:(manual?:boolean)=>Promise<SyncStatus>};
-export function WebsiteSyncLab({visible}:{visible:boolean}){
+export function WebsiteSyncLab({visible,onDraft}:{visible:boolean;onDraft?:(product:StoreProduct)=>void}){
  const businessId=useRef(getBusinessScope()).current;
  const locale=useContext(LocaleContext) as Locale;
  const t=strings[locale];
@@ -57,6 +60,9 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  const [devices,setDevices]=useState<Record<string,DeviceIdentity>>({});
  const [codes,setCodes]=useState<Record<string,string>>({});
  const [activating,setActivating]=useState<Record<string,boolean>>({});
+ const [catalogs,setCatalogs]=useState<StoreCatalogState>(()=>{try{return readStoreCatalog(businessId);}catch{return {version:1,sites:{}};}});
+ const [catalogErrors,setCatalogErrors]=useState<Record<string,string>>({});
+ const [confirmRemove,setConfirmRemove]=useState<string|null>(null);
  const [guideOpen,setGuideOpen]=useState(false);
  useEffect(()=>{
   let cancelled=false;
@@ -140,6 +146,18 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
       const task=(async()=>{
        const result=await controller.run(manual);
        if(!stopped)await loadSnapshot(scope,site.id);
+       if(!stopped&&site.mode==="device-v2"&&"catalogPage" in connector){
+        try{
+         const previous=readStoreCatalog(businessId).sites[site.id];
+         const age=previous?Date.now()-Date.parse(previous.syncedAt):Infinity;
+         if(manual||age>300_000){
+          const products=await fetchPublishedCatalog(connector);
+          if(stopped||!loadSites(businessId).some(x=>x.id===site.id&&x.enabled))return result;
+          await saveStoreCatalog(businessId,site.id,site.name,subject,products);
+          if(!stopped){setCatalogs(readStoreCatalog(businessId));setCatalogErrors(v=>({...v,[site.id]:""}));}
+         }
+        }catch(e){if(!stopped)setCatalogErrors(v=>({...v,[site.id]:String(e)}));}
+       }
        return result;
       })();
       running.current.set(site.id,task);
@@ -167,20 +185,22 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     Object.entries(tokens).map(([id,token])=>id+"-"+token).join("|"),
      Object.entries(devices).map(([id,device])=>id+"-"+device.deviceId).join("|")]);
  async function remove(site:Site){
-  setTokens(previous=>{const next={...previous};delete next[site.id];return next;});
   await update(sites.filter(s=>s.id!==site.id));
+  try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
+  await purgeSiteCache(site.id,businessId);
+  await clearStoreCatalog(businessId,site.id);
   if(site.mode==="device-v2")await deleteDevice(businessId,site.id);
-  try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
-  await purgeSiteCache(site.id,businessId);
+  setTokens(previous=>{const next={...previous};delete next[site.id];return next;});
   setStats(previous=>{const next={...previous};delete next[site.id];return next;});
   setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
+  setCatalogs(readStoreCatalog(businessId));
+  setCatalogErrors(previous=>{const next={...previous};delete next[site.id];return next;});
+  setConfirmRemove(null);
  }
- async function revoke(site:Site){
+ async function pause(site:Site){
   await update(sites.map(s=>s.id===site.id?{...s,enabled:false}:s));
-  try{await running.current.get(site.id);}catch{/* Cleanup continues. */}
-  await purgeSiteCache(site.id,businessId);
-  setStats(previous=>{const next={...previous};delete next[site.id];return next;});
-  setSummaries(previous=>{const next={...previous};delete next[site.id];return next;});
+  try{await running.current.get(site.id);}catch{/* Local data remain unchanged. */}
+  setNotice(locale==="pt-BR"?"Sincronização pausada. Os dados locais foram preservados.":locale==="en"?"Synchronization paused; local data preserved.":"Sincronización pausada; datos locales preservados.");
  }
  async function add(){
   try{
@@ -257,23 +277,33 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
      <option value={300000}>{t.five}</option><option value={0}>{t.only}</option>
     </select></label>
    </div>
-   <label className="field"><input type="checkbox" checked={site.enabled} onChange={e=>{
-    if(e.target.checked)void update(sites.map(s=>s.id===site.id?{...s,enabled:true}:s)).catch(()=>{});
-    else void revoke(site);
-   }}/> {t.consent}</label>
+   <label className="consent-row"><input type="checkbox" checked={site.enabled} onChange={e=>{
+    if(e.target.checked)void update(sites.map(s=>s.id===site.id?{...s,enabled:true}:s)).catch(e=>setNotice(String(e)));
+    else void pause(site).catch(e=>setNotice(String(e)));
+   }}/> <span>{t.consent}</span></label>
    <div className="advanced-actions">
     <button className="secondary" disabled={!site.enabled||!(site.mode==="device-v2"?devices[site.id]:tokens[site.id])||statuses[site.id]?.phase==="syncing"}
      onClick={()=>{const controller=controllers.current.get(site.id);
       if(!controller){setNotice(t.pending);return;}
       void controller.run(true).catch(e=>setNotice(String(e)));
      }}>{t.manual}</button>
-    <button className="danger" onClick={()=>{void remove(site);}}>{t.remove}</button>
+    <button className="danger" type="button" onClick={()=>setConfirmRemove(site.id)}>{t.remove}</button>
    </div>
-   <p role="status">{statusesText(site)}
+   {confirmRemove===site.id&&<div className="connection-delete-confirm" role="alertdialog" aria-label={locale==="pt-BR"?"Confirmar remoção da conexão":locale==="en"?"Confirm removal":"Confirmar eliminación"}>
+    <strong>{locale==="pt-BR"?"Excluir definitivamente o vínculo local com ":locale==="en"?"Permanently remove local connection to ":"Eliminar definitivamente conexión local con "}{site.name}?</strong>
+    <p>{locale==="pt-BR"?"Isso apagará pedidos, produtos espelhados e a chave local. NÃO revoga o dispositivo na Vezura; revogue-o também no painel administrativo.":locale==="en"?"This deletes cached orders, mirrored products and the local key. It does NOT revoke the device on the store server.":"Esto elimina pedidos, productos y clave local. NO revoca el dispositivo en el servidor de la tienda."}</p>
+    <div className="advanced-actions"><button type="button" className="secondary" onClick={()=>setConfirmRemove(null)}>{locale==="pt-BR"?"Cancelar":locale==="en"?"Cancel":"Cancelar"}</button>
+     <button type="button" className="danger" onClick={()=>{void remove(site).catch(e=>setNotice(String(e)));}}>{locale==="pt-BR"?"Confirmar exclusão":locale==="en"?"Delete local data":"Eliminar datos locales"}</button></div>
+   </div>}
+   <p role="status">{site.enabled?statusesText(site):(locale==="pt-BR"?"Pausado":locale==="en"?"Paused":"Pausado")}
     {statuses[site.id]?.lastError?" · "+(statuses[site.id]?.lastError??""):""}</p>
    <small>{t.last}: {stats[site.id]?.at?new Date(stats[site.id]?.at??0).toLocaleString(locale):t.never}
     {" · "}{t.rows}: {stats[site.id]?.count??0}
     {" · "}{t.imported}: {statuses[site.id]?.pulled??0}</small>
+   <p className="muted">{locale==="pt-BR"?"Produtos publicados sincronizados":locale==="en"?"Synced published products":"Productos publicados sincronizados"}: {catalogs.sites[site.id]?.products.length??0}
+    {catalogs.sites[site.id]?.syncedAt?" · "+new Date(catalogs.sites[site.id].syncedAt).toLocaleString(locale):""}</p>
+   {catalogErrors[site.id]&&<p role="alert">{locale==="pt-BR"?"Falha no catálogo (cache anterior preservado)":locale==="en"?"Catalog error (previous cache preserved)":"Error de catálogo (caché anterior conservada)"}: {catalogErrors[site.id]}</p>}
+   {onDraft&&<StoreCatalogPanel businessId={businessId} siteId={site.id} onDraft={onDraft}/>}
    {summaries[site.id]?.map((s,index)=><div className="list-row" key={s.currency+index}>
     <span>{s.currency} · {s.orders} · {t.paid}: {s.paid}</span>
     <small>{s.financialComplete?`${t.profit}: ${s.currency} ${s.projectedNet}`:(locale==="pt-BR"?"Resultado financeiro não disponível: custos sem comprovação":locale==="en"?"Financial result unavailable: costs not verified":"Resultado financiero no disponible: costos sin verificar")}</small>
