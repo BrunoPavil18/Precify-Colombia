@@ -12,3 +12,5 @@ Final post-audit release candidate gate (2026-11-02): sync purge race fix, selec
 - Precify hides projected financial profit for operational-only events whose costs are not reconciled.
 - Single final Windows Tauri x64 installer/ZIP and existing official gate (not additional random tests).
 - Precify PR #4 stays draft; no auto-merge or customer data sync until operator approval.
+
+2026-11-03 catalog integration complete regression gate: published-store API, SQLite mirror, safe consent, draft with missing-cost gate, audited connectors.
