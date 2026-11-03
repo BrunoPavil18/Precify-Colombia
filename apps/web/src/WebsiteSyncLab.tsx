@@ -67,7 +67,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
  },[businessId,sites.map(s=>s.id+":"+s.mode).join("|")]);
  const [statuses,setStatuses]=useState<Record<string,SyncStatus>>({});
  const [stats,setStats]=useState<Record<string,{at:number;count:number}>>({});
- const [summaries,setSummaries]=useState<Record<string,Array<{currency:string;orders:number;paid:number;projectedNet:string}>>>({});
+ const [summaries,setSummaries]=useState<Record<string,Array<{currency:string;orders:number;paid:number;projectedNet:string|null;financialComplete:boolean}>>>({});
  async function loadSnapshot(scope:string,id:string){
   const checkpoint=await readSiteCheckpoint(scope,businessId);
   if(checkpoint)setStats(previous=>({...previous,[id]:{at:checkpoint.at,count:checkpoint.count}}));
@@ -81,7 +81,8 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
   }
   setSummaries(previous=>({...previous,[id]:[...byCurrency].map(([currency,events])=>{
    const result=computeCODFunnel(events);
-   return {currency,orders:result.orders,paid:result.paid,projectedNet:result.projectedNet};
+   const financialComplete=events.every(event=>(event as OrderEvent&{financialCompleteness?:string}).financialCompleteness!=="operational_only");
+   return {currency,orders:result.orders,paid:result.paid,financialComplete,projectedNet:financialComplete?result.projectedNet:null};
   })}));
  }
  const [notice,setNotice]=useState("");
@@ -275,7 +276,7 @@ export function WebsiteSyncLab({visible}:{visible:boolean}){
     {" · "}{t.imported}: {statuses[site.id]?.pulled??0}</small>
    {summaries[site.id]?.map((s,index)=><div className="list-row" key={s.currency+index}>
     <span>{s.currency} · {s.orders} · {t.paid}: {s.paid}</span>
-    <small>{t.profit}: {s.currency} {s.projectedNet}</small>
+    <small>{s.financialComplete?`${t.profit}: ${s.currency} ${s.projectedNet}`:(locale==="pt-BR"?"Resultado financeiro não disponível: custos sem comprovação":locale==="en"?"Financial result unavailable: costs not verified":"Resultado financiero no disponible: costos sin verificar")}</small>
    </div>)}
   </div>)}
   <p className="muted"><small>{t.security}</small></p>
