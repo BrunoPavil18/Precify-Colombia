@@ -22,3 +22,5 @@ Final post-audit release candidate gate (2026-11-02): sync purge race fix, selec
 2026-11-03 consolidated final: source-level readonly summary, paginated Vezura catalog, i18n syntax fixes, full UI/financial/Rust/Windows verification.
 
 2026-11-03 verified JSON dictionary syntax after full typecheck and test diagnostics. Candidate gate.
+
+2026-11-03 final fixed pricing gate: store drafts never show profit/recommended price before cost review.
