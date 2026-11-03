@@ -87,7 +87,7 @@ export function WebsiteSyncLab({visible,onDraft}:{visible:boolean;onDraft?:(prod
   }
   setSummaries(previous=>({...previous,[id]:[...byCurrency].map(([currency,events])=>{
    const result=computeCODFunnel(events);
-   const financialComplete=events.every(event=>(event as OrderEvent&{financialCompleteness?:string}).financialCompleteness!=="operational_only");
+   const financialComplete=events.length>0&&events.every(event=>(event as OrderEvent&{financialCompleteness?:string}).financialCompleteness==="verified");
    return {currency,orders:result.orders,paid:result.paid,financialComplete,projectedNet:financialComplete?result.projectedNet:null};
   })}));
  }
