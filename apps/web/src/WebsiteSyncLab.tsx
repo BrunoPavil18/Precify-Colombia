@@ -146,7 +146,8 @@ export function WebsiteSyncLab({visible,onDraft}:{visible:boolean;onDraft?:(prod
       // a connection waits for all reads before purging its local records.
       const task=(async()=>{
        const result=await controller.run(manual);
-       if(!stopped)await loadSnapshot(scope,site.id);
+       if(!stopped)try{await loadSnapshot(scope,site.id);}catch(e){setNotice(String(e));}
+       // Report size limits must never block a complete product catalog refresh.
        if(!stopped&&site.mode==="device-v2"&&"catalogPage" in connector){
         try{
          const previous=readStoreCatalog(businessId).sites[site.id];
