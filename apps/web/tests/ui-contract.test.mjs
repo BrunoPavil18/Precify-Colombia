@@ -169,7 +169,7 @@ test("disconnect waits for the whole in-flight sync including local report refre
 test("store sync does not present operational-only events as verified financial profit",()=>{
  const lab=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
  assert.match(lab,/financialCompleteness\?:string/);
- assert.match(lab,/financialCompleteness!=="operational_only"/);
+ assert.match(lab,/financialCompleteness==="verified"/);
  assert.match(lab,/projectedNet:financialComplete\?result\.projectedNet:null/);
  assert.match(lab,/Resultado financeiro não disponível/);
 });
