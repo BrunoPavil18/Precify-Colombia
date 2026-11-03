@@ -182,6 +182,7 @@ test("published catalog is a separate, explicit local mirror and never overwrite
  assert.ok(app.includes('page==="productos"&&<StoreCatalogPanel businessId='));
  assert.ok(app.includes('async function openStoreProductDraft(product:StoreProduct)'));
  assert.ok(app.includes("setStoreDraftPending(true)"));
+ assert.ok(app.includes('{storeDraftPending?<div role="alert" className="error-box">'),"unknown store cost must suppress profit output");
  assert.ok(app.includes('const zero="0.00"'),"never import sample financial acquisition costs");
  assert.ok(app.includes('if(storeDraftPending)'),"draft cannot be saved before user cost review");
  assert.ok(store.includes('nativeWrite("catalog-mirror"'));
