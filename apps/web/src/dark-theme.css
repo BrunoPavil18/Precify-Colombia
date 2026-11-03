@@ -466,3 +466,6 @@ main>.main-card,main>.two-column,main>.advanced-results{animation:pc-reveal .25s
 .store-catalog-item strong{font-size:13px;overflow-wrap:anywhere}
 .store-catalog-item small{font-size:12px;color:var(--pc-muted)}
 .store-catalog-item button{min-height:34px;padding:6px 10px;font-size:12px}
+
+.main-card>.consent-row{display:flex;align-items:center;gap:12px;cursor:pointer;flex-wrap:wrap}
+.main-card>.consent-row input[type=checkbox]{width:20px;height:20px;min-height:20px;margin:0;padding:0;flex:0 0 20px}
