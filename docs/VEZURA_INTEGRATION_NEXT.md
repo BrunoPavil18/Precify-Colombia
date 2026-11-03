@@ -41,3 +41,10 @@ Construir consultas read-only de `readChanges({subject,cursor,limit})` sobre tra
 **Critério de conclusão:** não habilitar produção ou declarar lucro real antes da aprovação desses testes. O backend de conta opcional antigo e a API bearer v1 são compatibilidade, **não** o método recomendado para uma nova loja.
 
 Documentação do servidor e contrato: [STORE_DEVICE_API_V2.md](STORE_DEVICE_API_V2.md) · [FINANCY_FINAL_AUDIT.md](FINANCY_FINAL_AUDIT.md).
+
+
+## Extensão de catálogo publicado (nova candidata 03/11/2026)
+
+A [PR Vezura #119](https://github.com/Gabriel-Michalizsen/vezura-store/pull/119), ainda **draft**, acrescenta o endpoint assinado `GET /precify/v2/catalog?page=N` sem migração MySQL adicional. A branch Precify 2.1 recebe lista de produtos **publicados/disponíveis**, armazena espelho local por negócio/loja em SQLite e apresenta a opção de iniciar simulação COP com custos não verificados. Contrato, limites, proteção de dados e passos de homologação estão no arquivo [VEZURA_CATALOG_MIRROR_V2_1_0.md](VEZURA_CATALOG_MIRROR_V2_1_0.md).
+
+**Importante:** API v2 de dispositivos PR #118 e extensão do catálogo PR #119 são entregas separadas. Dispositivo ativado e 0 eventos financeiros NÃO significam catálogo zerado, mas os produtos só serão recebidos quando a extensão de catálogo for implantada no backend da loja. Não fazer merge/deploy/migration sem aceite.
