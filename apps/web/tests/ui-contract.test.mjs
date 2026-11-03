@@ -173,3 +173,41 @@ test("store sync does not present operational-only events as verified financial 
  assert.match(lab,/projectedNet:financialComplete\?result\.projectedNet:null/);
  assert.match(lab,/Resultado financeiro não disponível/);
 });
+
+
+test("published catalog is a separate, explicit local mirror and never overwrites manual products",()=>{
+ const app=readFileSync(new URL("../src/App.tsx",import.meta.url),"utf8");
+ const store=readFileSync(new URL("../src/store-catalog.ts",import.meta.url),"utf8");
+ const web=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ assert.ok(app.includes('page==="productos"&&<StoreCatalogPanel businessId='));
+ assert.ok(app.includes('async function openStoreProductDraft(product:StoreProduct)'));
+ assert.ok(app.includes("setStoreDraftPending(true)"));
+ assert.ok(app.includes('const zero="0.00"'),"never import sample financial acquisition costs");
+ assert.ok(app.includes('if(storeDraftPending)'),"draft cannot be saved before user cost review");
+ assert.ok(store.includes('nativeWrite("catalog-mirror"'));
+ assert.ok(web.includes("fetchPublishedCatalog(connector as ReturnType<typeof createDeviceConnector>)"));
+});
+test("store consent pauses without purging and deletion requires confirmation",()=>{
+ const web=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ const start=web.indexOf("async function pause(site:Site)");
+ const end=web.indexOf("async function add()",start);
+ const pause=web.slice(start,end);
+ assert.ok(start>0&&pause.includes("enabled:false"));
+ assert.ok(!pause.includes("purgeSiteCache("), "pausing must not delete order events");
+ assert.ok(!pause.includes("clearStoreCatalog("), "pausing must preserve product mirror");
+ assert.ok(web.includes("confirmRemove===site.id"));
+ assert.ok(web.includes("Confirmar exclusão"));
+ assert.ok(web.includes("await clearStoreCatalog(businessId,site.id)"));
+ assert.ok(web.includes('className="consent-row"'));
+});
+test("financial completion must be opt-in verified, not assumed from missing marker",()=>{
+ const web=readFileSync(new URL("../src/WebsiteSyncLab.tsx",import.meta.url),"utf8");
+ assert.ok(web.includes('financialCompleteness==="verified"'));
+ assert.ok(!web.includes('financialCompleteness!=="operational_only"'));
+});
+test("native web and SQLite read the same catalog-mirror snapshot kind",()=>{
+ const primary=readFileSync(new URL("../src/native-primary.ts",import.meta.url),"utf8");
+ const bridge=readFileSync(new URL("../src/desktop-snapshots.ts",import.meta.url),"utf8");
+ const rust=readFileSync(new URL("../../desktop/src-tauri/src/native_snapshots.rs",import.meta.url),"utf8");
+ for(const src of [primary,bridge,rust])assert.ok(src.includes('"catalog-mirror"'));
+});
