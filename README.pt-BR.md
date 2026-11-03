@@ -1,5 +1,8 @@
 # Precify Financy
 
+> **2.1 — catálogo Vezura em desenvolvimento:** o espelho de produtos publicados preserva dados manuais e não inventa custos; consulte [contrato e QA](docs/VEZURA_CATALOG_MIRROR_V2_1_0.md). A candidata só deve ser instalada após validação Windows e deploy da PR #119 da Vezura.
+
+
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
@@ -25,7 +28,7 @@ Esta branch acrescenta precificação nativa em moedas ISO, cotações indicativ
 
 **Armazenamento:** no Windows, SQLite é o armazenamento principal de perfis e dados financeiros, inclusive cache transacional de eventos de loja. A chave criptográfica não exportável fica no WebCrypto/IndexedDB do WebView2. Na PWA, os dados continuam no armazenamento web/IndexedDB, com consentimento por loja. O protocolo bearer v1 é apenas compatibilidade com conexões antigas.
 
-**Pendência externa:** a Vezura ainda não implementou a API da loja, então não há pedidos reais sincronizados. Consulte [protocolo v2 e adaptadores MySQL/Postgres](docs/STORE_DEVICE_API_V2.md) e [plano de integração Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
+**Estado da integração:** a API de dispositivos v2 da Vezura foi integrada ao código da loja (PR #118). A extensão de catálogo publicado está em PR #119 e só ficará disponível após merge/deploy; pedidos reais e Windows ainda dependem de homologação em produção. Consulte [protocolo v2 e adaptadores MySQL/Postgres](docs/STORE_DEVICE_API_V2.md) e [plano de integração Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Atualização 2.0.1
 
