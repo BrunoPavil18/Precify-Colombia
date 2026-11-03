@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import {loadGlobalCatalog,persistGlobalCatalog,decodeGlobalCatalogBackup,downloadGlobalCatalog,storageGlobalKey,type GlobalSavedCatalog} from "./global-storage";
 import {globalPrice,globalSuggestedPrice,currencyCatalog,type GlobalPriceInput} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
+import {nativePrimary} from "./native-primary";
 
 const defaultInput:GlobalPriceInput={
  currency:"USD",salePrice:"100.00",acquisition:"50.00",packaging:"0.00",shippingCost:"0.00",
@@ -36,7 +37,7 @@ export function GlobalPricingLab(){
   if(locked)return false;
   try{
    const raw=await persistGlobalCatalog(next,baseline.current);
-   baseline.current=raw;setCatalog(next);setNotice(t("Catálogo internacional guardado en este navegador."));return true;
+   baseline.current=raw;setCatalog(next);setNotice(t(nativePrimary()?"Datos confirmados en SQLite local.":"Catálogo internacional guardado en este navegador."));return true;
   }catch(e){setLocked(true);setNotice(String(e));return false;}
  }
  async function saveProduct(){
