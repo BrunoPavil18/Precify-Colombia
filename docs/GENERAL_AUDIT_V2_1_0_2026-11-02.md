@@ -97,3 +97,34 @@ A `main` permanece intacta; este fechamento **não declara** a API da Vezura imp
 - Instalador `Precify-Financy-2.1.0-setup.exe`: `c3e8842b222afe9f79d19eb7262bbe42cceafd477a54023fcdae135f4b3079a4`.
 
 **Critério de saída:** regressões automatizadas e distribuição Windows aprovadas. Falta teste manual do novo binário no Windows/WebView2 e backend real da Vezura, portanto a PR continua draft, sem merge nem lançamento de produção.
+
+
+## Terceira rodada — entrega consolidada catálogo Vezura e correções A01–A17 (03/11/2026)
+
+Fonte: auditoria técnica `Auditoria_Tecnica_Precify_Financy_Vezura_2026-11-02.md`; branch `feat/precify-colombia-v2.1.0` do Precify e PR #119 em `Gabriel-Michalizsen/vezura-store`.
+
+### Alterações em código efetivamente implementadas
+- **A01:** integração signed Device API v2 com `GET /precify/v2/catalog?page=N` na Vezura, sem PII/sem custos privados. Cliente valida páginas, total, limites, IDs e só confirma espelho completo separado do workspace. Windows persiste o novo snapshot `catalog-mirror` no SQLite; PWA usa localStorage próprio. Produtos aparecem em Produtos e Conexões; podem iniciar rascunho explícito com nome/preço, sem custos de exemplo e sem gravar automaticamente.
+- **A02/A03/A04:** pausa do consentimento NÃO apaga feed/catálogo; a exclusão exige confirmação e orienta revogação no admin da Vezura; checkbox recebeu estilo 20x20px alinhado ao texto.
+- **A05:** `financialCompleteness === 'verified'` é agora obrigatório para mostrar resultado líquido calculado pelo feed; eventos `operational_only` ou sem marcador não são classificados como lucro verificado.
+- **A06 (parcial):** novo resumo read-only na Visão Geral mostra contagens de produtos e registros por loja, separado do workspace manual, sem misturar receita/pagamentos. A conciliação COD multiorigem continua futura.
+- **A07 (mitigação):** uma leitura de relatório operacional acima do limite não bloqueia a sincronização independente do catálogo. O limite de 20.000 linhas para relatórios detalhados permanece, até migração para agregação/paginação SQL.
+- **A08:** observador do catálogo internacional agora usa `storageGlobalKey()` do negócio selecionado.
+- **A11:** na PR Vezura o simulador administrativo deixa custo de origem sem evidência vazio e bloqueia cálculo até o usuário fornecer custo.
+- **A13/A16:** corrigida URL do instalador, estado de documentação ES/PT/EN e mensagens nativas de gravação SQLite.
+
+### Retidos de propósito, não eliminados por suposição
+- `ConnectedLab` e `apps/service` / Supabase/Meta: legado avançado opcional, não necessário para conectar Vezura. Compatibilidade mantida até inventário de consumidores.
+- `integrations/site-owned-feed.mjs` bearer v1 e `integrations/precify-client.mjs`: SDKs/compatibilidade; não usados em novas conexões Device v2.
+- `src/lib/precify-colombia/*` na Vezura: motor v2.0.1 antigo; não substituir sem pacote compartilhado versionado + testes de paridade.
+- Motor financeiro TS/BigInt, SQL de outbox de pedidos e SQLite principal: preservados sem reescrita, por serem os componentes validados.
+
+### Pendências externas e limitações reais
+- PR Vezura #119 deve ser revisada/mesclada e aplicada em staging/produção antes de o Precify instalado buscar produtos; não há deploy automático.
+- Endpoints assinados devem ser testados em Windows/WebView2 real com HTTPS, dispositivos revogados e solicitações replay; sem credenciais ou DB de produção nesta rodada.
+- A12: seletor no simulador do painel Vezura continua limitado aos primeiros 50; não se confunde com o novo espelho completo do aplicativo Precify.
+- A07: paginação/agrupamento SQL para mais de 20k eventos ainda não implementados.
+- A10: migração compartilhada de motor entre Vezura e Precify aguarda teste de paridade.
+- A14: CI completo do Precify continua disparado por arquivo gatilho para poupar minutos; revisão futura pode introduzir job leve em PR.
+- A15/A17: Rust Cargo.lock não versionado, backup de identidade WebCrypto e hardware binding continuam limites explícitos.
+- Fonte financeira Vezura ainda registra confirmação do pedido, não pagamento COD ou custo conciliado. Não relatar lucro real.
