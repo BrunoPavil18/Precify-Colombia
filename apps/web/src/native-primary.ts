@@ -8,13 +8,14 @@
 import {readNativeSnapshot,supportsDesktopSQLite} from "./desktop-snapshots";
 import {STORE_KEY} from "@precify-financy/core";
 import {businessKey,MAIN_BUSINESS,validateBusinessDirectory} from "./BusinessProfiles";
-type Kind="workspace"|"operations"|"global-pricing"|"site-connectors"|"business-directory";
+type Kind="workspace"|"operations"|"global-pricing"|"site-connectors"|"catalog-mirror"|"business-directory";
 const prefix="precify-financy:";
 const names:Record<Exclude<Kind,"business-directory">,string>={
  "workspace":STORE_KEY,
  "operations":prefix+"operations:v1",
  "global-pricing":prefix+"global-pricing:v1",
- "site-connectors":prefix+"site-owned-connectors:v1"
+ "site-connectors":prefix+"site-owned-connectors:v1",
+ "catalog-mirror":prefix+"catalog-mirror:v1"
 };
 const directoryKey=prefix+"business-directory:v1";
 const storeKey=(id:string,kind:Kind)=>kind==="business-directory"?directoryKey:businessKey(names[kind],id);
