@@ -6,6 +6,7 @@ import { OperationsLab } from "./OperationsLab";
 import { CurrencyLab } from "./CurrencyLab";
 import { GlobalPricingLab } from "./GlobalPricingLab";
 import { OverviewDashboard } from "./OverviewDashboard";
+import {ConnectedSourcesOverview} from "./ConnectedSourcesOverview";
 import { UIIcon } from "./UIIcon";
 import { AdvancedLab } from "./AdvancedLab";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -612,6 +613,7 @@ export default function App(){
     <main id="main-content">
      {page!=="inicio"&&<div className="page-heading"><div><div className="eyebrow">{t("ESPACIO DE TRABAJO")} <span className="green-line"/> {t("DATOS LOCALES / OPCIONALES")}</div><h1>{t(pageTitles[page].title)}</h1><p>{t(pageTitles[page].description)}</p></div></div>}
      {page==="inicio"&&(allMode?<BusinessPortfolio onOpen={()=>setPage("inicio")}/>:<OverviewDashboard workspace={workspace} ranked={ranked} format={fmt} date={date} onNavigate={target=>{void navigate(target);}}/>)}
+      {page==="inicio"&&!allMode&&<ConnectedSourcesOverview businessId={getBusinessScope()}/> }
      {allMode&&page!=="inicio"&&<BusinessRoutePicker title={t(pageTitles[page].title)} onBack={()=>setPage("inicio")} onSelect={businessId=>{requestedBusinessPage=page;choose(businessId);}}/>}
      {confirmation&&<div className="modal-backdrop" role="presentation">
       <section className="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="precify-confirm-title" aria-describedby="precify-confirm-body">
