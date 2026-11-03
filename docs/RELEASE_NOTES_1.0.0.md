@@ -1,4 +1,4 @@
-# Precify Colombia 1.0.0 — Release Notes 🇨🇴
+# Precify Financy 1.0.0 — Release Notes 🇨🇴
 
 **Proposed tag:** `v1.0.0`  
 **Target branch:** `main`  
@@ -7,7 +7,7 @@
 
 ## First official stable source release
 
-Precify Colombia is an original, free, open-source, browser-local pricing application for Colombian commerce, in COP. It runs without required accounts, external APIs, commercial services, or backend.
+Precify Financy is an original, free, open-source, browser-local pricing application for Colombian commerce, in COP. It runs without required accounts, external APIs, commercial services, or backend.
 
 ### Included
 
@@ -20,7 +20,7 @@ Precify Colombia is an original, free, open-source, browser-local pricing applic
 
 ### Storage and privacy
 
-A clean installation or new browser site origin starts with no stored products, scenarios, profiles, or history. User workspace data is saved only in browser `localStorage`, under `precify-colombia:workspace:v1`. Developer sample data is not embedded into source or distribution builds. The calculator's sample fields are **not** a saved product. Export JSON backups regularly; data may be lost if site storage is cleared.
+A clean installation or new browser site origin starts with no stored products, scenarios, profiles, or history. User workspace data is saved only in browser `localStorage`, under `precify-financy:workspace:v1`. Developer sample data is not embedded into source or distribution builds. The calculator's sample fields are **not** a saved product. Export JSON backups regularly; data may be lost if site storage is cleared.
 
 ### Integration
 
@@ -45,4 +45,4 @@ No backup files, merchant products, saved scenarios or localStorage databases ar
 
 ### Suggested GitHub publication
 
-In the repository, choose **Releases → Draft a new release**, create tag `v1.0.0` targeting the current `main`, title it **Precify Colombia 1.0.0**, paste this document (omit publication instructions), and publish when ready. Do not enable automated build/deploy or GitHub Actions. GitHub's source-code ZIP/tar.gz assets are enough for this source release; the build can be generated locally.
+In the repository, choose **Releases → Draft a new release**, create tag `v1.0.0` targeting the current `main`, title it **Precify Financy 1.0.0**, paste this document (omit publication instructions), and publish when ready. Do not enable automated build/deploy or GitHub Actions. GitHub's source-code ZIP/tar.gz assets are enough for this source release; the build can be generated locally.

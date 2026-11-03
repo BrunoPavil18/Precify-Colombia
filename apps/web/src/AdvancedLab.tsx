@@ -1,6 +1,6 @@
 import {useMemo,useState} from "react";
 import {simulateCOD,simulateCampaign,pricePerMeasure,consumerPricePreview,simulatePortfolio,
- type Product,type Workspace,type AdvancedSimulationRecord,type CODSimulationInput,type CampaignInput,type PUMUnit} from "@precify-colombia/core";
+ type Product,type Workspace,type AdvancedSimulationRecord,type CODSimulationInput,type CampaignInput,type PUMUnit} from "@precify-financy/core";
 import {useTranslator} from "./i18n";
 
 const controls=(type:"cod"|"campaign")=>type==="cod"
@@ -27,13 +27,14 @@ function displayAdvancedResult(key:string,value:string|number):string{
  return raw;
 }
 
-export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
- workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>boolean;
+export function AdvancedLab({workspace,onSave,onDelete,onDirty,initialPane="cod",initialProductId=""}:{
+ initialPane?:Pane;initialProductId?:string;
+ workspace:Workspace;onSave:(record:AdvancedSimulationRecord)=>Promise<boolean>;
  onDelete:(id:string)=>void;onDirty:(dirty:boolean)=>void
 }){
  const t=useTranslator();
- const [pane,setPane]=useState<Pane>("cod");
- const [selected,setSelected]=useState("");
+ const [pane,setPane]=useState<Pane>(initialPane);
+ const [selected,setSelected]=useState(initialProductId);
  const [cod,setCOD]=useState(initialCOD);
  const [campaign,setCampaign]=useState(initialCampaign);
  const [measure,setMeasure]=useState({price:"10000.00",quantity:"500.00",unit:"g" as PUMUnit,referenceUnit:"g" as PUMUnit});
@@ -51,7 +52,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
    return {data:simulatePortfolio(workspace.products.map(p=>({product:p.input,monthlyUnits:quantities[p.id]??"0"})),fixed)};
   }catch(e){return {error:e instanceof Error?e.message:String(e)};}
  },[pane,product,cod,campaign,measure,preview,workspace.products,quantities,fixed]);
- function snapshot(){
+ async function snapshot(){
   const inputs:Record<string,string>=pane==="cod"?{...cod}:pane==="campaign"?{...campaign}
    :pane==="pum"?{...measure}
    :pane==="consumer"?{...preview}
@@ -61,7 +62,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
    kind:pane,productId:(pane==="cod"||pane==="campaign")?product?.id??null:null,
    at:new Date().toISOString(),label:pane+" · "+new Date().toLocaleDateString(),inputs
   };
-  if(onSave(record))onDirty(false);
+  if(await onSave(record))onDirty(false);
  }
  function load(record:AdvancedSimulationRecord){
   setPane(record.kind);
@@ -86,7 +87,7 @@ export function AdvancedLab({workspace,onSave,onDelete,onDirty}:{
   <h2>{t("Decisiones con supuestos explícitos")}</h2>
   <p className="muted">{t("Todos los valores son simulaciones ingresadas por el usuario, no tarifas oficiales. Los borradores de esta sección no modifican productos guardados.")}</p>
   <div className="advanced-tabs" role="group" aria-label={t("Tipo de simulación")}>
-   {panes.map(p=><button key={p} className={p===pane?"primary":"secondary"} aria-pressed={p===pane} onClick={()=>{setPane(p);onDirty(true);}}>{t(({cod:"Riesgo COD",campaign:"Publicidad y CAC",pum:"Precio por unidad",consumer:"Precio al consumidor",portfolio:"Cartera multiproducto"} as Record<Pane,string>)[p])}</button>)}
+   {panes.map(p=><button key={p} className={p===pane?"primary":"secondary"} aria-pressed={p===pane} onClick={()=>setPane(p)}>{t(({cod:"Riesgo COD",campaign:"Publicidad y CAC",pum:"Precio por unidad",consumer:"Precio al consumidor",portfolio:"Cartera multiproducto"} as Record<Pane,string>)[p])}</button>)}
   </div>
   {(pane==="cod"||pane==="campaign")&&<label className="field"><span>{t("Producto que deseas analizar")}</span><select value={product?.id??""} onChange={e=>{setSelected(e.target.value);onDirty(true);}}>
    {workspace.products.length===0?<option value="">{t("Primero guarda un producto")}</option>:workspace.products.map(p=><option key={p.id} value={p.id}>{p.input.name}</option>)}

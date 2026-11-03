@@ -25,8 +25,9 @@ export function simulateCOD(input:CODSimulationInput){
  const paid=roundDiv(delivered*bps(input.paidPercentOfDelivered),10000n);
  const failed=created-paid,notShipped=created-shipped,shipFailures=shipped-delivered,deliveredUnpaid=delivered-paid;
  const standard=signed(analyze(v).contribution);
- // Existing advertising and COD/returns reserves are NOT duplicated.
- const perPaid=standard-parseDecimal(v.advertising)-parseDecimal(v.codReserve)-parseDecimal(v.returnsReserve)
+ // Base product contribution already deducts advertising/COD/returns reserves.
+ // Add them back before charging the explicit order-stage expenses once.
+ const perPaid=standard+parseDecimal(v.advertising)+parseDecimal(v.codReserve)+parseDecimal(v.returnsReserve)
    -parseDecimal(input.extraCODFeePerPaidOrder);
  const ad=created*parseDecimal(input.advertisingPerCreatedOrder);
  const failures=shipFailures*parseDecimal(input.failedAttemptCost)+failed*parseDecimal(input.lossReservePerFailedOrder);
@@ -42,6 +43,34 @@ export function simulateCOD(input:CODSimulationInput){
   profitPerPaidOrder:paid===0n?null:fromCents(roundDiv(total,paid)),
   assumptions:["Las tasas y costos son hipótesis ingresadas por el usuario.","No equivale a una tarifa publicada por transportadoras.","La adquisición de mercancía no recuperada debe modelarse dentro de la reserva de pérdidas."]
  };
+}
+/** Minimum retail price covering an explicitly configured COD cohort.
+ * Rates and order volume are fixed hypotheses; changing retail price can
+ * change conversion in reality, so this is not a guaranteed market price.
+ */
+export function suggestCODBreakEvenPrice(input:CODSimulationInput):{
+ price:string|null;paidOrders:string;projectedProfit:string|null;reason:string;
+}{
+ const sample=simulateCOD(input);
+ if(sample.createdOrders==="0"||sample.paidOrders==="0"){
+  return {price:null,paidOrders:sample.paidOrders,projectedProfit:null,
+   reason:"Sin pedidos efectivamente pagados, no hay precio COD de equilibrio."};
+ }
+ const valid=(amount:bigint)=>{
+  try{
+   const result=simulateCOD({...input,product:{...input.product,currentPrice:fromCents(amount)}});
+   return signed(result.expectedProfit)>=0n;
+  }catch{return false;}
+ };
+ let low=0n,high=100n;
+ const max=100_000_000_000_000n;
+ while(high<max&&!valid(high))high=high*2n>max?max:high*2n;
+ if(!valid(high))return {price:null,paidOrders:sample.paidOrders,projectedProfit:null,
+  reason:"No existe precio viable dentro del límite admitido."};
+ while(low+1n<high){const mid=(low+high)/2n;if(valid(mid))high=mid;else low=mid;}
+ const outcome=simulateCOD({...input,product:{...input.product,currentPrice:fromCents(high)}});
+ return {price:fromCents(high),paidOrders:outcome.paidOrders,projectedProfit:outcome.expectedProfit,
+  reason:"Precio de equilibrio del escenario COD con tasas condicionales constantes."};
 }
 export type CampaignInput={
  product:PriceInput; impressions:string; conversionPercent:string;

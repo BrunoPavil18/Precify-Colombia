@@ -1,0 +1,26 @@
+Precify Financy v2.1 final security and Windows artifact gate
+Latest app source d725e043b016ecc630b2a2352c6232073165b850
+118 JavaScript tests, 4 Rust SQLite tests, Chromium 19-page + v2 connections, business-scoped optional cloud upload with explicit remote destination confirmation, Windows x64 Inno + ZIP.
+Release candidate - draft - no main merge/deployment.
+
+2026-11-02 full consolidated regression gate: in-app integration guide, pending Ed25519 identity recovery, connector cleanup, browser acceptance and UI tests.
+
+Final post-audit release candidate gate (2026-11-02): sync purge race fix, selectable documentation fallback, expanded regression tests, audit report.
+
+2026-11-02 Precify/Vezura API-v2 consolidated Windows acceptance build:
+- Vezura store backend merged via PR #118; installation requires migration 025 and explicit env enable.
+- Precify hides projected financial profit for operational-only events whose costs are not reconciled.
+- Single final Windows Tauri x64 installer/ZIP and existing official gate (not additional random tests).
+- Precify PR #4 stays draft; no auto-merge or customer data sync until operator approval.
+
+2026-11-03 catalog integration complete regression gate: published-store API, SQLite mirror, safe consent, draft with missing-cost gate, audited connectors.
+
+2026-11-03 FINAL Precify/Vezura published catalog regression gate: typed connector, isolated SQLite mirror, product UX and verified-only financial summaries.
+
+2026-11-03 regression after i18n and verified-only financial contract corrections. Full Windows x64, Chromium and JS tests.
+
+2026-11-03 consolidated final: source-level readonly summary, paginated Vezura catalog, i18n syntax fixes, full UI/financial/Rust/Windows verification.
+
+2026-11-03 verified JSON dictionary syntax after full typecheck and test diagnostics. Candidate gate.
+
+2026-11-03 final fixed pricing gate: store drafts never show profit/recommended price before cost review.

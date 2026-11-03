@@ -1,9 +1,9 @@
-# Security policy — Precify Colombia
+# Security policy — Precify Financy
 
 **Updated:** 2026-10-23. **Code version:** 2.0.0 in `main`; GitHub Release publication is a separate step. See [Changelog](CHANGELOG.md).
 
 ## Data and privacy
-Precify operates without mandatory user accounts, cloud storage, advertising integrations or API keys. Workspace data live in the user's origin-scoped `localStorage` under `precify-colombia:workspace:v1` (the storage **key remains v1 intentionally for compatibility**); backups exported in v2 format import version 1 and 2 records. Local storage is accessible to other scripts running on the same origin and browser profile; it is not encrypted, synchronized, or protected against shared-device access. Do not save sensitive client personal information or secrets. Export backups and safeguard them outside the browser.
+Precify operates without mandatory user accounts, cloud storage, advertising integrations or API keys. Workspace data live in the user's origin-scoped `localStorage` under `precify-financy:workspace:v1` (the storage **key remains v1 intentionally for compatibility**); backups exported in v2 format import version 1 and 2 records. Local storage is accessible to other scripts running on the same origin and browser profile; it is not encrypted, synchronized, or protected against shared-device access. Do not save sensitive client personal information or secrets. Export backups and safeguard them outside the browser.
 
 ## Implemented safeguards
 - Exact COP decimal-string/BigInt financial arithmetic and input validation.

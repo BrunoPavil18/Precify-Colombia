@@ -1,10 +1,34 @@
-# Precify Colombia 🇨🇴
+# Precify Financy
+
+> **2.1 catálogo Vezura candidato:** productos publicados se sincronizan a un espejo local independiente; consulte [arquitectura y QA](docs/VEZURA_CATALOG_MIRROR_V2_1_0.md). Requiere implementar PR #119 en la tienda y homologar Windows.
+
 
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versión 2.0.1 · Aplicación gratuita y de código abierto · Apache License 2.0**
+**Desarrollo v2.1.0 (NO publicado) · Última versión estable: 2.0.1 · Apache License 2.0**
+
+**Auditoría final de la candidata 2.1.0:** [Precify Financy — verificación consolidada](docs/FINANCY_FINAL_AUDIT.md). Motor TS/BigInt, SQLite principal en Windows y acceso por instalación con clave Ed25519. La validación con una tienda real aún depende de su servidor.
+
+[Auditoría general de 2.1.0: hallazgos y límites](docs/GENERAL_AUDIT_V2_1_0_2026-11-02.md).
+
+
+## Rediseño dark-first 2.1.0 — entrega consolidada (candidata)
+
+Se implementó un panel con base **Jet Black `#121212`**, navegación organizada por tareas, nueva **Visión general**, acceso directo a COD/CAC/CPA/PUM, catálogo con búsqueda, informes con filtros, microanimaciones normales por defecto y menú móvil. Se preservaron los cálculos y el funcionamiento local/offline. **118 pruebas automatizadas** y aceptación visual en Chromium (19 rutas, guardado y recarga) superadas. [Informe de entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidencia de CI](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119). Esta rama sigue sin publicarse y no modifica Vezura.
+
+## Desarrollo de 2.1.0 — todavía sin homologar
+
+Esta branch experimental añade precios nativos en monedas ISO, cotizaciones orientativas diarias con cache offline, catálogo internacional independiente, panel COD y CPA, importación de pedidos/anuncios CSV, dashboard y una API REST conectada opcional con organizaciones, roles, webhooks firmados y Facebook Ads. También permite integrar una calculadora sin cuentas mediante `?embed=1`, por ejemplo en Vezura, **sin modificar el repositorio de Vezura**. Las funciones conectadas requieren servidor PostgreSQL/Supabase, credenciales Meta y validación externa; aún NO se consideran listas para producción. [Checkpoints de ejecución](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Guía de integración](docs/CONNECTED_API_V2_1_0.md).
+
+## Conexión local-first con tiendas — protocolo v2 (candidata 2.1.0)
+
+**Ruta recomendada:** en **Conexiones → Sincronización con tiendas propias**, el administrador habilita en su servidor la API Precify v2 y genera un código de invitación de un solo uso para cada instalación. Introduce el nombre y la URL HTTPS, añade la tienda, pega el código en su tarjeta y activa el dispositivo. Cada equipo usa su propia identidad Ed25519; no necesita cuenta central ni contraseña de Precify. Los datos de pedidos y campañas permanecen en el servidor de la tienda incluso cuando los equipos están desconectados. El cliente sincroniza al abrirse y mientras está conectado/autorizado; no hay servicio en segundo plano con la aplicación cerrada.
+
+**Almacenamiento:** en Windows, el SQLite del aplicativo es la fuente de verdad para perfiles y datos financieros, e incluye la caché transaccional del feed de la tienda. La clave criptográfica no exportable permanece en el almacén WebCrypto del perfil WebView2. En la PWA se emplea el almacenamiento del navegador e IndexedDB, con consentimiento por tienda. La API bearer v1 solo se conserva para conexiones antiguas, no para las nuevas.
+
+**Estado actual:** el backend Device API v2 de Vezura ya fue integrado al código (PR #118). La extensión de catálogo publicado está en PR #119 y exige merge/despliegue; la sincronización comercial real todavía necesita homologación. [Protocolo v2, SQL MySQL/Postgres y revocación](docs/STORE_DEVICE_API_V2.md) · [Próximos pasos en Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Actualización 2.0.1
 
@@ -16,21 +40,21 @@ La v2.0.1 estabiliza campañas (ROAS atribuido y proyectado separados), costos C
 Además de las funcionalidades de la v1, la v2 incorpora simuladores interactivos de **riesgo COD** (pedidos creados/enviados/entregados/pagados), **publicidad y CAC/ROAS**, **PUM** (kg, L, m y unidad), **vista previa del precio final al consumidor** (impuesto incluido/adicional/ninguno) y **cartera multiproducto** con costos fijos deducidos una sola vez. Las simulaciones se guardan por módulo y se respaldan mediante JSON v2, con importación compatible con backups v1. Incluye márgenes de distinta base, markup comercial, clasificación de contribución cero, porcentajes localizados, modales de confirmación accesibles y PWA con almacenamiento offline de recursos y actualizaciones consentidas. Las cifras tributarias/logísticas no son normas automáticas.
 
 
-Precify Colombia calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
+Precify Financy calcula precios, contribución, margen, descuentos, publicidad, fletes, reservas de pago contra entrega (COD), metas y punto de equilibrio en **pesos colombianos (COP)**. Incluye catálogo, escenarios, informes, exportación CSV, respaldo/restauración JSON e interfaz en **ES / PT / EN**. Es independiente de Vezura y de cualquier servicio comercial.
 
 ## Privacidad: cada instalación comienza vacía
 
-Los productos, escenarios, perfiles y eventos se guardan en el **localStorage del navegador de cada usuario**, bajo la clave `precify-colombia:workspace:v1`. El repositorio y el build estático **no incluyen los datos que cargue el desarrollador en su propia computadora**. Si no hay datos locales, la aplicación inicia sin productos guardados. «Producto ejemplo» es solo un borrador demostrativo de la calculadora.
+Los productos, escenarios, perfiles y eventos se guardan en el **localStorage del navegador de cada usuario**, bajo la clave `precify-financy:workspace:v1`. El repositorio y el build estático **no incluyen los datos que cargue el desarrollador en su propia computadora**. Si no hay datos locales, la aplicación inicia sin productos guardados. «Producto ejemplo» es solo un borrador demostrativo de la calculadora.
 
-El almacenamiento está separado por origen (protocolo + dominio + puerto); usuarios distintos del mismo equipo y navegador/perfil podrían compartirlo. No es una base de datos multiusuario. Borrar datos del sitio o usar navegación privada puede eliminar los datos: **exporte respaldos periódicamente**. No se envían los datos a un backend de Precify Colombia.
+El almacenamiento está separado por origen (protocolo + dominio + puerto); usuarios distintos del mismo equipo y navegador/perfil podrían compartirlo. No es una base de datos multiusuario. Borrar datos del sitio o usar navegación privada puede eliminar los datos: **exporte respaldos periódicamente**. No se envían los datos a un backend de Precify Financy.
 
 ## Instalación para desarrollo
 
 Requisitos: **Node.js >=20.19** y **pnpm 10.34.7**; Git para clonar.
 
 ```bash
-git clone https://github.com/BrunoPavil18/Precify-Colombia.git
-cd Precify-Colombia
+git clone https://github.com/BrunoPavil18/Precify-Financy.git
+cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
@@ -69,7 +93,7 @@ Publique primero `apps/web/dist/` en un **origen HTTPS propio** (por ejemplo, `h
 ```html
 <iframe
   src="https://calculadora.ejemplo.com/"
-  title="Precify Colombia"
+  title="Precify Financy"
   loading="lazy"
   style="width:100%;height:850px;border:0"
 ></iframe>
@@ -79,10 +103,10 @@ En **WordPress**, utilice un bloque **HTML personalizado** si la política del s
 
 ### 2. Reutilizar cálculos en Node.js / TypeScript
 
-El workspace `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, `maxDiscountPercent` y tipos. En un monorepo pnpm puede declarar `"@precify-colombia/core": "workspace:*"`. Ejemplo *dentro de este repositorio*:
+El workspace `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, `maxDiscountPercent` y tipos. En un monorepo pnpm puede declarar `"@precify-financy/core": "workspace:*"`. Ejemplo *dentro de este repositorio*:
 
 ```ts
-import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-colombia/core";
+import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-financy/core";
 
 const input = { ...EMPTY_INPUT, acquisition: "37000.00", currentPrice: "99000.00" };
 const result = analyze(input);
@@ -90,7 +114,7 @@ console.log(result.contribution); // "49000.00" con los otros costos del ejemplo
 console.log(suggestPrice(input).price);
 ```
 
-**En v2.0.0**, el core genera ESM distribuible (`packages/core/dist/index.js`) y declaraciones de tipos (`dist/index.d.ts`) mediante `pnpm --filter @precify-colombia/core build`. Verifique los artefactos con `pnpm verify:core`. **No está publicado en npm**; puede empaquetarlo localmente y probarlo como dependencia, sin asumir instalación desde el registro público. Para WordPress/PHP se necesita un adaptador JavaScript o una API propia; no existe plugin oficial ni integración de pedidos.
+**En v2.0.0**, el core genera ESM distribuible (`packages/core/dist/index.js`) y declaraciones de tipos (`dist/index.d.ts`) mediante `pnpm --filter @precify-financy/core build`. Verifique los artefactos con `pnpm verify:core`. **No está publicado en npm**; puede empaquetarlo localmente y probarlo como dependencia, sin asumir instalación desde el registro público. Para WordPress/PHP se necesita un adaptador JavaScript o una API propia; no existe plugin oficial ni integración de pedidos.
 
 ### 3. Integración de datos
 
@@ -100,8 +124,8 @@ Use un adaptador específico que traduzca su modelo de producto a `PriceInput`, 
 
 - `packages/core`: motor financiero y serialización de backup, independientes de React.
 - `apps/web`: React + Vite, presentación accesible y almacenamiento local.
-- Solo COP, interfaz `es-CO` por defecto, `pt-BR` y `en` disponibles.
-- Sin backend, registro obligatorio, WordPress plugin, checkout, sincronización entre dispositivos ni conversión de divisas.
+- COP e ISO, interfaz `es-CO` por defecto, `pt-BR` y `en` disponibles.
+- Sin registro central obligatorio, checkout, sincronización comercial real o plugin WordPress oficial; la conexión por instalación requiere API de la tienda. Cotizaciones ISO son indicativas.
 - Resultados informativos, no asesoría financiera/tributaria. IVA y COD dependen de parámetros ingresados por el usuario.
 
 Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [seguridad](docs/SECURITY_AUDIT.md) y [licencia Apache 2.0](LICENSE). La licencia del código no concede derechos sobre marcas de terceros.
@@ -111,3 +135,7 @@ Consulte [arquitectura](docs/ARCHITECTURE.md), [idiomas](docs/I18N.md), [segurid
 - [Integration API v2](docs/INTEGRATION_V2.md)
 - [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
 - [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
+
+## Precify Desktop Tauri y negocios independientes (candidata 2.1.0)
+
+El núcleo monetario **permanece en TypeScript/BigInt** para conservar la paridad de cálculo con la PWA. La app Windows usa Rust para ventana nativa y respaldos SQLite por negocio; SQLite ya es el almacenamiento financiero principal en Windows; el almacenamiento web queda como proyección de lectura. Puede crear negocios separados y abrir el panel "Todos los negocios" sin inventar beneficios ni sumar distintas divisas. [Análisis técnico](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guía y limitaciones](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). No hay cambios en Vezura.

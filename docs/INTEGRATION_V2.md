@@ -1,4 +1,4 @@
-# Precify Colombia v2.0.1 — Integration guide
+# Precify Financy v2.0.1 — Integration guide
 
 **Status:** v2.0.1 patch validated locally by the maintainer (42 core + 21 web tests; typecheck, AST lint and production build passed). Merge/release is controlled independently. No claim of independent commercial-platform certification or npm publication.
 
@@ -11,11 +11,11 @@
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
-pnpm --filter @precify-colombia/core build
+pnpm --filter @precify-financy/core build
 pnpm verify:core
 ```
 
-The reusable `packages/core` package exposes ESM `dist/index.js` and type declarations `dist/index.d.ts`, with `exports["."]` resolving both. The source repository uses `"@precify-colombia/core": "workspace:*"`. It is **not published on npm**. External projects should either integrate the Apache-2.0 source or produce/test a local package (e.g., via `pnpm pack`); the maintainer validated ESM outputs, **not an npm registry installation or external consumer test**.
+The reusable `packages/core` package exposes ESM `dist/index.js` and type declarations `dist/index.d.ts`, with `exports["."]` resolving both. The source repository uses `"@precify-financy/core": "workspace:*"`. It is **not published on npm**. External projects should either integrate the Apache-2.0 source or produce/test a local package (e.g., via `pnpm pack`); the maintainer validated ESM outputs, **not an npm registry installation or external consumer test**.
 
 ## Using the core
 
@@ -23,7 +23,7 @@ The reusable `packages/core` package exposes ESM `dist/index.js` and type declar
 import {
   EMPTY_INPUT, analyze, suggestPrice, simulateCOD,
   simulateCampaign, pricePerMeasure, consumerPricePreview, simulatePortfolio
-} from "@precify-colombia/core";
+} from "@precify-financy/core";
 
 const product = {
   ...EMPTY_INPUT,
@@ -55,7 +55,7 @@ Money: COP decimal strings with two fractional digits (`"89900.50"`). Percentage
 - `simulatePortfolio`: combined variable contribution and one shared monthly fixed-cost deduction.
 
 ### Workspace and backup contracts
-- Local storage key: `precify-colombia:workspace:v1` (preserved intentionally for existing users).
+- Local storage key: `precify-financy:workspace:v1` (preserved intentionally for existing users).
 - JSON backup export: version **2**; `decodeBackup` accepts v1 or v2 and validates all data before accepting it.
 - The workspace includes saved advanced simulations; records are tagged by module.
 - Tab-conflict detection compares full validated workspace snapshots, **not an atomic multiuser transaction**.
@@ -65,7 +65,7 @@ Money: COP decimal strings with two fractional digits (`"89900.50"`). Percentage
 Run `pnpm build` and host `apps/web/dist/` on a static HTTPS origin. For a separate site, embed it via a permitted iframe:
 
 ```html
-<iframe src="https://calculator.example.com/" title="Precify Colombia" loading="lazy" style="width:100%;height:850px;border:0"></iframe>
+<iframe src="https://calculator.example.com/" title="Precify Financy" loading="lazy" style="width:100%;height:850px;border:0"></iframe>
 ```
 
 For WordPress, use a Custom HTML block or link to the deployed app. The iframe **does not share products, sessions, or orders**. Embedded localStorage is subject to browser third-party storage policies, and CSP/`frame-ancestors` must allow intended hosts.

@@ -1,0 +1,80 @@
+import {generateDeviceIdentity,activateDevice,createDeviceConnector} from "../../../integrations/device-client.mjs";
+export type DeviceIdentity={deviceId:string;publicKey:JsonWebKey;privateKey:CryptoKey;subject:string};
+const DB="precify-financy-identities-v1",TABLE="devices";
+const bucket=(mode:IDBTransactionMode):Promise<{db:IDBDatabase;tx:IDBTransaction;store:IDBObjectStore}>=>new Promise((resolve,reject)=>{
+ const req=indexedDB.open(DB,1);
+ req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(TABLE))req.result.createObjectStore(TABLE,{keyPath:"scope"});};
+ req.onerror=()=>reject(req.error);
+ req.onsuccess=()=>{const db=req.result,tx=db.transaction(TABLE,mode);resolve({db,tx,store:tx.objectStore(TABLE)});};
+});
+const scope=(businessId:string,siteId:string)=>businessId+":"+siteId;
+
+// Store a pending non-exportable key BEFORE sending the one-use invitation.
+// A network failure or crash after server redemption must not orphan that identity.
+async function readStoredDevice(businessId:string,siteId:string):Promise<DeviceIdentity|null>{
+ const {db,tx,store}=await bucket("readonly");
+ return new Promise((resolve,reject)=>{
+  const r=store.get(scope(businessId,siteId));
+  tx.oncomplete=()=>{db.close();resolve((r.result as {identity?:DeviceIdentity}|undefined)?.identity??null);};
+  tx.onerror=()=>{db.close();reject(tx.error);};
+  tx.onabort=()=>{db.close();reject(tx.error);};
+ });
+}
+export async function readDevice(businessId:string,siteId:string,baseURL?:string):Promise<DeviceIdentity|null>{
+ const identity=await readStoredDevice(businessId,siteId);
+ if(!identity)return null;
+ if(identity.subject)return identity;
+ // An activation may have succeeded while its HTTP response or the local final write failed.
+ // Signed identity lookup lets the SAME installation recover; a different computer cannot.
+ if(!baseURL)return null;
+ try{
+  const connector=createDeviceConnector({id:siteId,baseURL,identity});
+  const subject=await connector.identify();
+  const active={...identity,subject};
+  await saveDevice(businessId,siteId,active);
+  return active;
+ }catch{return null;}
+}
+export async function saveDevice(businessId:string,siteId:string,identity:DeviceIdentity):Promise<void>{
+ const {db,tx,store}=await bucket("readwrite");
+ return new Promise((resolve,reject)=>{
+  const existing=store.get(scope(businessId,siteId));
+  existing.onsuccess=()=>{
+   const previous=(existing.result as {identity?:DeviceIdentity}|undefined)?.identity;
+   if(previous&&previous.deviceId!==identity.deviceId){tx.abort();return;}
+   store.put({scope:scope(businessId,siteId),identity});
+  };
+  tx.oncomplete=()=>{db.close();resolve();};
+  tx.onerror=()=>{db.close();reject(tx.error);};
+  tx.onabort=()=>{db.close();reject(tx.error??new Error("Device identity conflict"));};
+ });
+}
+export async function deleteDevice(businessId:string,siteId:string):Promise<void>{
+ const {db,tx,store}=await bucket("readwrite");
+ return new Promise((resolve,reject)=>{
+  store.delete(scope(businessId,siteId));
+  tx.oncomplete=()=>{db.close();resolve();};
+  tx.onerror=()=>{db.close();reject(tx.error);};
+  tx.onabort=()=>{db.close();reject(tx.error);};
+ });
+}
+export async function enrollDevice(businessId:string,siteId:string,baseURL:string,code:string):Promise<DeviceIdentity>{
+ // Reuse only this installation's pending key. Never generate a new device ID
+ // for a code that might already have been consumed by this installation.
+ const previous=await readStoredDevice(businessId,siteId);
+ if(previous?.subject)throw Error("This device is already activated for this store");
+ const identity:DeviceIdentity=previous??{...await generateDeviceIdentity(),subject:""};
+ if(!previous)await saveDevice(businessId,siteId,identity);
+ try{
+  const activation=await activateDevice({baseURL,code,identity});
+  const active={...identity,subject:activation.subject};
+  await saveDevice(businessId,siteId,active);
+  return active;
+ }catch(error){
+  // The server might have committed activation even if the response was lost.
+  // Resolve it with the persisted private key, without reusing the invitation.
+  const recovered=await readDevice(businessId,siteId,baseURL);
+  if(recovered)return recovered;
+  throw error;
+ }
+}

@@ -1,8 +1,8 @@
-# Integration contract — Precify Colombia v2.0.1
+# Integration contract — Precify Financy v2.0.1
 
 **Canonical guide:** [INTEGRATION_V2.md](INTEGRATION_V2.md). This document replaces the outdated version 1 source-only package assumptions.
 
-The independent `@precify-colombia/core` package is compiled with `pnpm --filter @precify-colombia/core build` and exposes `dist/index.js` (ESM) plus `dist/index.d.ts` (TypeScript declarations). Run `pnpm verify:core` to check the built entrypoint. **It has not been published on npm.**
+The independent `@precify-financy/core` package is compiled with `pnpm --filter @precify-financy/core build` and exposes `dist/index.js` (ESM) plus `dist/index.d.ts` (TypeScript declarations). Run `pnpm verify:core` to check the built entrypoint. **It has not been published on npm.**
 
 Public exports include `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice`, `maxDiscountPercent`, `simulateCOD`, `simulateCampaign`, `pricePerMeasure`, `consumerPricePreview`, `simulatePortfolio`, `validateWorkspace`, `encodeBackup`, and `decodeBackup`.
 

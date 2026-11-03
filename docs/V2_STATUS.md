@@ -1,7 +1,7 @@
-# Precify Colombia v2.0.0 — estado de implementación consolidada
+# Precify Financy v2.0.0 — estado de implementación consolidada
 
-**Branch:** `feat/precify-colombia-v2`  
-**PR única:** [#2](https://github.com/BrunoPavil18/Precify-Colombia/pull/2) — merged into `main` on 2026-10-23  
+**Branch:** `feat/precify-financy-v2`  
+**PR única:** [#2](https://github.com/BrunoPavil18/Precify-Financy/pull/2) — merged into `main` on 2026-10-23  
 **Base:** `main` idéntica al tag público `v1.0.0` al crear el branch.  
 **Estado actual:** v2.0.0 merged into `main`, with maintainer QA (53 automated tests, 24 manual checks). GitHub tag/release publication is managed separately. Previous chronological entries below document the development process and should be read as historical snapshots.
 
@@ -12,7 +12,7 @@
 3. **Interfaz:** `apps/web/src/AdvancedLab.tsx`, sección Avanzado en navegación, ES/PT/EN, campos editables y resultados. Simulaciones guardadas en el workspace, cargables después de F5, exportables mediante backup y eliminables explícitamente.
 4. **Persistencia:** formato aditivo `advancedSimulations` validado; importación de backups **v1 y v2**, nuevo respaldo v2 sin descartar información v1. Escrituras comparan `updatedAt` para detectar cambios concurrentes; el evento `storage` bloquea pestaña desactualizada. La detección NO equivale a bloqueo transaccional: dos escrituras simultáneas pueden superar la verificación y requieren validación E2E. Los registros de simulación se validan con los parsers financieros durante importación.
 5. **PWA inicial:** manifest, icono, service worker de cache de shell/recursos estáticos y registro en producción. No hay caché de API ni datos de comerciantes. Se añadió aviso de actualización pendiente y botón explícito para activar el nuevo SW, además de limpieza de cachés antiguos de la app. Todavía falta homologar las actualizaciones en navegador y probar offline/online.
-6. **Compatibilidad de biblioteca:** paquete `@precify-colombia/core` apunta a `dist/index.js` + `dist/index.d.ts`. Scripts root preparados para compilar core antes de dev/typecheck. No se hizo paquete npm ni publicación.
+6. **Compatibilidad de biblioteca:** paquete `@precify-financy/core` apunta a `dist/index.js` + `dist/index.d.ts`. Scripts root preparados para compilar core antes de dev/typecheck. No se hizo paquete npm ni publicación.
 7. **COP y porcentajes:** parser localizado acepta `19,50` o `19.50`, canonicaliza `19.50`. El motor mantiene BigInt em centavos; no cambia moneda por idioma.
 8. **Móvil:** navegación inferior de sidebar en pantalla estrecha cambia a grid flexible evitando scrollbar horizontal anterior.
 9. **Fuentes colombianas:** [documentación datada](COLOMBIA_LEGAL_V2.md) con 1480/2011, 2439/2024, SIC/PUM, DIAN/IVA, protección de datos 1581/2012. Ningún modo se presenta como certificado legal.
@@ -36,8 +36,8 @@
 
 ```powershell
 git fetch origin
-git switch feat/precify-colombia-v2
-git pull --ff-only origin feat/precify-colombia-v2
+git switch feat/precify-financy-v2
+git pull --ff-only origin feat/precify-financy-v2
 pnpm.cmd install --frozen-lockfile --ignore-scripts
 pnpm.cmd typecheck
 pnpm.cmd lint

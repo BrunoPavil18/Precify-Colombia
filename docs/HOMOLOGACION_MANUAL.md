@@ -126,8 +126,8 @@ El usuario solicitó escoger el producto directamente en Metas. Se agregó un se
 4. Comprobar que el historial muestra las modificaciones guardadas, sin exigir una entrada por cada alteración de rascunho.
 
 **Respaldo / restauración con prioridad de seguridad:**
-1. Ir a Datos y descargar `precify-colombia-backup.json`. Guardar una segunda copia **fuera del navegador**.
-2. Abrir una copia en editor de texto (no modificar original). Verificar metadatos `format=precify-colombia-backup`, `backupVersion=1`, `currency=COP`, `locale=es-CO` y `workspace` con `products`, `scenarios`, `profiles`, `history`. `es-CO` es metadato canónico del formato, no el idioma activo de UI.
+1. Ir a Datos y descargar `precify-financy-backup.json`. Guardar una segunda copia **fuera del navegador**.
+2. Abrir una copia en editor de texto (no modificar original). Verificar metadatos `format=precify-financy-backup`, `backupVersion=1`, `currency=COP`, `locale=es-CO` y `workspace` con `products`, `scenarios`, `profiles`, `history`. `es-CO` es metadato canónico del formato, no el idioma activo de UI.
 3. Generar `respaldo-invalido.json` con el texto `{"prueba":true}` e intentar Restaurar copia. Debe rechazarse y dejar todos los datos intactos.
 4. Crear un producto temporal de prueba, sin alterar los originales. Intentar restaurar el backup válido y **Cancelar** la confirmación: debe seguir el producto temporal.
 5. Repetir la importación del backup válido y **Confirmar** únicamente después de comprobar que el archivo descargado contiene los productos y escenarios correctos. El producto temporal debe desaparecer; los datos guardados en ese backup deben reaparecer tras F5.

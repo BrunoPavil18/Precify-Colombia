@@ -55,7 +55,7 @@ test("locale survives reload without modifying financial workspace schema",()=>{
  assert.ok(app.includes('useState<Locale>(readLocale)'));
  assert.ok(app.includes("saveLocale(lang)"));
  assert.ok(app.includes("document.documentElement.lang=locale"));
- assert.ok(i18n.includes('precify-colombia:locale'));
+ assert.ok(i18n.includes('precify-financy:locale'));
  assert.ok(i18n.includes('??"es-CO"'));
  assert.ok(!i18n.includes("JSON.stringify(workspace)"));
 });
@@ -64,7 +64,7 @@ test("input unit, currency and backup metadata remain Colombian and canonical",(
  assert.ok(app.includes('className="unit">COP'));
  assert.ok(app.includes('formatMoneySAMPLE_DO_NOT_USE')===false);
  assert.ok(app.includes('exportProductsCsv(workspace,{'));
- assert.ok(app.includes('precify-colombia-backup.json'));
+ assert.ok(app.includes('precify-financy-backup.json'));
 });
 test("destructive dialogs are localized and static dictionaries need no network",()=>{
  assert.ok(app.includes('askConfirmation(t("¿Borrar DEFINITIVAMENTE'));
@@ -81,4 +81,20 @@ test("translated blank products do not appear modified until a real user edit",(
  assert.ok(app.includes('const hasUnsavedDraft=dirtyMoney.size>0||JSON.stringify(draft)!==JSON.stringify(persistedDraft)'));
  assert.ok(app.includes('if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))'));
  assert.ok(app.includes("setDraft(d=>({...d,name:translate(lang,\"Producto ejemplo\")}))"));
+});
+
+test("all 2.1.0 connected, embedded, FX and COD t-literals have ES/PT/EN coverage",()=>{
+ const paths=["CurrencyLab.tsx","GlobalPricingLab.tsx","OperationsLab.tsx",
+  "UnifiedCODLab.tsx","ConnectedLab.tsx","EmbedCalculator.tsx"];
+ let total=0;
+ for(const path of paths){
+  const text=read("../src/"+path);
+  const keys=[...text.matchAll(/\bt\("([^"]+)"\)/g)].map(x=>x[1]);
+  total+=keys.length;
+  for(const key of keys){
+   assert.ok(Object.hasOwn(pt,key),"pt-BR missing ("+path+"): "+key);
+   assert.ok(Object.hasOwn(en,key),"en missing ("+path+"): "+key);
+  }
+ }
+ assert.ok(total>120);
 });

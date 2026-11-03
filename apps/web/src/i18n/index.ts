@@ -40,7 +40,7 @@ export function useTranslator() {
  const locale=useContext(LocaleContext);
  return (key:string)=>translate(locale,key);
 }
-export const UI_LOCALE_KEY="precify-colombia:locale";
+export const UI_LOCALE_KEY="precify-financy:locale";
 export function readLocale():Locale {
  try {
   const value=localStorage.getItem(UI_LOCALE_KEY);

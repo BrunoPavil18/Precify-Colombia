@@ -1,0 +1,31 @@
+[package]
+name = "precify-financy-desktop"
+version = "2.1.0"
+description = "Precify Financy desktop pilot"
+authors = ["Precify Financy contributors"]
+edition = "2021"
+rust-version = "1.80"
+build = "build.rs"
+
+[lib]
+name = "precify_financy_desktop"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "precify-financy"
+path = "src/main.rs"
+
+[dependencies]
+tauri = { version = "2.12", default-features = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+[build-dependencies]
+tauri-build = { version = "2" }
+
+[profile.release]
+panic = "abort"
+strip = true
+lto = "thin"
+codegen-units = 1

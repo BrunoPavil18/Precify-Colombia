@@ -1,10 +1,34 @@
-# Precify Colombia 🇨🇴
+# Precify Financy
+
+> **2.1 — catálogo Vezura em desenvolvimento:** o espelho de produtos publicados preserva dados manuais e não inventa custos; consulte [contrato e QA](docs/VEZURA_CATALOG_MIRROR_V2_1_0.md). A candidata só deve ser instalada após validação Windows e deploy da PR #119 da Vezura.
+
 
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
 
-**Versão 2.0.1 · Gratuito e open source · Apache License 2.0**
+**Desenvolvimento da 2.1.0 (NÃO lançada) · Última versão estável: 2.0.1 · Apache License 2.0**
+
+**Auditoria final da candidata 2.1.0:** [Precify Financy — validação consolidada](docs/FINANCY_FINAL_AUDIT.md). Motor TS/BigInt, SQLite como armazenamento principal no Windows e acesso por instalação com chave Ed25519. A homologação com uma loja real ainda depende do servidor dela.
+
+[Auditoria geral da 2.1.0: achados e limitações](docs/GENERAL_AUDIT_V2_1_0_2026-11-02.md).
+
+
+## Redesign dark-first 2.1.0 — entrega consolidada (candidata)
+
+Foi implementado o painel com fundo **Jet Black `#121212`**, navegação por tarefas, nova **Visão Geral**, acesso direto a COD/CAC/CPA/PUM, catálogo pesquisável, relatórios com filtros, microanimações normais por padrão e menu mobile. Os cálculos e o funcionamento offline foram preservados. **118 testes automatizados** e aceitação real no Chromium (19 rotas, salvamento e recarga) aprovados. [Relatório da entrega](docs/REDESIGN_DELIVERY_V2_1_0.md) · [Evidência do CI](https://github.com/BrunoPavil18/Precify-Financy/actions/runs/41400964119). A branch continua não publicada e não altera a Vezura.
+
+## Desenvolvimento da 2.1.0 — ainda não homologada
+
+Esta branch acrescenta precificação nativa em moedas ISO, cotações indicativas diárias com cache offline, catálogo internacional independente, funil COD, matriz CPA, importação CSV, dashboards e uma API REST opcional com organizações, permissões, webhooks assinados e Facebook Ads. Também oferece calculadora incorporável por iframe (`?embed=1`), utilizável na Vezura e em outros sites, **sem modificar o repositório da Vezura**. Os serviços conectados dependem de PostgreSQL/Supabase, credenciais da Meta e testes externos; não estão prontos para produção. [Checkpoints](docs/EXECUTION_CHECKPOINTS_V2_1_0.md) · [Integração](docs/CONNECTED_API_V2_1_0.md).
+
+## Conexão local-first com lojas — protocolo v2 (candidata 2.1.0)
+
+**Caminho recomendado:** em **Conexões → Sincronização com lojas próprias**, o administrador habilita a API Precify v2 no site da loja e gera um convite de uso único para **cada instalação**. Informe nome e URL HTTPS, adicione a loja, cole o convite no cartão e ative a instalação. Cada computador possui uma identidade Ed25519; não é necessário login central no Precify. A loja mantém os pedidos e campanhas mesmo quando os computadores estão desligados, e o app sincroniza quando estiver aberto, conectado e autorizado. **Não há serviço em segundo plano quando o aplicativo está fechado.**
+
+**Armazenamento:** no Windows, SQLite é o armazenamento principal de perfis e dados financeiros, inclusive cache transacional de eventos de loja. A chave criptográfica não exportável fica no WebCrypto/IndexedDB do WebView2. Na PWA, os dados continuam no armazenamento web/IndexedDB, com consentimento por loja. O protocolo bearer v1 é apenas compatibilidade com conexões antigas.
+
+**Estado da integração:** a API de dispositivos v2 da Vezura foi integrada ao código da loja (PR #118). A extensão de catálogo publicado está em PR #119 e só ficará disponível após merge/deploy; pedidos reais e Windows ainda dependem de homologação em produção. Consulte [protocolo v2 e adaptadores MySQL/Postgres](docs/STORE_DEVICE_API_V2.md) e [plano de integração Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Atualização 2.0.1
 
@@ -20,7 +44,7 @@ Aplicação independente de precificação em **pesos colombianos (COP)**, com c
 
 ## Onde ficam os dados?
 
-**No navegador de cada pessoa**, usando `localStorage` e a chave `precify-colombia:workspace:v1`. Os seus dados de teste **não vão para o GitHub e não entram no build distribuído**. Em um navegador/origem sem dados, o catálogo começa vazio. O nome “Produto de exemplo” é só um rascunho inicial, não um produto cadastrado.
+**No navegador de cada pessoa**, usando `localStorage` e a chave `precify-financy:workspace:v1`. Os seus dados de teste **não vão para o GitHub e não entram no build distribuído**. Em um navegador/origem sem dados, o catálogo começa vazio. O nome “Produto de exemplo” é só um rascunho inicial, não um produto cadastrado.
 
 Os dados ficam associados à origem do site (protocolo, domínio e porta) e ao perfil do navegador. Quem compartilhar o mesmo perfil e origem pode acessar os mesmos dados; isso **não é armazenamento multiusuário** nem sincronização. Limpar dados do navegador, mudar de dispositivo ou usar aba anônima pode resultar em perda de informações. Use **Dados → Baixar backup** regularmente. O aplicativo não envia os dados para um backend próprio.
 
@@ -29,8 +53,8 @@ Os dados ficam associados à origem do site (protocolo, domínio e porta) e ao p
 Requisitos: **Node.js >=20.19**, **pnpm 10.34.7** e Git.
 
 ```bash
-git clone https://github.com/BrunoPavil18/Precify-Colombia.git
-cd Precify-Colombia
+git clone https://github.com/BrunoPavil18/Precify-Financy.git
+cd Precify-Financy
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
 pnpm install --frozen-lockfile --ignore-scripts
@@ -69,7 +93,7 @@ Hospede a pasta `apps/web/dist/` em `https://calculadora.exemplo.com/` e insira 
 ```html
 <iframe
   src="https://calculadora.exemplo.com/"
-  title="Precify Colombia"
+  title="Precify Financy"
   loading="lazy"
   style="width:100%;height:850px;border:0"
 ></iframe>
@@ -82,7 +106,7 @@ No WordPress, cole em um bloco **HTML personalizado** quando permitido, ou adici
 O pacote `packages/core` exporta `EMPTY_INPUT`, `validateInput`, `analyze`, `suggestPrice` e outras funções, sem React:
 
 ```ts
-import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-colombia/core";
+import { EMPTY_INPUT, analyze, suggestPrice } from "@precify-financy/core";
 
 const produto = { ...EMPTY_INPUT, acquisition: "37000.00", currentPrice: "99000.00" };
 const resultado = analyze(produto);
@@ -90,16 +114,31 @@ console.log(resultado.contribution); // "49000.00" com os demais custos de exemp
 console.log(suggestPrice(produto).price);
 ```
 
-Dentro deste monorepo pnpm, use `"@precify-colombia/core": "workspace:*"`. Na v2.0.0, o core compila ESM em `packages/core/dist/index.js` e tipos em `dist/index.d.ts`. Execute `pnpm --filter @precify-colombia/core build` e `pnpm verify:core`. **O pacote não está publicado no npm**; a integração externa exige empacotamento/teste local ou incorporação da fonte sob Apache 2.0. Não existe plugin WordPress ou API HTTP oficial.
+Dentro deste monorepo pnpm, use `"@precify-financy/core": "workspace:*"`. Na v2.0.0, o core compila ESM em `packages/core/dist/index.js` e tipos em `dist/index.d.ts`. Execute `pnpm --filter @precify-financy/core build` e `pnpm verify:core`. **O pacote não está publicado no npm**; a integração externa exige empacotamento/teste local ou incorporação da fonte sob Apache 2.0. Não existe plugin WordPress ou API HTTP oficial.
 
 Para importar dados de loja, converta o modelo da plataforma para o tipo `PriceInput`, valide com `validateInput` e execute `analyze`. Nunca exponha credenciais ao cliente nem altere preços de lojas sem autorização.
 
 Leia [contrato de integração](docs/INTEGRATION_CONTRACT.md), [fórmulas](docs/FINANCIAL_FORMULAS.md), [arquitetura](docs/ARCHITECTURE.md), [segurança](docs/SECURITY_AUDIT.md) e [licença Apache 2.0](LICENSE).
 
-**Limitações:** somente COP; armazenamento local por navegador; sem login, backend, sincronização, integração comercial automática, checkout ou plugin WordPress. Resultados não substituem assessoria contábil/tributária. A licença de código não concede direitos sobre marcas de terceiros.
+**Limitações:** o Windows utiliza SQLite; a PWA mantém armazenamento web. Há preços COP e ISO indicativos, mas não existe ainda sincronização comercial real, checkout ou plugin WordPress oficial. Conexões com lojas dependem do servidor da loja. Resultados não substituem assessoria contábil/tributária. A licença de código não concede direitos sobre marcas de terceiros.
 
 ## Documentación técnica v2 / Technical v2 documentation
 
 - [Integration API v2](docs/INTEGRATION_V2.md)
 - [Colombian legal references](docs/COLOMBIA_LEGAL_V2.md)
 - [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [v2 release notes](docs/RELEASE_NOTES_2.0.0.md)
+
+## Precify Desktop Tauri e negócios independentes (candidata 2.1.0)
+
+O núcleo financeiro **permanece em TypeScript/BigInt** para preservar equivalência com a PWA. O aplicativo Windows usa Rust para a janela nativa e snapshots SQLite por negócio; SQLite já é a fonte principal no Windows; o armazenamento web é somente uma projeção de leitura. É possível criar negócios independentes e abrir a visão "Todos os negócios", sem inventar lucros nem somar moedas diferentes. [Análise técnica](docs/FINANCIAL_ENGINE_RUST_DECISION_2026-11-02.md) · [Guia e limitações](docs/MULTI_BUSINESS_DESKTOP_V2_1_0.md). A Vezura não foi alterada.
+
+
+## Precify Financy — Windows SQLite e integração direta por instalação
+
+A versão Windows usa o Tauri 2, motor financeiro TypeScript/BigInt e **SQLite como armazenamento autoritativo** de perfis, catálogo COP, cenários, operações, preços ISO e configuração de lojas. O estado síncrono do React usa uma projeção descartável em localStorage, carregada do SQLite ao iniciar. Gravações financeiras confirmam primeiro o banco; falhas não resultam em mensagem falsa de sucesso. O site continua sendo a fonte oficial de pedidos/recebimentos importados.
+
+**Instalação limpa:** o identificador Tauri agora é `com.precifyfinancy.desktop` e o instalador Inno usa novo `AppId`. Isso evita sobrescrever a instalação antiga do Precify Colombia e não importa automaticamente produtos de desenvolvimento. A versão web continua usando seu armazenamento específico. O usuário pode exportar/importar JSON explicitamente, se desejar.
+
+As lojas emitem convites de uso único para cada instalação: o computador gera uma chave Ed25519 privada não exportável pelo WebCrypto e lê a API v2 do próprio site por HTTPS, com assinatura, nonce, timestamp e revogação por dispositivo. O código do convite é consumido uma única vez. Veja [protocolo de lojas e exemplos MySQL/Postgres](docs/STORE_DEVICE_API_V2.md).
+
+**Pendências externas:** o servidor de cada loja precisa instalar a API, fornecer o feed durável de pedidos e oferecer um painel administrativo para emissão/revogação. Nenhuma alteração na Vezura nesta entrega. O repositório GitHub foi renomeado para `BrunoPavil18/Precify-Financy`; a branch de desenvolvimento mantém temporariamente seu nome histórico para preservar a PR #4.

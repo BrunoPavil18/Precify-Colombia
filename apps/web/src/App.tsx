@@ -1,3 +1,13 @@
+import { ConnectedLab } from "./ConnectedLab";
+import { WebsiteSyncLab } from "./WebsiteSyncLab";
+import {StoreCatalogPanel} from "./StoreCatalogPanel";
+import type {StoreProduct} from "./store-catalog";
+import { OperationsLab } from "./OperationsLab";
+import { CurrencyLab } from "./CurrencyLab";
+import { GlobalPricingLab } from "./GlobalPricingLab";
+import { OverviewDashboard } from "./OverviewDashboard";
+import {ConnectedSourcesOverview} from "./ConnectedSourcesOverview";
+import { UIIcon } from "./UIIcon";
 import { AdvancedLab } from "./AdvancedLab";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -5,20 +15,166 @@ import {
  maxDiscountPercent, moneyDisplay, parseCOPInput, parseLocalizedPercent, parseDecimal, basisAmount, fromCents, suggestPrice, validateInput,
  validateWorkspace, emptyWorkspace, STORE_KEY,
  type PriceInput, type PriceRounding, type Workspace, type Product, type SavedScenario, type AdvancedSimulationRecord
-} from "@precify-colombia/core";
+} from "@precify-financy/core";
 import { LocaleContext, readLocale, saveLocale, translate, useTranslator, type Locale } from "./i18n";
-import { downloadFile, loadWorkspace, persistWorkspace } from "./storage";
+import { downloadFile, loadWorkspace, persistWorkspace, workspaceStorageKey } from "./storage";
+import {useBusinesses,ALL_BUSINESSES,BusinessPortfolio,BusinessChooser,BusinessRoutePicker} from "./BusinessProfiles";
+import {nativeRemove,nativePrimary} from "./native-primary";
+import {getBusinessScope} from "./BusinessProfiles";
 
-type Page = "calculadora" | "productos" | "escenarios" | "metas" | "informes" | "datos" | "avanzado";
-const nav: {id:Page;icon:string;label:string;description:string}[]=[
- {id:"calculadora",icon:"◈",label:"Calculadora",description:"Precio recomendado"},
- {id:"productos",icon:"▦",label:"Productos",description:"Catálogo local"},
- {id:"escenarios",icon:"◫",label:"Escenarios",description:"Riesgo y oportunidades"},
- {id:"metas",icon:"◎",label:"Metas",description:"Punto de equilibrio"},
- {id:"informes",icon:"▥",label:"Informes",description:"Comparar y exportar"},
- {id:"datos",icon:"◇",label:"Datos",description:"Privacidad y copias"},
- {id:"avanzado",icon:"◉",label:"Avanzado",description:"COD, campañas y PUM"},
+type Page="inicio"|"calculadora"|"productos"|"escenarios"|"metas"|"pum"|"consumer"|"portfolio"|"global"|"panel-cod"|"cod"|"marketing"|"cpa"|"operaciones"|"importar"|"informes"|"competidores"|"conectado"|"cambio"|"datos"|"avanzado";
+type NavItem={id:Page;icon:string;label:string;description:string};
+const navSections:{name:string;items:NavItem[]}[]=[
+ {
+  "name": "VISIÓN GENERAL",
+  "items": [
+   {
+    "id": "inicio",
+    "icon": "home",
+    "label": "Visión general",
+    "description": "Tu espacio financiero"
+   }
+  ]
+ },
+ {
+  "name": "PRECIFICACIÓN",
+  "items": [
+   {
+    "id": "calculadora",
+    "icon": "calculator",
+    "label": "Calculadora",
+    "description": "Precio y margen"
+   },
+   {
+    "id": "productos",
+    "icon": "products",
+    "label": "Productos",
+    "description": "Catálogo local"
+   },
+   {
+    "id": "escenarios",
+    "icon": "scenarios",
+    "label": "Escenarios",
+    "description": "Comparar hipótesis"
+   },
+   {
+    "id": "metas",
+    "icon": "goals",
+    "label": "Metas",
+    "description": "Punto de equilibrio"
+   },
+   {
+    "id": "pum",
+    "icon": "unit",
+    "label": "Precio por unidad",
+    "description": "PUM"
+   },
+   {
+    "id": "consumer",
+    "icon": "consumer",
+    "label": "Precio al consumidor",
+    "description": "Cargos e impuestos"
+   },
+   {
+    "id": "portfolio",
+    "icon": "portfolio",
+    "label": "Cartera multiproducto",
+    "description": "Rentabilidad del mix"
+   },
+   {
+    "id": "global",
+    "icon": "global",
+    "label": "Precios internacionales",
+    "description": "Catálogo ISO"
+   }
+  ]
+ },
+ {
+  "name": "OPERACIONES COD",
+  "items": [
+   {
+    "id": "panel-cod",
+    "icon": "orders",
+    "label": "Panel COD",
+    "description": "Pedidos y pérdidas"
+   },
+   {
+    "id": "cod",
+    "icon": "cod",
+    "label": "Riesgo COD",
+    "description": "Envío y entrega"
+   },
+   {
+    "id": "marketing",
+    "icon": "marketing",
+    "label": "Marketing y CAC",
+    "description": "CPA y ROAS"
+   },
+   {
+    "id": "cpa",
+    "icon": "matrix",
+    "label": "Matriz CPA",
+    "description": "Sensibilidad"
+   },
+   {
+    "id": "operaciones",
+    "icon": "activity",
+    "label": "Precificación COD",
+    "description": "Embudo y precio"
+   },
+   {
+    "id": "importar",
+    "icon": "import",
+    "label": "Importar CSV",
+    "description": "Pedidos y campañas"
+   }
+  ]
+ },
+ {
+  "name": "INTELIGENCIA",
+  "items": [
+   {
+    "id": "informes",
+    "icon": "reports",
+    "label": "Informes",
+    "description": "Comparar y exportar"
+   },
+   {
+    "id": "competidores",
+    "icon": "competitors",
+    "label": "Competidores",
+    "description": "Referencias de precio"
+   }
+  ]
+ },
+ {
+  "name": "CONEXIONES Y DATOS",
+  "items": [
+   {
+    "id": "conectado",
+    "icon": "connected",
+    "label": "Conexiones",
+    "description": "Fuentes opcionales"
+   },
+   {
+    "id": "cambio",
+    "icon": "currency",
+    "label": "Divisas",
+    "description": "Cambio indicativo"
+   },
+   {
+    "id": "datos",
+    "icon": "data",
+    "label": "Datos y copias",
+    "description": "Privacidad local"
+   }
+  ]
+ }
 ];
+const nav=navSections.flatMap(g=>g.items);
+const advancedPages:Page[]=["avanzado","cod","marketing","pum","consumer","portfolio"];
+const operationPages:Page[]=["operaciones","panel-cod","cpa","importar","competidores"];
+const pageTitles:Record<Page,{title:string;description:string}>={"inicio":{"title":"Tu negocio, en perspectiva.","description":"Tus datos locales y tus decisiones en un solo lugar."},"calculadora":{"title":"Calculadora de precios","description":"Determina tu precio, margen y costos con precisión."},"productos":{"title":"Catálogo de productos","description":"Organiza y compara los productos guardados."},"escenarios":{"title":"Escenarios de rentabilidad","description":"Explora alternativas sin modificar tus precios guardados."},"metas":{"title":"Metas y punto de equilibrio","description":"Descubre cuántas unidades necesitas vender."},"informes":{"title":"Informes y comparaciones","description":"Resultados calculados a partir de datos locales."},"datos":{"title":"Datos, privacidad y copias","description":"Tus archivos locales permanecen bajo tu control."},"avanzado":{"title":"Herramientas de simulación","description":"Explora tus análisis financieros."},"cambio":{"title":"Divisas y cambio","description":"Cotizaciones indicativas y datos disponibles sin conexión."},"operaciones":{"title":"Precificación COD integrada","description":"Precios, entregas y costos por etapa."},"conectado":{"title":"Fuentes y conexiones","description":"Conecta servicios solo cuando lo decidas."},"cod":{"title":"Simulación de riesgo COD","description":"Analiza pérdidas y contribución por etapa del pedido."},"marketing":{"title":"Marketing y CAC","description":"Cruza inversión publicitaria y rentabilidad proyectada."},"pum":{"title":"Precio por unidad","description":"Compara cantidades y presentaciones con precisión."},"consumer":{"title":"Precio al consumidor","description":"Comprende cobros, descuentos e impuestos."},"portfolio":{"title":"Cartera multiproducto","description":"Evalúa tu mezcla de productos y costos fijos."},"global":{"title":"Precificación internacional","description":"Trabaja con monedas ISO y un catálogo independiente."},"panel-cod":{"title":"Panel de operaciones COD","description":"Pedidos y campañas importados, con origen explícito."},"cpa":{"title":"Matriz de sensibilidad CPA","description":"Comprueba el impacto de marketing y entregas."},"importar":{"title":"Importación de datos","description":"Carga registros CSV validados sin inventar pagos."},"competidores":{"title":"Referencias de competidores","description":"Registra y compara precios observados."}};
 type MoneyKey = "acquisition"|"packaging"|"shippingCost"|"shippingCharged"|
  "fixedFee"|"advertising"|"returnsReserve"|"codReserve"|"discountFixed"|"currentPrice"|"monthlyFixed";
 type PercentKey = "feePercent"|"taxPercent"|"ivaPercent"|"codPercent"|"discountPercent"|"targetMargin";
@@ -119,17 +275,46 @@ function ProductEditor({value,onChange,onDirty}:{value:PriceInput;onChange:(next
   </section>
  </div>;
 }
+// Navigation handoff survives the intentional App remount when switching businesses.
+let requestedBusinessPage:Page|null=null;
 export default function App(){
+ const {selectedId,choose}=useBusinesses();
+ const allMode=selectedId===ALL_BUSINESSES;
  const initialized=useMemo(loadWorkspace,[]);
- const wasStored=useRef<boolean>(typeof localStorage!=="undefined"&&localStorage.getItem(STORE_KEY)!==null);
+ const wasStored=useRef<boolean>(typeof localStorage!=="undefined"&&localStorage.getItem(workspaceStorageKey())!==null);
  const [workspace,setWorkspace]=useState<Workspace>(initialized.state);
  const [locked,setLocked]=useState(initialized.locked);
- useEffect(()=>{const onStorage=(event:StorageEvent)=>{if(event.key===STORE_KEY){setLocked(true);setNotice("Conflicto entre pestañas: cambios externos detectados. Recarga la página para continuar, después de exportar tus datos.");}};window.addEventListener("storage",onStorage);return()=>window.removeEventListener("storage",onStorage);},[]);
+ useEffect(()=>{const onStorage=(event:StorageEvent)=>{if(event.key===workspaceStorageKey()){setLocked(true);setNotice("Conflicto entre pestañas: cambios externos detectados. Recarga la página para continuar, después de exportar tus datos.");}};window.addEventListener("storage",onStorage);return()=>window.removeEventListener("storage",onStorage);},[]);
  const [notice,setNotice]=useState(initialized.error??"");
+
  const [dirtyMoney,setDirtyMoney]=useState<Set<string>>(()=>new Set());
  const markDirty=(key:string,dirty:boolean)=>setDirtyMoney(prev=>{const next=new Set(prev);if(dirty)next.add(key);else next.delete(key);return next;});
- const [page,setPage]=useState<Page>("calculadora");
+ const [page,setPage]=useState<Page>(()=>{const next=requestedBusinessPage;requestedBusinessPage=null;return next??"inicio";});
+ const [productSearch,setProductSearch]=useState("");
+ const [productOrder,setProductOrder]=useState<"recent"|"name"|"price">("recent");
+ const [reportSearch,setReportSearch]=useState("");
+ const [reportOrder,setReportOrder]=useState<"contribution"|"margin"|"recent">("contribution");
+ const [mobileNavOpen,setMobileNavOpen]=useState(false);
+ const [showAdvancedConnected,setShowAdvancedConnected]=useState(false);
+ const [desktopRuntime,setDesktopRuntime]=useState<string|null>(null);
+ const [binaryIpcReady,setBinaryIpcReady]=useState(false);
+ useEffect(()=>{
+  type Bridge={core?:{invoke?:(command:string)=>Promise<unknown>}};
+  const api=(window as Window&{__TAURI__?:Bridge}).__TAURI__?.core?.invoke;
+  if(!api)return;
+  let live=true;
+  void Promise.all([api("desktop_runtime"),api("ipc_probe")]).then(([info,raw])=>{
+   if(!live)return;
+   const record=info as {platform?:unknown;architecture?:unknown;appVersion?:unknown;runtime?:unknown};
+   if(record.runtime==="tauri-v2"&&typeof record.platform==="string"&&typeof record.architecture==="string"){
+    setDesktopRuntime(record.platform+" "+record.architecture+" · "+String(record.appVersion??""));
+   }
+   setBinaryIpcReady(raw instanceof ArrayBuffer&&new TextDecoder().decode(raw)==="precify-ipc-v2");
+  }).catch(()=>{/* Native bridge status is optional in web preview. */});
+  return()=>{live=false;};
+ },[]);
  const [draft,setDraft]=useState<PriceInput>(()=>({...EMPTY_INPUT,name:translate(readLocale(),"Producto ejemplo")}));
+ const [storeDraftPending,setStoreDraftPending]=useState(false);
  const [activeId,setActiveId]=useState<string|null>(null);
  const [scenarioId,setScenarioId]=useState<string|null>(null);
  const [scenarioProductId,setScenarioProductId]=useState("");
@@ -140,7 +325,7 @@ export default function App(){
  const [goalEditorRevision,setGoalEditorRevision]=useState(0);
  const [editorRevision,setEditorRevision]=useState(0);
  const [locale,setLocale]=useState<Locale>(readLocale);
- useEffect(()=>{document.documentElement.lang=locale;document.title="Precify Colombia — "+translate(locale,"Calculadora");},[locale]);
+ useEffect(()=>{document.documentElement.lang=locale;document.title="Precify Financy — "+translate(locale,"Calculadora");},[locale]);
  const [showTips,setShowTips]=useState(true);
  const [confirmation,setConfirmation]=useState<{message:string;resolve:(confirmed:boolean)=>void}|null>(null);
  const confirmRef=useRef<HTMLButtonElement>(null);
@@ -220,12 +405,12 @@ export default function App(){
   if(goalDirty&&!(await askConfirmation(t("Hay cambios sin guardar en Metas. ¿Descartarlos para cambiar de producto?"))))return;
   setGoalProductId(id);resetGoalDraft();
  }
- function saveGoalChanges(){
+ async function saveGoalChanges(){
   if(!goalProduct||!goalInput)return;
   if(goalMoneyUnvalidated){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(goalInput);}catch(e){setNotice("Corrige los campos: "+String(e));return;}
   const now=new Date().toISOString();
-  const ok=commit(w=>({
+  const ok=await commit(w=>({
    ...w,
    products:w.products.map(p=>p.id!==goalProduct.id?p:{
     ...p,updatedAt:now,input:{...p.input,monthlyFixed:goalInput.monthlyFixed,monthlyUnits:goalInput.monthlyUnits}
@@ -247,8 +432,8 @@ export default function App(){
   setNotice("Se descartaron los cambios sin guardar. La versión guardada permanece intacta.");
  }
  async function navigate(target:Page){
-  if(target!==page&&page==="avanzado"&&advancedDirty&&!(await askConfirmation(t("Hay simulaciones sin guardar. ¿Salir y descartarlas?"))))return;
-  if(target!==page&&page==="avanzado")setAdvancedDirty(false);
+  if(target!==page&&advancedPages.includes(page)&&advancedDirty&&!(await askConfirmation(t("Hay simulaciones sin guardar. ¿Salir y descartarlas?"))))return;
+  if(target!==page&&advancedPages.includes(page))setAdvancedDirty(false);
   if(target!==page&&page==="escenarios"&&scenarioId){
    if(hasUnsavedDraft&&!(await askConfirmation(t("El escenario tiene cambios sin guardar. ¿Salir y descartarlos?"))))return;
    if(savedProduct)setDraft({...savedProduct.input});
@@ -262,7 +447,9 @@ export default function App(){
    const selected=workspace.products.find(p=>p.id===goalProductId)??workspace.products.find(p=>p.id===activeId)??workspace.products[0];
    setGoalProductId(selected?.id??"");resetGoalDraft();
   }
-  setPage(target);
+  // An all-business selection must NEVER silently fall back to the first store.
+  // Show a scoped entry point until the user explicitly chooses the target business.
+  setPage(target);setMobileNavOpen(false);
  }
  async function switchScenarioProduct(id:string){
   if(!scenarioId&&hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para cambiar el producto de escenarios?"))))return;
@@ -271,11 +458,11 @@ export default function App(){
   const selected=workspace.products.find(p=>p.id===id);
   if(selected){setActiveId(selected.id);setDraft({...selected.input});}
  }
- function commit(change:(prior:Workspace)=>Workspace){
+ async function commit(change:(prior:Workspace)=>Workspace):Promise<boolean>{
   if(locked){setNotice("Almacenamiento bloqueado por datos corruptos. Exporta los datos originales o restaura un respaldo válido.");return false;}
   try{
    const next=validateWorkspace({...change(workspace),updatedAt:new Date().toISOString()});
-   persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice("Cambios guardados únicamente en este navegador.");return true;
+   await persistWorkspace(next,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(next);setNotice(nativePrimary()?"Datos confirmados en SQLite local.":"Datos guardados en este navegador.");return true;
   }catch(e){setNotice("No se pudieron guardar los cambios: "+(e instanceof Error?e.message:String(e)));return false;}
  }
  const result=useMemo(()=>{
@@ -287,23 +474,37 @@ export default function App(){
    return {breakdown,suggestion,limit,error:null as string|null};
   }catch(e){return {breakdown:null,suggestion:null,limit:null,error:String(e instanceof Error?e.message:e)};}
  },[draft]);
- function saveProduct(){
+ async function saveProduct(){
+  if(storeDraftPending){setNotice(locale==="pt-BR"?"Confirme os custos antes de salvar a simulação.":locale==="en"?"Review costs before saving.":"Revisa los costos antes de guardar.");return;}
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Corrige los campos: "+String(e));return;}
   const now=new Date().toISOString(),id=activeId??makeId();
   const exists=workspace.products.some(p=>p.id===id);
-  const ok=commit(w=>{
+  const ok=await commit(w=>{
    const p:Product={id,createdAt:w.products.find(p=>p.id===id)?.createdAt??now,updatedAt:now,input:{...draft}};
    return {...w,products:exists?w.products.map(row=>row.id===id?p:row):[...w.products,p],
     history:[...w.history,{id:makeId(),productId:id,at:now,action:exists?"Actualización":"Creación",snapshot:{...draft}}].slice(-3000)};
   });
-  if(ok){setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
+  if(ok){setStoreDraftPending(false);setActiveId(id);setScenarioProductId(id);setScenarioId(null);setPage("productos");}
  }
- async function openProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?"))))return;setDirtyMoney(new Set());setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ async function openProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para abrir otro producto?"))))return;setDirtyMoney(new Set());setStoreDraftPending(false);setDraft({...p.input});setActiveId(p.id);setScenarioId(null);setScenarioProductId(p.id);setGoalProductId(p.id);setEditorRevision(n=>n+1);setPage("calculadora");setNotice("Producto cargado: "+p.input.name);}
+ async function openStoreProductDraft(product:StoreProduct){
+  if(product.currency!=="COP"){setNotice("Este catálogo solo inicia borradores COP; usa precios internacionales para otras monedas.");return;}
+  if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para abrir un producto de la tienda?"))))return;
+  // No supplier/fulfillment cost is provided by the public storefront.
+  const zero="0.00";
+  const fromStore:PriceInput={...EMPTY_INPUT,name:product.name.slice(0,120),origin:"estimado",
+   currentPrice:product.price,acquisition:zero,packaging:zero,shippingCost:zero,
+   fixedFee:zero,advertising:zero,returnsReserve:zero,codReserve:zero,
+   shippingCharged:zero,monthlyUnits:"0"};
+  setDraft(fromStore);setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);
+  setStoreDraftPending(true);setEditorRevision(n=>n+1);setPage("calculadora");
+  setNotice(locale==="pt-BR"?"Rascunho criado. Informe custos reais: zero é desconhecido, não custo verificado.":locale==="en"?"Draft ready. Enter actual costs: zero means unknown, not verified.":"Borrador creado. Informa costos reales: cero significa desconocido, no verificado.");
+ }
  async function duplicateProduct(p:Product){if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos antes de duplicar?"))))return;setDirtyMoney(new Set());setDraft({...p.input,name:p.input.name+" (copia)"});setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);setPage("calculadora");}
  async function deleteProduct(p:Product){
   if(!(await askConfirmation(t("¿Eliminar «")+p.input.name+t("» y sus escenarios? El historial de auditoría se conservará hasta borrarlo desde Datos."))))return;
-  const ok=commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id),advancedSimulations:w.advancedSimulations.filter(x=>x.productId!==p.id)}));
+  const ok=await commit(w=>({...w,products:w.products.filter(x=>x.id!==p.id),scenarios:w.scenarios.filter(x=>x.productId!==p.id),advancedSimulations:w.advancedSimulations.filter(x=>x.productId!==p.id)}));
   if(ok && activeId===p.id){setActiveId(null);setDraft({...EMPTY_INPUT});}
  }
  async function createScenarios(){
@@ -315,28 +516,28 @@ export default function App(){
    .filter(template=>!existing.some(s=>s.title===template.name))
    .map(template=>({id:makeId(),productId:product.id,title:template.name,note:template.note,values:{...template.values}}));
   if(!presets.length){setNotice("Este producto ya tiene los tres escenarios. Selecciona uno para editarlo.");return;}
-  if(commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){
+  if(await commit(w=>({...w,scenarios:[...w.scenarios,...presets]}))){
    const first=presets.find(p=>p.title==="Esperado")??presets[0];
    if(first){setScenarioId(first.id);setActiveId(product.id);setScenarioProductId(product.id);
     setDraft({...first.values});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}
    setPage("escenarios");
   }
  }
- function saveScenario(){
+ async function saveScenario(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   if(!scenarioId||!activeId){setNotice("Selecciona un escenario vinculado a un producto.");return;}
   try{validateInput(draft);}catch(e){setNotice("Escenario inválido: "+String(e));return;}
-  if(commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
+  if(await commit(w=>({...w,scenarios:w.scenarios.map(s=>s.id===scenarioId?{...s,values:{...draft}}:s)})))setNotice("Escenario guardado sin modificar el producto original.");
  }
  async function openScenario(s:SavedScenario){
   if(scenarioId!==s.id&&scenarioId&&hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos y abrir otro escenario?"))))return;
   setDirtyMoney(new Set());setScenarioId(s.id);setActiveId(s.productId);setScenarioProductId(s.productId);
   setDraft({...s.values});setEditorRevision(n=>n+1);setPage("escenarios");
  }
- function saveProfile(){
+ async function saveProfile(){
   if(dirtyMoney.size){setNotice("Hay campos COP sin validar. Revísalos antes de guardar.");return;}
   try{validateInput(draft);}catch(e){setNotice("Perfil inválido: "+String(e));return;}
-  commit(w=>({...w,profiles:[...w.profiles,{id:makeId(),name:draft.name+" · configuración",values:{...draft}}]}));
+  await commit(w=>({...w,profiles:[...w.profiles,{id:makeId(),name:draft.name+" · configuración",values:{...draft}}]}));
  }
  async function restoreProfile(id:string){
   const profile=workspace.profiles.find(p=>p.id===id);
@@ -348,18 +549,18 @@ export default function App(){
   try{
    const valid=decodeBackup(await file.text());
    if(!(await askConfirmation(t("¿Reemplazar TODOS los productos, perfiles, escenarios e historial locales por este respaldo? Descarga antes una copia de los datos actuales."))))return;
-   persistWorkspace(valid,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
+   await persistWorkspace(valid,wasStored.current?workspace:undefined);wasStored.current=true;setWorkspace(valid);setLocked(false);setActiveId(null);setScenarioId(null);setScenarioProductId("");setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setEditorRevision(n=>n+1);
    setNotice("Respaldo validado y restaurado. Se reemplazó el conjunto completo de datos.");setPage("productos");
   }catch(e){setNotice("Respaldo rechazado, sin modificaciones: "+String(e instanceof Error?e.message:e));}
   finally{if(uploadRef.current)uploadRef.current.value="";}
  }
  async function reset(){
-  if(!(await askConfirmation(t("¿Borrar DEFINITIVAMENTE los datos de Precify Colombia almacenados en este navegador? Haz una copia de seguridad antes."))))return;
-  try{localStorage.removeItem(STORE_KEY);wasStored.current=false;setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
+  if(!(await askConfirmation(t("¿Borrar DEFINITIVAMENTE los datos de Precify Financy almacenados en este navegador? Haz una copia de seguridad antes."))))return;
+  try{await nativeRemove("workspace",getBusinessScope());wasStored.current=false;setWorkspace(emptyWorkspace());setLocked(false);setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT});setDirtyMoney(new Set());setScenarioProductId("");setEditorRevision(n=>n+1);setNotice("Datos locales borrados.");}
   catch(e){setNotice("No se pudieron borrar los datos: "+String(e));}
  }
  function rawBackup(){
-  const raw=localStorage.getItem(STORE_KEY);
+  const raw=localStorage.getItem(workspaceStorageKey());
   if(raw===null){setNotice("No existe almacenamiento original para descargar.");return;}
   downloadFile(raw,"precify-datos-locales-sin-validar.json","application/json");
  }
@@ -371,19 +572,49 @@ export default function App(){
   const aVal=signedCents(a.result.contribution),bVal=signedCents(b.result.contribution);
   return bVal>aVal?1:bVal<aVal?-1:0;
  }),[workspace.products]);
+ const visibleReports=useMemo(()=>{
+   const query=reportSearch.trim().toLocaleLowerCase();
+   const list=ranked.filter(row=>!query||row.p.input.name.toLocaleLowerCase().includes(query)||row.p.input.category.toLocaleLowerCase().includes(query));
+   if(reportOrder==="margin")return [...list].sort((a,b)=>Number(b.result?.marginPercent??-1000)-Number(a.result?.marginPercent??-1000));
+   if(reportOrder==="recent")return [...list].sort((a,b)=>b.p.updatedAt.localeCompare(a.p.updatedAt));
+   return list;
+  },[ranked,reportSearch,reportOrder]);
+  const visibleProducts=useMemo(()=>{
+   const query=productSearch.trim().toLocaleLowerCase();
+   const list=workspace.products.filter(p=>!query||p.input.name.toLocaleLowerCase().includes(query)||p.input.category.toLocaleLowerCase().includes(query));
+   return list.sort((a,b)=>productOrder==="name"?a.input.name.localeCompare(b.input.name):productOrder==="price"?Number(b.input.currentPrice)-Number(a.input.currentPrice):b.updatedAt.localeCompare(a.updatedAt));
+  },[workspace.products,productSearch,productOrder]);
  return <LocaleContext.Provider value={locale}><div className="app-shell">
-   <aside className="sidebar">
-    <a className="brand" href="#" onClick={e=>{e.preventDefault();navigate("calculadora");}} aria-label={t("Precify Colombia, inicio")}>
-     <span className="brand-mark" aria-hidden="true">P<span>₵</span></span><span><strong>precify<span className="brand-accent">.</span></strong><small>COLOMBIA</small></span>
+   <aside className={"sidebar"+(mobileNavOpen?" mobile-open":"")}>
+    <a className="brand" href="#" onClick={e=>{e.preventDefault();void navigate("inicio");}} aria-label={t("Precify Financy, inicio")}>
+     <span className="brand-mark" aria-hidden="true">P<span>₵</span></span><span><strong>precify<span className="brand-accent">.</span></strong><small>FINANCY</small></span>
     </a>
-    <div className="nav-caption">{t("ESPACIO DE TRABAJO")}</div>
-    <nav aria-label={t("Navegación principal")}>{nav.map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="nav-icon" aria-hidden="true">{item.icon}</span><span>{t(item.label)}<small>{t(item.description)}</small></span></button>)}</nav>
-    <div className="sidebar-bottom"><span className="privacy-dot"></span><span>{t("Sin cuenta · 100% local")}</span><small>{t("Open source · Apache 2.0")}</small></div>
+    <button type="button" className="mobile-close" onClick={()=>setMobileNavOpen(false)} aria-label={t("Cerrar menú")}><UIIcon name="close" size={20}/></button>
+    <div className="sidebar-nav-scroll">
+     <nav aria-label={t("Navegación principal")}>{navSections.map((group,i)=><details key={group.name} className="nav-group" open={group.items.some(item=>item.id===page)||i<2?true:undefined}>
+      <summary className="nav-group-title">{t(group.name)} <UIIcon name="chevron" size={15}/></summary>
+      <div className="nav-items">
+       {group.items.slice(0,group.name==="PRECIFICACIÓN"?4:group.name==="OPERACIONES COD"?3:group.items.length).map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>{void navigate(item.id);}}><span className="nav-icon"><UIIcon name={item.icon}/></span><span>{t(item.label)}<small>{t(item.description)}</small></span></button>)}
+       {(group.name==="PRECIFICACIÓN"||group.name==="OPERACIONES COD")&&<details className="nav-subgroup" open={group.items.slice(group.name==="PRECIFICACIÓN"?4:3).some(item=>item.id===page)?true:undefined}>
+        <summary>{t("Más herramientas")}</summary>
+        {group.items.slice(group.name==="PRECIFICACIÓN"?4:3).map(item=><button key={item.id} className={"nav-link"+(page===item.id?" selected":"")} aria-current={page===item.id?"page":undefined} onClick={()=>{void navigate(item.id);}}><span className="nav-icon"><UIIcon name={item.icon}/></span><span>{t(item.label)}<small>{t(item.description)}</small></span></button>)}
+       </details>}
+      </div>
+     </details>)}</nav>
+    </div>
+    <div className="sidebar-bottom"><span className="privacy-dot"/><span>{t("Sin cuenta · 100% local")}</span><small>{t("Open source · Apache 2.0")}</small></div>
    </aside>
+   {mobileNavOpen&&<button aria-label={t("Cerrar menú")} className="mobile-nav-backdrop" onClick={()=>setMobileNavOpen(false)}/>}
    <div className="content-column">
-    <header className="topbar"><div className="breadcrumb">PRECIFY / <strong>{t(titleOf(page)).toUpperCase()}</strong></div><div className="topbar-right"><span className="currency-pill">COP <span aria-hidden="true">▾</span></span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> LOCAL</span></div></header>
+    <header className="topbar">
+     <div className="topbar-location"><button className="menu-toggle" aria-label={t("Abrir menú")} onClick={()=>setMobileNavOpen(v=>!v)} aria-expanded={mobileNavOpen}><UIIcon name="menu"/></button><div className="breadcrumb">FINANCY <span>/</span> <strong>{t(titleOf(page))}</strong></div></div>
+     <div className="topbar-right"><BusinessChooser onChange={()=>setPage("inicio")}/><span className="currency-pill">{["cambio","operaciones","global","panel-cod","conectado"].includes(page)?"ISO / COP":"COP"}</span><label className="language-select">{t("Idioma")} <select aria-label={t("Idioma")} value={locale} onChange={e=>{const lang=e.target.value as Locale;if(!activeId&&["Producto ejemplo","Produto de exemplo","Sample product"].includes(draft.name))setDraft(d=>({...d,name:translate(lang,"Producto ejemplo")}));setLocale(lang);saveLocale(lang);}}><option value="es-CO">ES</option><option value="pt-BR">PT</option><option value="en">EN</option></select></label><span className="local-chip"><span aria-hidden="true">●</span> {t("LOCAL")}</span>{desktopRuntime&&<span className="desktop-chip" title={desktopRuntime+" · IPC "+(binaryIpcReady?"ArrayBuffer OK":"indisponível")}>APP WINDOWS <span aria-hidden="true">●</span></span>}<span className="version-pill">v2.1</span></div>
+    </header>
     <main id="main-content">
-     <div className="page-heading"><div><div className="eyebrow">{t("HERRAMIENTA FINANCIERA GRATUITA")} <span className="green-line"></span> {t("VERSIÓN 2.0.1")}</div><h1>{t(page==="calculadora"?"Precios que tienen sentido.":page==="productos"?"Tus productos. Tus números.":page==="escenarios"?"Prepárate para cada escenario.":page==="metas"?"Del objetivo al resultado.":page==="informes"?"Decisiones respaldadas por datos.":page==="avanzado"?"Simula tu negocio con precisión.":"Tus datos te pertenecen.")}</h1><p>{t(page==="calculadora"?"Calcula el precio correcto, protege tu margen y toma mejores decisiones para tu negocio.":page==="productos"?"Tu catálogo se guarda exclusivamente en este dispositivo.":page==="escenarios"?"Simula resultados antes de cambiar el precio de un producto.":page==="metas"?"Estima cuánto necesitas vender para cubrir gastos fijos.":page==="informes"?"Compara contribuciones reales y lleva tus reportes contigo.":page==="avanzado"?"Analiza COD, publicidad, precio por unidad y rentabilidad de varios productos.":"Sin cuentas, sin seguimiento y sin enviar tus cifras a ningún servidor.")}</p></div><div className="heading-symbol" aria-hidden="true">✳</div></div>
+     {page!=="inicio"&&<div className="page-heading"><div><div className="eyebrow">{t("ESPACIO DE TRABAJO")} <span className="green-line"/> {t("DATOS LOCALES / OPCIONALES")}</div><h1>{t(pageTitles[page].title)}</h1><p>{t(pageTitles[page].description)}</p></div></div>}
+     {page==="inicio"&&(allMode?<BusinessPortfolio onOpen={()=>setPage("inicio")}/>:<OverviewDashboard workspace={workspace} ranked={ranked} format={fmt} date={date} onNavigate={target=>{void navigate(target);}}/>)}
+      {page==="inicio"&&!allMode&&<ConnectedSourcesOverview businessId={getBusinessScope()}/> }
+     {allMode&&page!=="inicio"&&<BusinessRoutePicker title={t(pageTitles[page].title)} onBack={()=>setPage("inicio")} onSelect={businessId=>{requestedBusinessPage=page;choose(businessId);}}/>}
      {confirmation&&<div className="modal-backdrop" role="presentation">
       <section className="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="precify-confirm-title" aria-describedby="precify-confirm-body">
        <h2 id="precify-confirm-title">{t("Confirmar operación")}</h2>
@@ -397,9 +628,17 @@ export default function App(){
      {updateReady&&<div role="status" className="notice"><span>{t("Hay una actualización disponible para uso offline.")}</span><button className="primary" onClick={activateUpdate}>{t("Instalar actualización")}</button></div>}
      {notice&&<div role="status" aria-live="polite" className={"notice"+(locked?" notice-danger":"")}><span>{t(notice)}</span><button aria-label={t("Cerrar aviso")} onClick={()=>setNotice("")}>×</button></div>}
      {locked&&<div className="critical"><strong>{t("Protección de datos activa")}</strong><p>{t("La información local existente está dañada o inaccesible. Se bloquea el guardado para no sobrescribirla silenciosamente.")}</p><button onClick={rawBackup}>{t("Descargar datos originales sin validar")}</button> <button className="ghost" onClick={()=>setPage("datos")}>{t("Opciones de recuperación")}</button></div>}
+     {!allMode&&<>
      {page==="calculadora"&&<>
+      {storeDraftPending&&<section className="main-card" role="note">
+       <strong>{locale==="pt-BR"?"Custos da loja ainda não verificados":locale==="en"?"Store costs not yet verified":"Costos de la tienda aún sin verificar"}</strong>
+       <p>{locale==="pt-BR"?"Nome e preço vieram da loja. Os demais custos estão zerados como dados não informados — margens exibidas são ilustrativas. Revise antes de salvar.":locale==="en"?"Name and price came from the store. Missing costs are zero placeholders, so displayed margins are illustrative. Review before saving.":"Nombre y precio provienen de la tienda. Los costos faltantes son ceros provisionales; los márgenes son ilustrativos. Revísalos antes de guardar."}</p>
+       <label className="consent-row"><input type="checkbox" checked={!storeDraftPending} onChange={e=>{if(e.target.checked)setStoreDraftPending(false);}}/>
+        <span>{locale==="pt-BR"?"Revisei os custos e assumo os valores informados nesta simulação":locale==="en"?"I reviewed these costs and accept the simulation values":"Revisé los costos y acepto los valores de simulación"}</span></label>
+      </section>}
       <div className="action-strip"><div><span className="eyebrow">{t("SIMULACIÓN ACTIVA")}</span><strong>{t(activeId?"Editando producto guardado":"Nuevo producto · borrador")}</strong></div><div className="actions"><button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("Hay cambios sin guardar. ¿Descartarlos para crear un producto nuevo?"))))return;setDraft({...EMPTY_INPUT,name:t("Producto ejemplo")});setDirtyMoney(new Set());setActiveId(null);setScenarioId(null);setEditorRevision(n=>n+1);}}>{t("+ Nuevo")}</button>{(activeId||hasUnsavedDraft)&&<button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>}<button className="primary" onClick={saveProduct}>{t("Guardar producto")} <span aria-hidden="true">↗</span></button></div></div>
-      <div className="two-column"><div><ProductEditor key={"product-"+activeId+"-"+editorRevision} value={draft} onChange={setDraft} onDirty={markDirty}/></div><div className="results-column"><div className="results-card"><div className="results-label"><span>{t("RESULTADOS EN TIEMPO REAL")}</span><span className="live-dot">●</span></div>{result.error?<div role="alert" className="error-box"><strong>{t("Revisa los datos")}</strong><p>{t(result.error)}</p></div>:result.breakdown&&result.suggestion&&<>
+      <div className="context-actions"><button onClick={()=>{void navigate("cod");}}><UIIcon name="cod" size={17}/>{t("Simular riesgo COD")}</button><button onClick={()=>{void navigate("marketing");}}><UIIcon name="marketing" size={17}/>{t("Analizar marketing y CAC")}</button><button onClick={()=>{void navigate("escenarios");}}><UIIcon name="scenarios" size={17}/>{t("Comparar escenarios")}</button></div>
+      <div className="two-column"><div><ProductEditor key={"product-"+activeId+"-"+editorRevision} value={draft} onChange={setDraft} onDirty={markDirty}/></div><div className="results-column"><div className="results-card"><div className="results-label"><span>{t("RESULTADOS EN TIEMPO REAL")}</span><span className="live-dot">●</span></div>{storeDraftPending?<div role="alert" className="error-box"><strong>{locale==="pt-BR"?"Custos pendentes":locale==="en"?"Missing costs":"Costos pendientes"}</strong><p>{locale==="pt-BR"?"Nenhuma margem nem preço recomendado será exibido até revisar e confirmar os custos deste rascunho.":locale==="en"?"No margins or recommended price are displayed until you review and acknowledge this draft’s costs.":"No se mostrarán márgenes ni precio recomendado hasta revisar y confirmar los costos del borrador."}</p></div>:result.error?<div role="alert" className="error-box"><strong>{t("Revisa los datos")}</strong><p>{t(result.error)}</p></div>:result.breakdown&&result.suggestion&&<>
        <div className="suggested"><span>{t("PRECIO SUGERIDO")}</span><strong>{fmt(result.suggestion.price)}</strong><small>{t("Con margen meta del")} {draft.targetMargin}% {t("· después de descuentos y redondeo")}</small></div>
        <div className="kpi-grid"><Kpi label="Contribución actual" value={fmt(result.breakdown.contribution)} detail="Por venta, después de costos variables" attention={!result.breakdown.feasible}/><Kpi label="Margen de contribución" value={(result.breakdown.marginPercent??"N/D")+"%"} detail="Sobre venta neta del producto" attention={!result.breakdown.feasible}/><Kpi label="Ingresos cobrados" value={fmt(result.breakdown.collected)} detail="Producto neto + envío cobrado"/><Kpi label="Markup de contribución" value={(result.breakdown.markupPercent??"N/D")+"%"} detail="Contribución / costo variable"/><Kpi label="Margen sobre ingresos totales" value={(result.breakdown.marginOnCollectedPercent??"N/D")+"%"} detail="Contribución / producto neto más frete"/><Kpi label="Markup comercial" value={(result.breakdown.commercialMarkupPercent??"N/D")+"%"} detail="(Producto neto - costo variable) / costo variable"/><Kpi label="Deducciones + IVA" value={fmt(result.breakdown.deductions)} detail="Porcentajes configurados por el usuario"/></div>
        <div className="result-details"><div><span>{t("Descuento aplicado")}</span><strong>{fmt(result.breakdown.discount)}</strong></div><div><span>{t("Costos variables")}</span><strong>{fmt(result.breakdown.variableCost)}</strong></div><div><span>{t("IVA incluido ilustrativo")}</span><strong>{fmt(result.breakdown.ivaIncluded)}</strong></div><div><span>{t("Máximo descuento orientativo*")}</span><strong>{result.limit===null?t("No disponible"):result.limit+"%"}</strong></div></div>
@@ -409,10 +648,13 @@ export default function App(){
       <div className="aside-info"><div className="info-symbol">i</div><div><strong>{t("¿Cómo se calcula?")}</strong><p>{t("Trabajamos con centavos exactos. La contribución es lo cobrado menos costos variables, comisiones y supuestos tributarios. Los gastos fijos mensuales se restan después.")}</p><button className="linklike" onClick={()=>setShowTips(!showTips)} aria-expanded={showTips}>{t("Ver premisas")} {showTips?"−":"+"}</button>{showTips&&result.breakdown&&<ul>{result.breakdown.assumptions.map(assumption=><li key={assumption}>{t(assumption)}</li>)}</ul>}</div></div></div></div>
      </>}
      {page==="productos"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("CATÁLOGO")}</span><h2>{workspace.products.length} {t(workspace.products.length===1?"producto guardado":"productos guardados")}</h2></div><button className="primary" onClick={()=>{setActiveId(null);setScenarioId(null);setDraft({...EMPTY_INPUT,name:t("Producto ejemplo")});setDirtyMoney(new Set());setPage("calculadora");}}>{t("+ Agregar producto")}</button></div>
-      {workspace.products.length===0?<div className="empty-state"><div className="empty-icon">▦</div><h3>{t("Tu catálogo empieza aquí")}</h3><p>{t("Guarda tu primera simulación para crear productos comparables.")}</p></div>:<div className="product-grid">{workspace.products.map(p=><article className="product-card" key={p.id}><span className="product-category">{p.input.category||t("Sin categoría")}</span><h3>{p.input.name}</h3><p>{t(p.input.origin==="estimado"?"Estimación":p.input.origin==="confirmado"?"Declarado confirmado":"Ingreso manual")} · {date(p.updatedAt)}</p><strong>{fmt(p.input.currentPrice)}</strong><div className="card-actions"><button onClick={()=>openProduct(p)}>{t("Editar")}</button><button onClick={()=>{setScenarioProductId(p.id);setScenarioId(null);setActiveId(p.id);setDraft({...p.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);setPage("escenarios");}}>{t("Escenarios")}</button><button onClick={()=>duplicateProduct(p)}>{t("Duplicar")}</button><button className="danger-link" onClick={()=>deleteProduct(p)}>{t("Eliminar")}</button></div></article>)}</div>}
+      {workspace.products.length>0&&<div className="catalog-toolbar"><label className="field"><span>{t("Buscar productos")}</span><input type="search" placeholder={t("Nombre o categoría")} value={productSearch} onChange={e=>setProductSearch(e.target.value)}/></label><label className="field"><span>{t("Ordenar")}</span><select value={productOrder} onChange={e=>setProductOrder(e.target.value as typeof productOrder)}><option value="recent">{t("Más recientes")}</option><option value="name">{t("Nombre A–Z")}</option><option value="price">{t("Mayor precio")}</option></select></label></div>}
+      {workspace.products.length>0&&visibleProducts.length===0&&<div className="empty-state"><h3>{t("No hay productos con ese filtro")}</h3><button className="secondary" onClick={()=>setProductSearch("")}>{t("Limpiar búsqueda")}</button></div>}
+      {workspace.products.length===0?<div className="empty-state"><div className="empty-icon">▦</div><h3>{t("Tu catálogo empieza aquí")}</h3><p>{t("Guarda tu primera simulación para crear productos comparables.")}</p></div>:<div className="product-grid">{visibleProducts.map(p=><article className="product-card" key={p.id}><span className="product-category">{p.input.category||t("Sin categoría")}</span><h3>{p.input.name}</h3><p>{t(p.input.origin==="estimado"?"Estimación":p.input.origin==="confirmado"?"Declarado confirmado":"Ingreso manual")} · {date(p.updatedAt)}</p><strong>{fmt(p.input.currentPrice)}</strong><div className="card-actions"><button onClick={()=>openProduct(p)}>{t("Editar")}</button><button onClick={()=>{setScenarioProductId(p.id);setScenarioId(null);setActiveId(p.id);setDraft({...p.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);setPage("escenarios");}}>{t("Escenarios")}</button><button onClick={()=>{setActiveId(p.id);setDraft({...p.input});setDirtyMoney(new Set());setScenarioId(null);setPage("cod");}}>{t("Riesgo COD")}</button><button onClick={()=>{setActiveId(p.id);setDraft({...p.input});setDirtyMoney(new Set());setScenarioId(null);setPage("marketing");}}>{t("Marketing y CAC")}</button><button onClick={()=>duplicateProduct(p)}>{t("Duplicar")}</button><button className="danger-link" onClick={()=>deleteProduct(p)}>{t("Eliminar")}</button></div></article>)}</div>}
       <div className="section-head profiles-head"><div><span className="eyebrow">{t("PERFILES REUTILIZABLES")}</span><h2>{t("Plantillas de costos")}</h2></div><button className="secondary" onClick={saveProfile}>{t("Guardar configuración actual")}</button></div>
       {workspace.profiles.length===0?<p className="muted">{t("No hay perfiles todavía. Guarda una configuración para reutilizar tasas y costos.")}</p>:<div className="stack-list">{workspace.profiles.map(p=><div key={p.id} className="list-row"><span>{p.name}</span><div><button onClick={()=>restoreProfile(p.id)}>{t("Aplicar")}</button><button className="danger-link" onClick={()=>commit(w=>({...w,profiles:w.profiles.filter(x=>x.id!==p.id)}))}>{t("Eliminar")}</button></div></div>)}</div>}
      </section>}
+     {page==="productos"&&<StoreCatalogPanel businessId={getBusinessScope()} onDraft={p=>{void openStoreProductDraft(p);}}/>}
      {page==="escenarios"&&<section className="main-card">
       <div className="section-head"><div><span className="eyebrow">{t("ANÁLISIS DE RIESGO")}</span><h2>{t("Compara posibles resultados")}</h2></div><button className="primary" disabled={!scenarioProduct} onClick={createScenarios}>{t("+ Crear escenarios faltantes")}</button></div>
       <div className="scenario-intro">
@@ -427,9 +669,9 @@ export default function App(){
         <div className="section-head"><div><span className="eyebrow">{t("EDICIÓN INDEPENDIENTE")}</span><h3>{t(selectedScenario.title.replace(/ \(copia\)$/,""))+(selectedScenario.title.endsWith(" (copia)")?t(" (copia)"):"")} · {scenarioProduct.input.name}</h3><p className="muted">{t("Los cambios solo afectan a este escenario cuando presionas Guardar escenario.")}</p></div>
          <div className="actions">
           <button className="secondary" disabled={!hasUnsavedDraft} onClick={restoreSavedDraft}>{t("Descartar cambios")}</button>
-          <button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("¿Descartar los cambios no guardados antes de duplicar?"))))return;commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
+          <button className="secondary" onClick={async ()=>{if(hasUnsavedDraft&&!(await askConfirmation(t("¿Descartar los cambios no guardados antes de duplicar?"))))return;await commit(w=>({...w,scenarios:[...w.scenarios,{...selectedScenario,id:makeId(),title:selectedScenario.title+" (copia)"}]}));}}>{t("Duplicar")}</button>
           <button className="primary" onClick={saveScenario}>{t("Guardar escenario")}</button>
-          <button className="danger-link" onClick={async ()=>{if(await askConfirmation(t("¿Eliminar este escenario?"))&&commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
+          <button className="danger-link" onClick={async ()=>{if(await askConfirmation(t("¿Eliminar este escenario?"))&&await commit(w=>({...w,scenarios:w.scenarios.filter(s=>s.id!==scenarioId)}))){setScenarioId(null);setDraft({...scenarioProduct.input});setDirtyMoney(new Set());setEditorRevision(n=>n+1);}}}>{t("Eliminar")}</button>
          </div></div>
         <div className="scenario-preview" aria-live="polite">
          <span className="eyebrow">{t("VISTA PREVIA DE ESTE ESCENARIO · AÚN SIN GUARDAR")}</span>
@@ -492,19 +734,43 @@ export default function App(){
         </>}
       </aside>
      </div>}
-     {page==="avanzado"&&<AdvancedLab workspace={workspace} onDirty={setAdvancedDirty}
-      onSave={(record:AdvancedSimulationRecord)=>{const ok=commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice("Simulación guardada en este navegador.");}return ok;}}
-      onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
-     {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t("Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
+     {page==="cambio"&&<CurrencyLab/>}
+     {page==="global"&&<GlobalPricingLab/>}
+     {operationPages.includes(page)&&<OperationsLab key={page} products={workspace.products} initialTab={page==="panel-cod"?"dashboard":page==="cpa"?"matrix":page==="importar"?"import":page==="competidores"?"prices":"unified"}/>}
+     <WebsiteSyncLab visible={page==="conectado"} onDraft={p=>{void openStoreProductDraft(p);}} />
+     {page==="conectado"&&<section className="optional-cloud-connections" aria-label={locale==="pt-BR"?"Serviços de conta avançados":locale==="en"?"Advanced account services":"Servicios de cuenta avanzados"}>
+      <button type="button" className="secondary optional-cloud-toggle" aria-expanded={showAdvancedConnected} aria-controls="optional-cloud-details" onClick={()=>setShowAdvancedConnected(value=>!value)}>
+       <UIIcon name="settings" size={18}/>
+       {locale==="pt-BR"?"Contas e organizações (opcional, avançado)":locale==="en"?"Accounts and organizations (optional, advanced)":"Cuentas y organizaciones (opcional, avanzado)"}
+       <UIIcon name="chevron" size={18} style={{transform:showAdvancedConnected?"rotate(180deg)":undefined}}/>
+      </button>
+      <p className="muted">{locale==="pt-BR"?"Este módulo antigo utiliza um servidor conectado separado. Não é necessário para conectar uma loja usando convites de instalação.":locale==="en"?"This older module uses a separate connected account server. It is not required to connect a store using device invitation codes.":"Este módulo anterior utiliza un servidor de cuentas separado. No hace falta para conectar una tienda con códigos de invitación por instalación."}</p>
+      <div id="optional-cloud-details">{showAdvancedConnected&&<ConnectedLab/>}</div>
+     </section>}
+     {advancedPages.includes(page)&&<AdvancedLab key={page} initialPane={page==="marketing"?"campaign":page==="pum"?"pum":page==="consumer"?"consumer":page==="portfolio"?"portfolio":"cod"} initialProductId={activeId??""} workspace={workspace} onDirty={setAdvancedDirty}
+      onSave={async (record:AdvancedSimulationRecord)=>{const ok=await commit(w=>({...w,advancedSimulations:[...w.advancedSimulations,record]}));if(ok){setAdvancedDirty(false);setNotice(nativePrimary()?"Datos confirmados en SQLite local.":"Simulación guardada en este navegador.");}return ok;}}
+      onDelete={async id=>{if(await askConfirmation(t("¿Eliminar esta simulación guardada?")))await commit(w=>({...w,advancedSimulations:w.advancedSimulations.filter(row=>row.id!==id)}));}}/>}
+     {page==="informes"&&<section className="main-card"><div className="section-head"><div><span className="eyebrow">{t("RENTABILIDAD")}</span><h2>{t(reportOrder==="margin"?"Ranking por margen":"Ranking por contribución")}</h2></div><div className="actions"><button className="secondary" onClick={()=>{try{downloadFile(exportProductsCsv(workspace,{
  headers:["ID","Producto","Categoría","Origen","Precio actual (COP)","Contribución (COP)","Margen contribución (%)","Fecha actualización"].map(t),
  origin:{manual:t("Ingreso manual"),estimado:t("Estimación"),confirmado:t("Declarado confirmado")}
-}),"precify-productos.csv","text/csv;charset=utf-8");}catch(e){setNotice(String(e));}}}>{t("Exportar CSV")}</button><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-colombia-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Exportar JSON")}</button></div></div>
-       {ranked.length===0?<div className="empty-state"><p>{t("Agrega productos para compararlos.")}</p></div>:<div className="table-scroll"><table><caption>{t("Productos ordenados por contribución unitaria")}</caption><thead><tr><th scope="col">{t("Producto")}</th><th scope="col">{t("Precio")}</th><th scope="col">{t("Contribución")}</th><th scope="col">{t("Margen")}</th><th scope="col">{t("Sensibilidad")}</th></tr></thead><tbody>{ranked.map(({p,result:r,error})=><tr key={p.id}><th scope="row">{p.input.name}<small>{t(p.input.origin==="manual"?"Ingreso manual":p.input.origin==="estimado"?"Estimación":"Declarado confirmado")}</small></th><td>{fmt(p.input.currentPrice)}</td><td className={r&&!r.feasible?"red":""}>{r?fmt(r.contribution):t(error??"")}</td><td>{r?r.marginPercent+"%":"N/D"}</td><td>{r?<span className="sensitivity-value">{sensitivity(p.input)} <small>{t("pérdida ante +10% costo de adquisición")}</small><progress max={100} value={Math.max(0,Math.min(100,Number(r.marginPercent??0)))} aria-label={t("Indicador de margen de")+" "+(r.marginPercent??"0")+" "+t("por ciento")}/></span>:"—"}</td></tr>)}</tbody></table></div>}
+}),"precify-productos.csv","text/csv;charset=utf-8");}catch(e){setNotice(String(e));}}}>{t("Exportar CSV")}</button><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-financy-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Exportar JSON")}</button></div></div>
+       {ranked.length>0&&<div className="catalog-toolbar"><label className="field"><span>{t("Buscar productos")}</span><input type="search" value={reportSearch} placeholder={t("Nombre o categoría")} onChange={e=>setReportSearch(e.target.value)}/></label><label className="field"><span>{t("Ordenar")}</span><select value={reportOrder} onChange={e=>setReportOrder(e.target.value as typeof reportOrder)}><option value="contribution">{t("Mayor contribución")}</option><option value="margin">{t("Mayor margen")}</option><option value="recent">{t("Más recientes")}</option></select></label></div>}
+       {visibleReports.length===0?<div className="empty-state"><p>{t("Agrega productos para compararlos.")}</p></div>:<div className="table-scroll"><table><caption>{t("Productos ordenados por contribución unitaria")}</caption><thead><tr><th scope="col">{t("Producto")}</th><th scope="col">{t("Precio")}</th><th scope="col">{t("Contribución")}</th><th scope="col">{t("Margen")}</th><th scope="col">{t("Sensibilidad")}</th></tr></thead><tbody>{visibleReports.map(({p,result:r,error})=><tr key={p.id}><th scope="row">{p.input.name}<small>{t(p.input.origin==="manual"?"Ingreso manual":p.input.origin==="estimado"?"Estimación":"Declarado confirmado")}</small></th><td>{fmt(p.input.currentPrice)}</td><td className={r&&!r.feasible?"red":""}>{r?fmt(r.contribution):t(error??"")}</td><td>{r?r.marginPercent+"%":"N/D"}</td><td>{r?<span className="sensitivity-value">{sensitivity(p.input)} <small>{t("pérdida ante +10% costo de adquisición")}</small><progress max={100} value={Math.max(0,Math.min(100,Number(r.marginPercent??0)))} aria-label={t("Indicador de margen de")+" "+(r.marginPercent??"0")+" "+t("por ciento")}/></span>:"—"}</td></tr>)}</tbody></table></div>}
        <div className="section-head profiles-head"><div><span className="eyebrow">{t("TRAZABILIDAD LOCAL")}</span><h2>{t("Historial de cambios")} ({workspace.history.length})</h2></div></div><div className="stack-list history">{workspace.history.slice().reverse().slice(0,50).map(h=><div className="list-row" key={h.id}><span>{t(h.action)} · {h.snapshot.name}</span><small>{date(h.at)}</small></div>)}{workspace.history.length>50&&<p className="muted">{t("Se muestran los 50 eventos más recientes. El respaldo JSON incluye todo el historial guardado.")}</p>}</div>
      </section>}
-     {page==="datos"&&<div className="two-column"><section className="main-card"><span className="eyebrow">{t("CONTROL DE DATOS")}</span><h2>{t("Tu información, tu control.")}</h2><p>{t("Los cálculos y datos se procesan en tu navegador. Sin cuentas, sin analíticas, sin servidores y sin comunicación obligatoria con servicios externos.")}</p><div className="data-actions"><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-colombia-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Descargar copia de seguridad")}</button><button className="secondary" onClick={()=>uploadRef.current?.click()}>{t("Restaurar copia")}</button><input ref={uploadRef} type="file" accept=".json,application/json" className="sr-only" aria-label={t("Seleccionar respaldo JSON")} onChange={e=>{void importBackup(e.target.files?.[0]);}}/><button className="danger" onClick={reset}>{t("Borrar todos los datos")}</button></div><p className="muted">{t("La restauración valida versión, moneda, tamaño, identificadores y costos; sustituye el conjunto completo solo después de tu confirmación. Conserva copias de seguridad fuera del navegador.")}</p></section><aside className="results-card"><span className="eyebrow">{t("ESTADO DEL ESPACIO")}</span><div className="storage-stat"><strong>{workspace.products.length}</strong><span>{t("Productos locales")}</span></div><div className="storage-stat"><strong>{workspace.scenarios.length}</strong><span>{t("Escenarios")}</span></div><div className="storage-stat"><strong>{workspace.history.length}</strong><span>{t("Eventos históricos")}</span></div><p className="muted">{t("Formato de respaldo: precify-colombia-backup v2 · COP · es-CO · máximo 2 MB.")}</p>{locked&&<button onClick={rawBackup}>{t("Descargar datos locales originales")}</button>}</aside></div>}
-     <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Colombia 2.0.1 · Proyecto independiente · Apache-2.0 · COP / es-CO")}</p></footer>
+     {page==="datos"&&<div className="two-column"><section className="main-card"><span className="eyebrow">{t("CONTROL DE DATOS")}</span><h2>{t("Tu información, tu control.")}</h2><p>{t("Los cálculos y datos locales se procesan en este navegador. No necesitas crear una cuenta. Las conexiones a servicios externos son opcionales y requieren tu autorización.")}</p><div className="data-actions"><button className="primary" onClick={()=>{try{downloadFile(encodeBackup(workspace),"precify-financy-backup.json","application/json");}catch(e){setNotice(String(e));}}}>{t("Descargar copia de seguridad")}</button><button className="secondary" onClick={()=>uploadRef.current?.click()}>{t("Restaurar copia")}</button><input ref={uploadRef} type="file" accept=".json,application/json" className="sr-only" aria-label={t("Seleccionar respaldo JSON")} onChange={e=>{void importBackup(e.target.files?.[0]);}}/><button className="danger" onClick={reset}>{t("Borrar todos los datos")}</button></div><p className="muted">{t("La restauración valida versión, moneda, tamaño, identificadores y costos; sustituye el conjunto completo solo después de tu confirmación. Conserva copias de seguridad fuera del navegador.")}</p></section><aside className="results-card"><span className="eyebrow">{t("ESTADO DEL ESPACIO")}</span><div className="storage-stat"><strong>{workspace.products.length}</strong><span>{t("Productos locales")}</span></div><div className="storage-stat"><strong>{workspace.scenarios.length}</strong><span>{t("Escenarios")}</span></div><div className="storage-stat"><strong>{workspace.history.length}</strong><span>{t("Eventos históricos")}</span></div><p className="muted">{t("Formato de respaldo: precify-financy-backup v2 · COP · es-CO · máximo 2 MB.")}</p>{locked&&<button onClick={rawBackup}>{t("Descargar datos locales originales")}</button>}</aside></div>}
+     </>}
+     <footer className="footer"><p>{t("Resultados orientativos. Consulta a un contador para el tratamiento tributario.")} {t("Ninguna cifra de IVA, COD, tarifa logística o impuesto se presume aplicable por defecto.")}</p><p>{t("Precify Financy 2.1.0 · En desarrollo · Apache-2.0")}</p></footer>
     </main>
    </div>
+   <nav className="mobile-bottom-nav" aria-label={t("Navegación rápida")}>
+     {([
+      ["inicio","home","Inicio"],
+      ["calculadora","calculator","Precio"],
+      ["productos","products","Productos"],
+      ["panel-cod","orders","COD"],
+      ["conectado","connected","Conexiones"]
+     ] as const).map(([target,icon,label])=><button key={target} className={page===target?"active":""} onClick={()=>{void navigate(target);}}><UIIcon name={icon}/>{t(label)}</button>)}
+   </nav>
  </div></LocaleContext.Provider>;
 }
