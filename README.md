@@ -1,5 +1,8 @@
 # Precify Financy
 
+> **2.1 catálogo Vezura candidato:** productos publicados se sincronizan a un espejo local independiente; consulte [arquitectura y QA](docs/VEZURA_CATALOG_MIRROR_V2_1_0.md). Requiere implementar PR #119 en la tienda y homologar Windows.
+
+
 
 
 [Español](README.md) · [Português](README.pt-BR.md) · [English](README.en.md)
@@ -25,7 +28,7 @@ Esta branch experimental añade precios nativos en monedas ISO, cotizaciones ori
 
 **Almacenamiento:** en Windows, el SQLite del aplicativo es la fuente de verdad para perfiles y datos financieros, e incluye la caché transaccional del feed de la tienda. La clave criptográfica no exportable permanece en el almacén WebCrypto del perfil WebView2. En la PWA se emplea el almacenamiento del navegador e IndexedDB, con consentimiento por tienda. La API bearer v1 solo se conserva para conexiones antiguas, no para las nuevas.
 
-**Importante:** Vezura todavía no ha implementado estos endpoints; no se han recibido pedidos reales ni desplegado el adaptador. [Protocolo v2, SQL MySQL/Postgres y revocación](docs/STORE_DEVICE_API_V2.md) · [Próximos pasos en Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
+**Estado actual:** el backend Device API v2 de Vezura ya fue integrado al código (PR #118). La extensión de catálogo publicado está en PR #119 y exige merge/despliegue; la sincronización comercial real todavía necesita homologación. [Protocolo v2, SQL MySQL/Postgres y revocación](docs/STORE_DEVICE_API_V2.md) · [Próximos pasos en Vezura](docs/VEZURA_INTEGRATION_NEXT.md).
 
 ## Actualización 2.0.1
 
