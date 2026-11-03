@@ -151,7 +151,7 @@ export function WebsiteSyncLab({visible,onDraft}:{visible:boolean;onDraft?:(prod
          const previous=readStoreCatalog(businessId).sites[site.id];
          const age=previous?Date.now()-Date.parse(previous.syncedAt):Infinity;
          if(manual||age>300_000){
-          const products=await fetchPublishedCatalog(connector);
+          const products=await fetchPublishedCatalog(connector as ReturnType<typeof createDeviceConnector>);
           if(stopped||!loadSites(businessId).some(x=>x.id===site.id&&x.enabled))return result;
           await saveStoreCatalog(businessId,site.id,site.name,subject,products);
           if(!stopped){setCatalogs(readStoreCatalog(businessId));setCatalogErrors(v=>({...v,[site.id]:""}));}
@@ -301,7 +301,7 @@ export function WebsiteSyncLab({visible,onDraft}:{visible:boolean;onDraft?:(prod
     {" · "}{t.rows}: {stats[site.id]?.count??0}
     {" · "}{t.imported}: {statuses[site.id]?.pulled??0}</small>
    <p className="muted">{locale==="pt-BR"?"Produtos publicados sincronizados":locale==="en"?"Synced published products":"Productos publicados sincronizados"}: {catalogs.sites[site.id]?.products.length??0}
-    {catalogs.sites[site.id]?.syncedAt?" · "+new Date(catalogs.sites[site.id].syncedAt).toLocaleString(locale):""}</p>
+    {catalogs.sites[site.id]?.syncedAt?" · "+new Date(catalogs.sites[site.id]?.syncedAt??"").toLocaleString(locale):""}</p>
    {catalogErrors[site.id]&&<p role="alert">{locale==="pt-BR"?"Falha no catálogo (cache anterior preservado)":locale==="en"?"Catalog error (previous cache preserved)":"Error de catálogo (caché anterior conservada)"}: {catalogErrors[site.id]}</p>}
    {onDraft&&<StoreCatalogPanel businessId={businessId} siteId={site.id} onDraft={onDraft}/>}
    {summaries[site.id]?.map((s,index)=><div className="list-row" key={s.currency+index}>
