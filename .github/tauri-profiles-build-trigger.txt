@@ -14,3 +14,5 @@ Final post-audit release candidate gate (2026-11-02): sync purge race fix, selec
 - Precify PR #4 stays draft; no auto-merge or customer data sync until operator approval.
 
 2026-11-03 catalog integration complete regression gate: published-store API, SQLite mirror, safe consent, draft with missing-cost gate, audited connectors.
+
+2026-11-03 FINAL Precify/Vezura published catalog regression gate: typed connector, isolated SQLite mirror, product UX and verified-only financial summaries.
